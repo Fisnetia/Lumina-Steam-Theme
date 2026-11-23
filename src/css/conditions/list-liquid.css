@@ -148,6 +148,12 @@ html {{DownloadsPage.ItemLists}} {
     padding-bottom: var(--lm-bar-space) !important;
 }
 
+/* the console's input sits at the bottom of the page */
+html {{ConsoleInput.Console}} {
+    box-sizing: border-box;
+    padding-bottom: var(--lm-bar-space) !important;
+}
+
 html {{ScrollToTopButton.ScrollToTopButton}} {
     translate: 0 calc(-1 * var(--lm-bar-space));
 }
@@ -161,6 +167,107 @@ html {{GameListHomeAndSearch.Container}} .ReactVirtualized__Grid__innerScrollCon
 /* the web view stays mounted, hidden by an inline display: none */
 html {{ForceOpaqueBackground.ContentFrame}}:has(> {{ForceOpaqueBackground.BrowserWrapper}}:not([style*="none"])) {
     margin-bottom: var(--lm-bar-space);
+}
+
+/* Web pages: the capsules merge into a full-width bottom bar, lower than
+   Steam's (js/bottom-bar.js, html.lm-web-bar). The bar's glass rises from
+   the bottom edge as the capsules shed theirs and settle into it; the page
+   ends at its top. */
+:root {
+    --lm-web-bar-h: 36px;
+}
+
+html {{BottomBarContainer.BottomBar}} {
+    position: relative;
+}
+
+html {{BottomBarContainer.BottomBar}}::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--lm-web-bar-h);
+    z-index: -1;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--lm-t) calc(var(--lm-liquid-alpha, 24%) + 14%), transparent);
+    backdrop-filter: var(--lm-pill-tone);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    opacity: 0;
+    translate: 0 100%;
+    transition: opacity 0.3s ease, translate 0.42s cubic-bezier(0.25, 0.7, 0.25, 1);
+}
+
+html.lm-web-bar {{BottomBarContainer.BottomBar}}::before {
+    opacity: 1;
+    translate: none;
+}
+
+/* Steam sizes the bar by flex-basis (50px), not height */
+html.lm-web-bar {{BottomBarContainer.BottomBar}} {
+    flex: 0 0 var(--lm-web-bar-h) !important;
+    height: var(--lm-web-bar-h) !important;
+    padding: 0 6px !important;
+}
+
+html.lm-web-bar {{ForceOpaqueBackground.ContentFrame}} {
+    margin-bottom: var(--lm-web-bar-h) !important;
+}
+
+html {{BottomBarContainer.AddGameButton}},
+html {{BottomBarContainer.DownloadStatus}},
+html {{BottomBarContainer.FriendsButton}} {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* plain buttons in the bar */
+html.lm-web-bar {{BottomBarContainer.AddGameButton}},
+html.lm-web-bar {{BottomBarContainer.DownloadStatus}},
+html.lm-web-bar {{BottomBarContainer.FriendsButton}} {
+    height: 28px;
+    padding: 0 12px;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+html.lm-web-bar {{BottomBarContainer.AddGameButton}}:hover,
+html.lm-web-bar {{BottomBarContainer.DownloadStatus}}:hover,
+html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+/* Title bar capsules (menus, nav, window buttons) and the URL bar: liquid
+   glass like the bottom bar (filters #lm-liquid-menus, -nav, -window, -url).
+   The border turns clear so their size doesn't change. */
+html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}},
+html {{ForceOpaqueBackground.SuperNavBar}},
+html .title-bar-actions,
+html {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
+    border-color: transparent !important;
+    backdrop-filter: var(--lm-pill-tone);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+        0 6px 18px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.lm-liquid-menus-ready {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}} {
+    backdrop-filter: url(#lm-liquid-menus) var(--lm-pill-tone);
+}
+
+html.lm-liquid-nav-ready {{ForceOpaqueBackground.SuperNavBar}} {
+    backdrop-filter: url(#lm-liquid-nav) var(--lm-pill-tone);
+}
+
+html.lm-liquid-window-ready .title-bar-actions {
+    backdrop-filter: url(#lm-liquid-window) var(--lm-pill-tone);
+}
+
+html.lm-liquid-url-ready {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    backdrop-filter: url(#lm-liquid-url) var(--lm-pill-tone);
 }
 
 /* the panel floats, so the column divider only shows on hover */

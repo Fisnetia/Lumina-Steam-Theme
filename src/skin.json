@@ -49,6 +49,10 @@
     },
     {
       "MatchRegexString": "^Steam$",
+      "TargetJs": "js/bottom-bar.js"
+    },
+    {
+      "MatchRegexString": "^Steam$",
       "TargetJs": "js/liquid-glass.js"
     },
     {

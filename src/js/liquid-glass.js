@@ -10,9 +10,9 @@
  * by slightly different amounts, and a thin band at the rim is brightened,
  * which gives the edge a faint fringe coloured by the backdrop.
  *
- * Panes: the game list, the in-page menu panel of js/morph-nav.js and the
- * three bottom bar capsules. Each sets its ready class on <html> once its
- * filter exists.
+ * Panes: the game list, the in-page menu panel of js/morph-nav.js, the
+ * bottom bar capsules and the title bar capsules. Each sets its ready class
+ * on <html> once its filter exists.
  */
 (() => {
     if (window.__lmLiquid) return;
@@ -190,9 +190,12 @@
                reach: 0.92 }),   // 46px at 50%
         pane({ selector: ".lm-morph.lm-morph-inpage", id: "lm-liquid-menu", ready: "lm-liquid-menu-ready",
                reach: 0.56 }),    // 28px at 50%
-        // bottom bar capsules, 36px tall
+        // bottom bar capsules (36px tall) and title bar capsules (32px)
         ...[["{{BottomBarContainer.AddGameButton}}", "add"], ["{{BottomBarContainer.DownloadStatus}}", "dl"],
-            ["{{BottomBarContainer.FriendsButton}}", "friends"]].map(([selector, name]) =>
+            ["{{BottomBarContainer.FriendsButton}}", "friends"],
+            ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}}", "menus"],
+            ["{{ForceOpaqueBackground.SuperNavBar}}", "nav"], [".title-bar-actions", "window"],
+            ["{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}}", "url"]].map(([selector, name]) =>
             pane({ selector, id: `lm-liquid-${name}`, ready: `lm-liquid-${name}-ready`,
                    reach: 0.24 })),   // 12px at 50%
     ];
