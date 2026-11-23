@@ -83,6 +83,21 @@
         ];
     };
 
+    /* "View Friends List (N Online)": Steam fills in N when the menu renders,
+     * before friends have loaded, and the native menu never renders again
+     * here. A stand-in shows the live count; a click goes to the real item. */
+    const onlineCount = () => {
+        try { return opener().g_FriendsUIApp.m_FriendStore.GetOnlineFriendCount(); } catch { return null; }
+    };
+    const withOnlineCount = (entry) => {
+        const real = entry.item, n = onlineCount();
+        if (typeof n !== "number" || !/\d/.test(real.textContent)) return entry;
+        const el = document.createElement("div");
+        el.textContent = real.textContent.replace(/\d+/, String(n));
+        el.addEventListener("click", () => real.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })));
+        return { item: el };
+    };
+
     // [{ item: Element } | { separator: true }] in menu order
     const entries = (title) => {
         const w = popupWindow(title), box = w && w.document.querySelector(".contextMenuContents");
@@ -91,6 +106,7 @@
             .filter(el => el.classList.contains("contextMenuItem") || !el.closest(".contextMenuItem"))
             .map(el => el.classList.contains("contextMenuItem") ? { item: el } : { separator: true });
         const items = list.filter(e => e.item);
+        if (title === "Friends Root Menu" && items.length) list[list.indexOf(items[0])] = withOnlineCount(items[0]);
         if (title === "Steam Root Menu" && items.length &&
             !items.some(e => e.item.textContent.includes("Millennium"))) {
             list.splice(list.lastIndexOf(items[items.length - 1]), 0, ...millenniumItems());
