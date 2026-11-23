@@ -6,45 +6,41 @@ A glass theme for the Steam desktop client, built on [Millennium](https://steamb
 
 ![Library](docs/screenshots/library.jpg)
 
-| Morphing nav menu | Title bar menus |
-|---|---|
-| ![Nav menu](docs/screenshots/nav-menu.gif) | ![Title bar menus](docs/screenshots/title-menus.gif) |
+![Morphing nav menu](docs/screenshots/nav-menu.gif)
 
-| | | |
-|---|---|---|
-| ![Library menu](docs/screenshots/menu-nav.jpg) | ![View menu](docs/screenshots/menu-view.jpg) | ![Friends menu](docs/screenshots/menu-friends.jpg) |
+![Title bar menus](docs/screenshots/title-menus.gif)
 
-| Game page | Store |
-|---|---|
-| ![Game page](docs/screenshots/game.jpg) | ![Store](docs/screenshots/store.jpg) |
+![Game page](docs/screenshots/game.jpg)
 
-Install Millennium, then put `lumina` in `Steam\millennium\themes` (and optionally `lumina-extended` in `Steam\millennium\plugins`) from a [release](../../releases).
+![Store](docs/screenshots/store.jpg)
+
+Install Millennium, then put `lumina` from a [release](../../releases) in `Steam\millennium\themes`; the optional `lumina-extended` plugin goes in `Steam\millennium\plugins`.
 
 ## Settings
 
 **Backdrop**
 
-- **Backdrop**: what shows behind the glass. *Wallpaper* (default) is your own picture, video or Wallpaper Engine scene; *Aurora* is an animated gradient in the accent color; *Acrylic* is Windows' own blur and needs the dwmx plugin.
-- **Wallpaper**: choose a picture or video, or pick from your Wallpaper Engine library. Scenes run live in Steam; other windows show a still of them.
+- **Backdrop**: what shows behind the glass. *Wallpaper* (default) takes a picture, a video or a Wallpaper Engine scene; *Aurora* is an animated gradient in the accent color; *Acrylic* is the Windows blur and needs the dwmx plugin.
+- **Wallpaper**: a picture or video file, or an item from the Wallpaper Engine library. Scenes run live in Steam; other windows show a still of them.
 - **Blur**: how much the backdrop is blurred (default 4 px).
 
 **Glass**
 
 - **Opacity**: how dark the panels are; lower is clearer.
 - **Corner radius**: rounding of panels, buttons and menus.
-- **Game list**: *Classic* keeps the list as a full-height panel; *Liquid glass* floats it with edges that bend the backdrop, and turns the menus into liquid glass too.
+- **Game list**: *Classic* is a full-height panel; *Liquid glass* floats the list with edges that bend the backdrop, and turns the menus into liquid glass as well.
 - **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes, and how far in from the edges the backdrop bends.
-- **Accent** and **Glass tint**: selection color and the base color of the panels.
+- **Accent** and **Glass tint**: the selection color and the base color of the panels.
 
 **Motion**
 
-- **Menu animation**: *Cascade* unrolls menus item by item and unfolds collections row by row; *Fade* only fades; *Off* turns them off.
-- **Nav menu**: *Morph* uses one panel that slides between Store, Library, Community and profile, also for the title bar and account menus; *Native* keeps Steam's own popups.
+- **Menu animation**: *Cascade* unrolls menus item by item and unfolds collections row by row; *Fade* fades them in; *Off* disables the animations.
+- **Nav menu**: *Morph* uses one panel that slides between Store, Library, Community and profile, shared with the title bar and account menus; *Native* keeps Steam's popups.
 - **Smooth scrolling**: mouse-wheel smoothing in the game list.
 - **Wallpaper mouse**: Wallpaper Engine scenes follow the mouse (parallax and cursor effects).
 
-The Lumina Extended plugin reads your Wallpaper Engine library in place (no copying, web wallpapers included) and shows your wallpaper behind the Store and Community pages.
+The Lumina Extended plugin reads the Wallpaper Engine library in place (no copying, web wallpapers included) and shows the current wallpaper behind the Store and Community pages.
 
 ---
 
-Not affiliated with Valve, Steam or Wallpaper Engine. The default wallpaper is third-party artwork. Scenes are rendered with [webwallgl](https://github.com/oneincase/webwallgl) (MIT). See [NOTICE.md](NOTICE.md).
+Not affiliated with Valve, Steam or Wallpaper Engine. The default wallpaper is third-party artwork. Scenes are rendered with [webwallgl](https://github.com/oneincase/webwallgl) (MIT).

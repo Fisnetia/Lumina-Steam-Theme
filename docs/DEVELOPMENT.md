@@ -1,6 +1,6 @@
 # 开发说明
 
-面向修改 Lumina 的人：构建方式、调试工具、各功能的实现细节和踩过的坑。用户说明见 [README](../README.zh-CN.md)，进度见 [PROGRESS.md](../PROGRESS.md)。
+面向修改 Lumina 的人：构建方式、调试工具、各功能的实现细节和踩过的坑。用户说明见 [README](../README.zh-CN.md)。
 
 ## 构建
 
