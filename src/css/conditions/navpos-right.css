@@ -1,0 +1,4 @@
+/* Nav position: right (read by js/nav-fit.js). */
+:root {
+    --lm-nav-pos: right;
+}

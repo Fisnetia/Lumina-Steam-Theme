@@ -30,8 +30,8 @@
 /* ---- Title bar, nav, URL bar ---- */
 
 /* One row: the title bar has no background of its own and the nav bar
-   floats as a capsule centered in it. Narrow windows put the capsule back
-   on a second row so it never covers the menus or window buttons. */
+   floats as a capsule centered in it. When it would touch the menus or the
+   buttons, it goes back on a second row (js/nav-fit.js). */
 {{ForceOpaqueBackground.TopBar}} {
     position: relative;
     background: transparent !important;
@@ -73,8 +73,23 @@
     --lm-capsule-h: 32px;
 }
 
+/* js/nav-fit.js places the capsule by the Nav position setting
+   (--lm-nav-x), or on a second row (html.lm-nav-wrap) when it would touch
+   the menus or buttons; the breakpoint applies only without the script */
+html.lm-nav-placed {{ForceOpaqueBackground.SuperNavBar}} {
+    left: var(--lm-nav-x);
+    translate: none;
+}
+
+html.lm-nav-wrap {{ForceOpaqueBackground.SuperNavBar}} {
+    position: static;
+    translate: none;
+    align-self: var(--lm-nav-align, flex-start);
+    margin: 0 10px 6px;
+}
+
 @media (max-width: 1240px) {
-    {{ForceOpaqueBackground.SuperNavBar}} {
+    html:not(.lm-nav-fit) {{ForceOpaqueBackground.SuperNavBar}} {
         position: static;
         translate: none;
         align-self: flex-start;
@@ -155,6 +170,12 @@
     background: var(--lm-hover) !important;
 }
 
+/* tightened when the title bar is short of room (js/nav-fit.js) */
+html.lm-nav-compact {{SuperNav.MenuButton}} {
+    padding: 0 8px;
+    letter-spacing: 0.01em;
+}
+
 {{SuperNav.SuperNavMenu}}{{SuperNav.Selected}} {{SuperNav.MenuButton}} {
     color: #fff !important;
     text-shadow: none !important;
@@ -192,6 +213,81 @@
 
 {{RootMenuBar.RootMenuButton}}:hover {
     background: var(--lm-hover) !important;
+}
+
+/* minimize, maximize, close: a glass capsule like the menus on the left */
+/* their box has a fixed width (flex-basis): the capsule (102px) and 10px
+   after it; the account button's box already leaves room before it */
+{{ForceOpaqueBackground.WindowControls}} {
+    flex: 0 0 108px !important;
+}
+
+.title-bar-actions {
+    box-sizing: border-box;
+    height: var(--lm-capsule-h) !important;
+    margin: calc((var(--lm-titlebar-h) - var(--lm-capsule-h)) / 2) 10px 0 0 !important;
+    padding: 0 3px;
+    align-items: center;
+    gap: 2px;
+    background: var(--lm-panel-strong);
+    border: 1px solid var(--lm-border-strong);
+    border-radius: 999px;
+    box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+.title-bar-actions .title-area-icon {
+    width: 30px !important;
+    height: 24px !important;
+    border-radius: 999px !important;
+}
+
+.title-bar-actions .title-area-icon-inner {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* the Big Picture button: View > Big Picture Mode opens it too */
+{{TitleBarControls.TitleBarControls}} > :has(> {{TitleBarControls.GamepadUIToggle}}) {
+    display: none !important;
+}
+
+/* account avatar: round, its status a ring around it instead of a bar on the
+   right (Steam's status colors) */
+{{TitleBarControls.AccountMenu}} .avatarHolder {
+    --lm-status: rgb(109, 207, 246);
+    align-items: center;
+    width: auto !important;
+    margin-right: 3px !important;
+    transform: none !important;   /* Steam scales it to 0.86 */
+}
+
+{{TitleBarControls.AccountMenu}} .avatarHolder.ingame {
+    --lm-status: rgb(140, 214, 29);
+}
+
+{{TitleBarControls.AccountMenu}} .avatarHolder.awayOrSnooze {
+    --lm-status: rgba(109, 207, 246, 0.5);
+}
+
+{{TitleBarControls.AccountMenu}} .avatarHolder.offline {
+    --lm-status: rgb(137, 137, 137);
+}
+
+html {{TitleBarControls.AccountMenu}} .avatarHolder .avatarStatus.avatarStatus {
+    display: none !important;
+}
+
+{{TitleBarControls.AccountMenu}} .avatarHolder .avatar {
+    box-sizing: border-box;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 0 0 3px;
+    border: none !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 0 0 2.5px var(--lm-status) !important;
 }
 
 /* account, notifications, announcements */

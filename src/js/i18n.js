@@ -19,6 +19,7 @@
         "Menu animation": "菜单动画", "Smooth scrolling": "平滑滚动", "Nav menu": "导航菜单",
         "Wallpaper mouse": "壁纸鼠标响应", "Game list": "游戏栏",
         "Liquid opacity": "液态玻璃不透明度", "Refraction": "折射强度",
+        "Nav position": "导航位置",
     };
     // color pickers (root-colors.css)
     const COLORS = {
@@ -39,6 +40,7 @@
         "Game list": "经典面板，或四周留边、边缘折射背景的悬浮液态玻璃，底栏也随之悬浮",
         "Liquid opacity": "仅液态玻璃：游戏栏、菜单和底栏的着色深浅",
         "Refraction": "仅液态玻璃：背景从边缘向内弯折的范围",
+        "Nav position": "商店、库、社区所在胶囊在标题栏中的位置，放不下时移到第二行",
     };
     // A dropdown menu is translated only when its items are exactly one of these sets.
     const OPTION_SETS = [
@@ -48,6 +50,7 @@
         { "Morph": "变形", "Native": "原生" },
         { "On": "开启", "Off": "关闭" },
         { "Classic": "经典", "Liquid glass": "液态玻璃" },
+        { "Center": "居中", "Left": "靠左", "Right": "靠右" },
         { "Backdrop": "背景", "Glass": "玻璃", "Motion": "动效" },
     ];
     const VALUES = Object.assign({}, ...OPTION_SETS);

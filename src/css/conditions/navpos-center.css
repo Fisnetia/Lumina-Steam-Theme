@@ -1,0 +1,4 @@
+/* Nav position: center (read by js/nav-fit.js). */
+:root {
+    --lm-nav-pos: center;
+}

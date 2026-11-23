@@ -45,6 +45,10 @@
     },
     {
       "MatchRegexString": "^Steam$",
+      "TargetJs": "js/nav-fit.js"
+    },
+    {
+      "MatchRegexString": "^Steam$",
       "TargetJs": "js/liquid-glass.js"
     },
     {
@@ -88,6 +92,16 @@
       "values": {
         "Classic": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-classic.css" } },
         "Liquid glass": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-liquid.css" } }
+      }
+    },
+    "Nav position": {
+      "tab": "Glass",
+      "description": "Where the Store, Library and Community capsule sits in the title bar; it moves to a second row when it doesn't fit.",
+      "default": "Center",
+      "values": {
+        "Center": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-center.css" } },
+        "Left": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-left.css" } },
+        "Right": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-right.css" } }
       }
     },
     "Liquid opacity": {

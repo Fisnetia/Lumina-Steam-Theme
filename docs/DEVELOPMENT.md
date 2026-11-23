@@ -65,6 +65,7 @@ src/js/library-anim.js           库分类展开、折叠动画，切换游戏�
 src/js/smooth-scroll.js          库游戏列表的鼠标滚轮平滑滚动
 src/js/morph-nav.js              变形菜单：导航、标题栏菜单、账户菜单
 src/js/url-bar.js                URL 栏胶囊换地址时的宽度动画
+src/js/nav-fit.js                导航胶囊按「导航位置」摆放；放不下时先在空隙里挪、再收紧，最后才换行
 src/js/liquid-glass.js           液态玻璃的折射滤镜（游戏栏、菜单面板）
 src/js/wallpaper.js              壁纸设置卡片、WE 预览图墙，各窗口的图片 / 视频 / Scene / 网页壁纸
 src/js/i18n.js                   中文界面下的设置页文字
