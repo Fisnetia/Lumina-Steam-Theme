@@ -10,10 +10,9 @@
  * by slightly different amounts, and a thin band at the rim is brightened,
  * which gives the edge a faint fringe coloured by the backdrop.
  *
- * Panes: the game list and the three bottom bar capsules (maps redrawn after
- * resizing settles), and the in-page menu panel of js/morph-nav.js (redrawn
- * every frame while it morphs; it is small). Each sets its ready class on
- * <html> once its filter exists.
+ * Panes: the game list, the in-page menu panel of js/morph-nav.js and the
+ * three bottom bar capsules. Each sets its ready class on <html> once its
+ * filter exists.
  */
 (() => {
     if (window.__lmLiquid) return;
@@ -116,12 +115,24 @@
         `<feComposite in="edge" in2="body" operator="over"/>`;
 
     // One refracting pane, its bevel width = Refraction x reach.
-    // live: redraw on every size change (once per frame) instead of after
-    // resizing settles.
     // scale: displacement at the rim is about scale / 2; with the t² profile,
     // up to 0.9 x bevel keeps the mapping monotonic.
-    const pane = ({ selector, id, ready, reach, live }) => {
+    // While the pane resizes, the last map is stretched to the new size, which
+    // only changes a few attributes; drawing and decoding a map every frame
+    // drops frames. The map is redrawn once the size settles.
+    const SETTLE = 120;
+    const pane = ({ selector, id, ready, reach }) => {
         let el = null, size = "", observer = null, pending = 0;
+
+        const stretch = () => {
+            const f = document.getElementById(id), img = f && f.firstElementChild;
+            if (!img) return false;
+            const W = Math.round(el.offsetWidth), H = Math.round(el.offsetHeight);
+            if (!W || !H) return true;
+            f.setAttribute("width", W); f.setAttribute("height", H);
+            img.setAttribute("width", W); img.setAttribute("height", H);
+            return true;
+        };
 
         const build = () => {
             pending = 0;
@@ -143,14 +154,18 @@
             html.classList.add(ready);
         };
 
+        // runs after layout, before paint, so the stretched map lands in the same frame
         const schedule = () => {
-            if (live) { if (!pending) pending = requestAnimationFrame(build); }
-            else { clearTimeout(pending); pending = setTimeout(build, 80); }
+            if (!el || !el.isConnected) return;
+            clearTimeout(pending);
+            if (stretch()) pending = setTimeout(build, SETTLE);
+            else build();
         };
 
         const detach = () => {
             if (observer) observer.disconnect();
-            observer = null; el = null; size = "";
+            clearTimeout(pending);
+            observer = null; el = null; size = ""; pending = 0;
             html.classList.remove(ready);
         };
 
@@ -172,14 +187,14 @@
 
     const panes = [
         pane({ selector: "{{GameListHomeAndSearch.Container}}", id: "lm-liquid", ready: "lm-liquid-ready",
-               reach: 0.92, live: false }),   // 46px at 50%
+               reach: 0.92 }),   // 46px at 50%
         pane({ selector: ".lm-morph.lm-morph-inpage", id: "lm-liquid-menu", ready: "lm-liquid-menu-ready",
-               reach: 0.56, live: true }),    // 28px at 50%
+               reach: 0.56 }),    // 28px at 50%
         // bottom bar capsules, 36px tall
         ...[["{{BottomBarContainer.AddGameButton}}", "add"], ["{{BottomBarContainer.DownloadStatus}}", "dl"],
             ["{{BottomBarContainer.FriendsButton}}", "friends"]].map(([selector, name]) =>
             pane({ selector, id: `lm-liquid-${name}`, ready: `lm-liquid-${name}-ready`,
-                   reach: 0.24, live: false })),   // 12px at 50%
+                   reach: 0.24 })),   // 12px at 50%
     ];
 
     // the library mounts and unmounts the list; the menu panel appears on first use;
