@@ -1,0 +1,16 @@
+/* Windows acrylic from the dwmx plugin: every layer must be transparent. */
+:root {
+    --lm-backdrop: none;
+    --lm-menu-alpha: 62%;
+}
+
+html,
+body,
+{{ForceOpaqueBackground.OuterFrame}} {
+    background: transparent !important;
+}
+
+{{ForceOpaqueBackground.OuterFrame}}::before,
+html.friendsui-container body::before {
+    display: none !important;
+}

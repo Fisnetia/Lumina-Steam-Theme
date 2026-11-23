@@ -1,0 +1,517 @@
+/* Lumina: main window (title bar, library, game pages).
+   The backdrop is blurred once behind the window; Steam's opaque containers
+   become translucent tints, so panels need no backdrop-filter of their own. */
+
+/* ---- Backdrop ---- */
+
+{{ForceOpaqueBackground.Wrapper}}{{ForceOpaqueBackground}},
+{{ForceOpaqueBackground.FocusBar}} {
+    background: transparent !important;
+}
+
+{{ForceOpaqueBackground.OuterFrame}} {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: #07090f !important;
+}
+
+{{ForceOpaqueBackground.OuterFrame}}::before {
+    content: "";
+    position: absolute;
+    /* overscan so the blur doesn't fade at the edges */
+    inset: calc(var(--lm-blur-px) * -2);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--lm-backdrop, linear-gradient(160deg, #0e1424, #06080e));
+    filter: blur(var(--lm-blur-px)) saturate(1.15);
+}
+
+/* ---- Title bar, nav, URL bar ---- */
+
+/* One row: the title bar has no background of its own and the nav bar
+   floats as a capsule centered in it. Narrow windows put the capsule back
+   on a second row so it never covers the menus or window buttons. */
+{{ForceOpaqueBackground.TopBar}} {
+    position: relative;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+{{ForceOpaqueBackground.TopBar}} > {{ForceOpaqueBackground.TitleBar}} {
+    height: var(--lm-titlebar-h);
+}
+
+{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}},
+{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}} {
+    align-self: center;
+    margin-top: 0 !important;
+}
+
+{{ForceOpaqueBackground.SuperNavBar}} {
+    position: absolute;
+    top: calc((var(--lm-titlebar-h) - var(--lm-capsule-h)) / 2);
+    left: 50%;
+    translate: -50% 0;
+    box-sizing: border-box;
+    height: var(--lm-capsule-h) !important;
+    min-height: 0 !important;
+    padding: 0 4px !important;
+    background: var(--lm-panel-strong);
+    border: 1px solid var(--lm-border-strong);
+    border-radius: 999px;
+    box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+{{ForceOpaqueBackground.SuperNavBar}} > {{SuperNav.SuperNav}} {
+    width: auto;
+    flex-grow: 0;
+}
+
+:root {
+    --lm-titlebar-h: 40px;
+    --lm-capsule-h: 32px;
+}
+
+@media (max-width: 1240px) {
+    {{ForceOpaqueBackground.SuperNavBar}} {
+        position: static;
+        translate: none;
+        align-self: flex-start;
+        margin: 0 0 6px 10px;
+    }
+}
+
+/* the library's spacer where web pages show the URL bar */
+{{ForceOpaqueBackground.LocalContentContainer}} {{ForceOpaqueBackground.URLBarReplacement}} {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* URL bar: a centered capsule as wide as the address; width changes are
+   animated by js/url-bar.js */
+{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    align-self: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    min-height: 28px;
+    margin: 2px 0 6px;
+    padding: 0 6px !important;
+    background: var(--lm-panel-strong) !important;
+    border: 1px solid var(--lm-border-strong);
+    border-radius: 999px;
+    box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* while the capsule shrinks only the address gives way */
+{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} > * {
+    flex-shrink: 0;
+}
+
+{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} > {{ForceOpaqueBackground.URLBarText}} {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: 2px 12px 2px 6px !important;
+}
+
+{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {{ForceOpaqueBackground.URL}} {
+    flex-grow: 0 !important;
+    font-size: 12px !important;
+    color: var(--lm-text-dim) !important;
+}
+
+{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBarText}}:hover,
+{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.ReloadButton}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+{{SuperNav.Arrow}} {
+    padding: 0 3px !important;
+}
+
+{{SuperNav.Arrow}}:first-child {
+    padding-left: 8px !important;
+}
+
+{{SuperNav.SuperNavMenu}} {
+    display: flex !important;
+    align-items: center;
+    padding: 0 1px !important;
+}
+
+{{SuperNav.MenuButton}} {
+    height: 24px !important;
+    padding: 0 12px;
+    font-size: 14px;
+    line-height: 24px;
+    letter-spacing: 0.04em;
+    border-radius: 999px !important;
+    transition: color 0.15s ease, background-color 0.15s ease !important;
+}
+
+{{SuperNav.MenuButton}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+{{SuperNav.SuperNavMenu}}{{SuperNav.Selected}} {{SuperNav.MenuButton}} {
+    color: #fff !important;
+    text-shadow: none !important;
+    background: var(--lm-selected) !important;
+}
+
+{{SuperNav.SuperNavMenu}}{{SuperNav.Selected}} {{SuperNav.MenuButton}}::after {
+    display: none !important;
+}
+
+/* Steam / View / Friends / Games / Help: a glass capsule like the nav, so the
+   text stays readable over any wallpaper */
+{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}} {
+    box-sizing: border-box;
+    height: var(--lm-capsule-h);
+    margin-left: 6px;
+    padding: 0 4px;
+    align-items: center;
+    background: var(--lm-panel-strong);
+    border: 1px solid var(--lm-border-strong);
+    border-radius: 999px;
+    box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+{{RootMenuBar.RootMenuButton}} {
+    height: 24px;
+    align-items: center;
+    color: color-mix(in srgb, var(--lm-text) 82%, transparent) !important;
+    border-radius: 999px !important;
+}
+
+{{RootMenuBar.RootMenuButton}} * {
+    color: inherit !important;
+}
+
+{{RootMenuBar.RootMenuButton}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+/* account, notifications, announcements */
+{{TitleBarControls.AccountMenu}},
+{{TitleBarControls.NotificationsButton}},
+{{TitleBarControls.AnnouncementsButton}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+/* ---- Library layout ---- */
+
+{{LeftListSizableContainer.Container}},
+{{LeftListSizableContainer.MainPanel}},
+{{LeftListSizableContainer.AppDetailsTransitionGroup}} {
+    /* AppDetailsTransitionGroup paints #22242a behind the right side */
+    background: transparent !important;
+}
+
+{{LeftListSizableContainer.LibraryWindowDivider}} {
+    background-color: var(--lm-border) !important;
+}
+
+{{LeftListSizableContainer.LibraryWindowDivider}}:hover {
+    background-color: color-mix(in srgb, var(--lm-a) 55%, transparent) !important;
+}
+
+/* "new collection" drop target */
+{{LeftListSizableContainer.MainPanel}} {{LeftListSizableContainer.NewCollectionTarget}} {
+    background-color: var(--lm-panel-strong) !important;
+    border: 1px dashed color-mix(in srgb, var(--lm-a) 60%, transparent) !important;
+    border-radius: var(--lm-r) !important;
+}
+
+/* Left column */
+{{GameListHomeAndSearch.Container}} {
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+    border-right: 1px solid var(--lm-border);
+}
+
+{{GameListHomeAndSearch.GameListHomeAndSearch}} {
+    background: transparent !important;
+    box-shadow: none !important;   /* Steam's dark edge lines around the Home row */
+}
+
+{{GameListHomeAndSearch.HomeBox}} {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{GameListHomeAndSearch.HomeBox}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+/* the selected Home bar is solid gray */
+{{CollectionIconBox.Bar}} {
+    background: transparent !important;
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{CollectionIconBox.Bar}}{{CollectionIconBox.Selected}} {
+    background: var(--lm-selected) !important;
+}
+
+/* filter row */
+{{ViewFiltersBar.Bar}} {{ViewFiltersBar.MenuHeader}} {
+    background-color: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{ViewFiltersBar.Bar}} {{ViewFiltersBar.MenuHeader}}:hover {
+    background-color: var(--lm-hover) !important;
+}
+
+/* Search box */
+{{AdvancedSearchButton.Container}} {
+    background-color: transparent !important;
+}
+
+{{AdvancedSearchButton.SearchInput}} .DialogTextInputBase {
+    background-color: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r-sm) !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease !important;
+}
+
+{{AdvancedSearchButton.SearchInput}} .DialogTextInputBase:hover {
+    background-color: var(--lm-hover) !important;
+}
+
+{{AdvancedSearchButton.SearchInput}} .DialogTextInputBase:focus {
+    border-color: color-mix(in srgb, var(--lm-a) 70%, transparent) !important;
+}
+
+{{AdvancedSearchButton.AdvancedSearchPane}} {
+    background: var(--lm-menu-bg) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: var(--lm-shadow) !important;
+}
+
+/* collection headers */
+{{SectionHeaderContent.Container}} {
+    background: transparent !important;
+}
+
+{{SectionHeaderContent.Container}}:hover,
+{{SectionHeaderContent.Container}}{{SectionHeaderContent.HoverOverlay}} {
+    background: var(--lm-hover) !important;
+}
+
+{{SectionHeaderContent.SectionName}} {
+    color: var(--lm-text-dim) !important;
+    letter-spacing: 0.06em;
+}
+
+/* Game rows */
+{{GameListEntryContainer.Container}} {
+    border-radius: var(--lm-r-sm) !important;
+    margin-inline: 4px;
+    transition: background-color 0.12s ease !important;
+}
+
+{{GameListEntryContainer.Container}}:hover,
+{{GameListEntryContainer.Container}}{{GameListEntryContainer.HoverOverlay}} {
+    background-color: var(--lm-hover) !important;
+}
+
+{{GameListEntryContainer.Selected}} {{GameListEntryContainer.Container}},
+{{GameListEntryContainer.Container}}{{GameListEntryContainer.Selected}} {
+    background-color: var(--lm-selected) !important;
+    box-shadow: inset 2px 0 0 var(--lm-a);
+}
+
+{{GameListEntryContainer.Selected}} {{GameListEntryContainer.Container}}:hover,
+{{GameListEntryContainer.Container}}{{GameListEntryContainer.Selected}}:hover {
+    background-color: var(--lm-selected-hover) !important;
+}
+
+/* row content shifts right on hover and stays shifted while selected;
+   translate leaves Steam's drag transform intact */
+{{GameListEntryContainer.Container}} > {{GameListEntryContainer.GameListEntryContainer}} {
+    transition: translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.21s ease-in-out !important;
+}
+
+{{GameListEntryContainer.Container}}:hover > {{GameListEntryContainer.GameListEntryContainer}},
+{{GameListEntryContainer.HoverOverlay}} > {{GameListEntryContainer.GameListEntryContainer}},
+{{GameListEntryContainer.Container}}{{GameListEntryContainer.Selected}} > {{GameListEntryContainer.GameListEntryContainer}},
+{{GameListEntryContainer.Selected}} {{GameListEntryContainer.Container}} > {{GameListEntryContainer.GameListEntryContainer}} {
+    translate: var(--lm-row-shift) 0;
+}
+
+:root {
+    --lm-row-shift: 6px;
+}
+
+/* Truncated names: on hover Steam draws a full-width copy of the row in a
+   body-level layer (HoverOverlay) over the game page. Give it an opaque glass
+   background so the overflowing part stays readable. */
+{{HoverPosition.HoverPosition}}:has({{GameListEntryContainer.HoverOverlay}}) {
+    /* an ancestor with opacity < 1 disables backdrop-filter; fade the row itself */
+    transition: none !important;
+}
+
+{{GameListEntryContainer.Container}}{{GameListEntryContainer.HoverOverlay}} {
+    padding-inline-end: calc(var(--lm-row-shift) + 6px);
+    color: #fff !important;
+    background: linear-gradient(var(--lm-hover), var(--lm-hover)), var(--lm-menu-bg) !important;
+    backdrop-filter: blur(18px) saturate(1.2);
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-shadow) !important;
+    animation: lm-overlay-in 0.16s ease-out both;
+}
+
+{{GameListEntryContainer.Container}}{{GameListEntryContainer.HoverOverlay}}{{GameListEntryContainer.Selected}} {
+    background: linear-gradient(var(--lm-selected-hover), var(--lm-selected-hover)), var(--lm-menu-bg) !important;
+    box-shadow: inset 2px 0 0 var(--lm-a), var(--lm-shadow) !important;
+}
+
+/* the copy appears unshifted; slide it to match the row underneath */
+{{GameListEntryContainer.HoverOverlay}}:not({{GameListEntryContainer.Selected}}) > {{GameListEntryContainer.GameListEntryContainer}} {
+    animation: lm-row-shift 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes lm-overlay-in {
+    from { opacity: 0; }
+}
+
+@keyframes lm-row-shift {
+    from { translate: 0 0; }
+}
+
+{{GameListEntryContainer.GameIcon}} {
+    border-radius: 4px;
+}
+
+/* bottom bar */
+{{BottomBarContainer.BottomBar}} {
+    background: var(--lm-panel-strong) !important;
+    border-top: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+}
+
+{{BottomBarContainer.AddGameButton}},
+{{BottomBarContainer.FriendsButton}},
+{{BottomBarContainer.DownloadStatus}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{BottomBarContainer.AddGameButton}}:hover,
+{{BottomBarContainer.FriendsButton}}:hover,
+{{BottomBarContainer.DownloadStatus}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+{{BottomBarContainer.ProgressBar}} {
+    background: var(--lm-a) !important;
+}
+
+/* ---- Library home ---- */
+
+{{LibraryHome.Container}},
+{{LibraryHome.LibraryHome}} {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* "What's new" strip */
+{{LibraryHome.UpdatesContainer}} {
+    background: var(--lm-panel-soft) !important;
+    background-image: none !important;
+    border-bottom: 1px solid var(--lm-border);
+}
+
+/* radial gradient behind the grid views */
+{{AppGridSectionHeader.AppGridSectionHeader}}::after {
+    background: none !important;
+}
+
+{{ContainerScroll.OuterContainer}} {
+    background: transparent !important;
+}
+
+{{FeaturedCapsule.LibraryItemBox}} {
+    border-radius: var(--lm-r-sm) !important;
+    overflow: hidden;
+}
+
+{{AppGridSectionHeader.SortingDropDown}},
+{{AppGridSectionHeader.CollectionOptions}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+/* ---- Game page ---- */
+
+/* hidden while a game or collection switch renders (js/library-anim.js) */
+{{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{AppDetailsOverviewPanel.Container}},
+{{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{ContainerScroll.OuterContainer}} {
+    opacity: 0 !important;
+}
+
+{{AppDetailsOverviewPanel.ScrollContainer}},
+{{AppDetailsOverviewPanel.Glassy}}{{AppDetailsOverviewPanel.ScrollContainer}} {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* ColumnContainer sits under BackdropGlass; tint only one of them */
+{{SpotlightLeftColumn.Container}} {{SpotlightLeftColumn.ColumnContainer}},
+{{SpotlightLeftColumn.Glassy}} {{SpotlightLeftColumn.ColumnContainer}} {
+    background: transparent !important;
+}
+
+/* Steam's glass layer under the hero: 450px tall, fades out downward so it
+   leaves no edge; the mask fades its blur as well */
+{{SpotlightLeftColumn.Glassy}} {{SpotlightLeftColumn.BackdropGlass}} {
+    background: var(--lm-panel) !important;
+    mask-image: linear-gradient(to bottom, #000 82px, transparent);
+}
+
+/* the page scrolls under the play bar, so it gets a real blur */
+{{PlayBarGameName.PlayBar}} {
+    background: linear-gradient(to top, var(--lm-panel-strong) 30%, transparent) !important;
+}
+
+{{PlayBarGameName.StickyHeader}} {{PlayBarGameName.Glassy}} {
+    background: var(--lm-panel-strong) !important;
+    backdrop-filter: blur(18px) saturate(1.2) !important;
+    border-bottom: 1px solid var(--lm-border) !important;
+}
+
+{{AppGameInfoContainer}},
+{{PlayBarGameName.GameInfoButton}} {
+    background-color: var(--lm-panel-soft) !important;
+}
+
+{{PlayBarGameName.AppButtonsContainer}} > *,
+{{PlayBarGameName.MenuButton}},
+{{PlayBarGameName.GameInfoButton}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{PlayButtonContainer.PlayButtonContainer}},
+{{PlayButtonContainer.PlayButton}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+/* activity, achievements, friends cards */
+{{AppDetailsSectionContainer.AppDetailsSectionContainer}}{{AppDetailsSectionContainer.RightColumnSection}},
+{{AppDetailsSectionContainer.RightColumnSection}}{{AppDetailsSectionContainer.AppDetailsSectionContainer}} {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: var(--lm-sheen) !important;
+}
+
+/* progress bars */
+{{PlayBarGameName.DetailsProgressBar}} {
+    background: var(--lm-a) !important;
+    border-radius: 3px;
+}

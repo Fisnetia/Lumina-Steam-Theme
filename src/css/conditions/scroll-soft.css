@@ -1,0 +1,8 @@
+/* Smooth scrolling: soft (~400ms per notch). */
+:root {
+    --lm-smooth-scroll: 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --lm-smooth-scroll: 0ms; }
+}

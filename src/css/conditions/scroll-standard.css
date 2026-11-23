@@ -1,0 +1,8 @@
+/* Smooth scrolling: standard (~240ms per notch). Read by js/smooth-scroll.js. */
+:root {
+    --lm-smooth-scroll: 60ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --lm-smooth-scroll: 0ms; }
+}

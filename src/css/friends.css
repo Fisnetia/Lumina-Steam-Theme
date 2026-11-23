@@ -1,0 +1,159 @@
+/* Lumina: friends list and chat (readable class names, no placeholders). */
+
+/* ---- Backdrop ---- */
+
+html.friendsui-container,
+html.friendsui-container body {
+    background: #07090f !important;
+}
+
+html.friendsui-container body {
+    isolation: isolate;
+}
+
+html.friendsui-container body::before {
+    content: "";
+    position: fixed;
+    inset: calc(var(--lm-blur-px) * -2);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--lm-backdrop, linear-gradient(160deg, #0e1424, #06080e));
+    filter: blur(var(--lm-blur-px)) saturate(1.15);
+}
+
+.singleWindowFocusBar,
+.statusHeaderGlow {
+    display: none !important;
+}
+
+/* ---- Friends list ---- */
+
+.friendListHeaderContainer,
+.friendListFooter {
+    background-color: var(--lm-panel-strong) !important;
+    box-shadow: var(--lm-sheen) !important;
+}
+
+.friendListHeaderContainer {
+    border-bottom: 1px solid var(--lm-border);
+}
+
+.friendListFooter {
+    border-top: 1px solid var(--lm-border);
+}
+
+.friendlistListContainer,
+.chatRoomListContainer {
+    background: var(--lm-panel) !important;
+}
+
+.friendsListSectionTitle,
+.activeTab {
+    background-color: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm) var(--lm-r-sm) 0 0;
+}
+
+.friendsListSectionTitle.chatSectionTitle:hover {
+    background-color: var(--lm-hover) !important;
+}
+
+.socialListTab {
+    box-shadow: none !important;
+}
+
+.friendGroup .groupName {
+    color: var(--lm-text-dim) !important;
+    letter-spacing: 0.05em;
+}
+
+.friendGroup .groupName.gpfocus,
+.gpfocus .friendGroup .groupName {
+    background: var(--lm-hover) !important;
+}
+
+/* Individual friends */
+.friendlistListContainer .friend,
+.chatRoomListContainer .ChatRoomListGroupItem {
+    border-radius: var(--lm-r-sm);
+    margin-inline: 4px;
+    transition: background-color 0.12s ease;
+}
+
+.friendlistListContainer .friend:hover,
+.chatRoomListContainer .ChatRoomListGroupItem:hover {
+    background-color: var(--lm-hover) !important;
+}
+
+.friendlistListContainer .friend.gpfocus,
+.friendlistListContainer .friend.activeChat {
+    background-color: var(--lm-selected) !important;
+}
+
+/* Search and buttons */
+.friendListHeaderContainer input,
+.socialTabSearchContainer input {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r-sm) !important;
+}
+
+.friendListButton {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+.friendListButton:hover {
+    background: var(--lm-hover) !important;
+}
+
+/* ---- Chat ---- */
+
+.titleBarContainer.ChatTabs {
+    background-color: var(--lm-panel-strong) !important;
+    border-bottom: 1px solid var(--lm-border);
+}
+
+.chatTabSetContainer .chatTab,
+.chatTabSetContainer .chattab {
+    border-radius: var(--lm-r-sm) var(--lm-r-sm) 0 0;
+}
+
+.chatDialogs {
+    background: var(--lm-panel) !important;
+}
+
+.chatWindow .chatHeader {
+    background: var(--lm-panel-strong) !important;
+    border-bottom: 1px solid var(--lm-border);
+}
+
+.chatHistory {
+    background: transparent !important;
+}
+
+/* Message input */
+.chatEntry {
+    background: var(--lm-panel-strong) !important;
+    border-top: 1px solid var(--lm-border);
+}
+
+.chatEntry textarea,
+.chatEntry .chatTextarea {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r-sm) !important;
+}
+
+.chatEntry textarea:focus,
+.chatEntry .chatTextarea:focus {
+    border-color: color-mix(in srgb, var(--lm-a) 70%, transparent) !important;
+}
+
+.chatSubmitButton {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+/* group chat side panel, voice */
+.chatRoomVoiceChannelsGroup,
+.ChatRoomGroupDialog .chatRoomRightPanel {
+    background: var(--lm-panel-soft) !important;
+}

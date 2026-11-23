@@ -1,0 +1,56 @@
+/* Game list: a floating liquid glass panel. The edges refract the backdrop
+   through an SVG displacement filter built by js/liquid-glass.js, which sets
+   html.lm-liquid-ready once the filter exists; until then it is plain glass. */
+:root {
+    --lm-liquid: 1;
+    --lm-float-gap: 8px;
+    --lm-liquid-tone: blur(2px) saturate(1.35) brightness(1.04);
+}
+
+html {{GameListHomeAndSearch.Container}} {
+    box-sizing: border-box;
+    height: calc(100% - 2 * var(--lm-float-gap)) !important;
+    margin: var(--lm-float-gap);   /* the same gap on the divider side */
+    /* keeps the Home box 8px from the rounded corner, so its corner is concentric */
+    padding: 4px 2px 2px;
+    overflow: hidden;
+    border: none !important;
+    border-radius: calc(var(--lm-r) * 1.4) !important;
+    background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
+    backdrop-filter: var(--lm-liquid-tone);
+    /* rim light on top, a darker lip below, then the drop shadow */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+        0 10px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.lm-liquid-ready {{GameListHomeAndSearch.Container}} {
+    backdrop-filter: url(#lm-liquid) var(--lm-liquid-tone);
+}
+
+/* Menus (js/morph-nav.js) get the same pane: clearer fill, rim light and
+   lip; in the main window their edges refract too (filter #lm-liquid-menu).
+   The popup-window surface over web pages can't blur, so it keeps its fill. */
+html .lm-morph {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+        0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+html .lm-morph.lm-morph-inpage {
+    background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent);
+    backdrop-filter: blur(2px) saturate(1.35) brightness(1.04);
+}
+
+html.lm-liquid-menu-ready .lm-morph.lm-morph-inpage {
+    backdrop-filter: url(#lm-liquid-menu) blur(2px) saturate(1.35) brightness(1.04);
+}
+
+/* the panel floats, so the column divider only shows on hover */
+{{LeftListSizableContainer.LibraryWindowDivider}} {
+    background-color: transparent !important;
+}

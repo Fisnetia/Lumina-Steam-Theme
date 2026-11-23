@@ -1,0 +1,62 @@
+/* Wallpaper: --lm-wallpaper (set by js/wallpaper.js) or images/wallpaper.jpg.
+   The fallback url stays here so it resolves relative to this file. */
+:root {
+    --lm-backdrop: #0b0e15;
+    --lm-backdrop-mode: wallpaper;
+}
+
+{{ForceOpaqueBackground.OuterFrame}}::before,
+html.friendsui-container body::before {
+    background-image:
+        linear-gradient(rgba(6, 8, 14, 0.18), rgba(6, 8, 14, 0.18)),
+        var(--lm-wallpaper, url("../../images/wallpaper.jpg")) !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* video and scene layers, over the ::before still */
+.lm-video-layer,
+.lm-scene-layer {
+    position: absolute;
+    inset: calc(var(--lm-blur-px) * -2);
+    width: calc(100% + var(--lm-blur-px) * 4);
+    height: calc(100% + var(--lm-blur-px) * 4);
+    object-fit: cover;
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(var(--lm-blur-px)) saturate(1.15) brightness(0.84);
+}
+
+html.friendsui-container .lm-video-layer {
+    position: fixed;
+}
+
+/* Store and Community (html.lm-web, js/wallpaper.js): the client's backdrop
+   still behind the page. Their text sits right on it, so it is blurred at
+   least 12px and tinted more than the client's. */
+html.lm-web {
+    background: #0b0e15 !important;
+}
+
+html.lm-web body {
+    background: transparent !important;
+}
+
+html.lm-web body::before {
+    content: "";
+    position: fixed;
+    inset: calc(max(var(--lm-blur-px), 12px) * -2);
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(color-mix(in srgb, var(--lm-t) 55%, transparent), color-mix(in srgb, var(--lm-t) 55%, transparent)),
+        var(--lm-web-wallpaper, url("../../images/wallpaper.jpg")) center / cover;
+    filter: blur(max(var(--lm-blur-px), 12px)) saturate(1.15);
+}
+
+/* webwallgl's canvas */
+.lm-scene-layer canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}

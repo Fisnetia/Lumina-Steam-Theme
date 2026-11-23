@@ -1,0 +1,13 @@
+:root {
+    /*
+     * @name Accent
+     * @description Selection, progress bars and the aurora.
+     */
+    --lm-accent: #7cc4ff;
+
+    /*
+     * @name Glass tint
+     * @description Base color of the panels; their opacity is a separate slider.
+     */
+    --lm-tint: #121722;
+}

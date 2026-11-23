@@ -1,0 +1,507 @@
+/* Lumina: tokens and styles shared by every Steam window.
+   Class placeholders in double braces are resolved by tools/build.py. */
+
+:root {
+    /* Inputs (accent, tint, sliders) are not declared here, so injection order
+       can't override the user's values; defaults are the var() fallbacks. */
+    --lm-a: var(--lm-accent, #7cc4ff);
+    --lm-t: var(--lm-tint, #121722);
+    --lm-r: var(--lm-radius, 10px);
+    --lm-r-sm: calc(var(--lm-r) * 0.6);   /* menu items, list rows */
+
+    /* strong panels (title bar, headers) sit 17% above the opacity slider */
+    --lm-panel: color-mix(in srgb, var(--lm-t) var(--lm-alpha, 38%), transparent);
+    --lm-panel-strong: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 17%), 100%), transparent);
+    --lm-panel-soft: rgba(255, 255, 255, 0.045);
+    --lm-hover: rgba(255, 255, 255, 0.07);
+    --lm-pressed: rgba(255, 255, 255, 0.11);
+    --lm-selected: color-mix(in srgb, var(--lm-a) 26%, transparent);
+    --lm-selected-hover: color-mix(in srgb, var(--lm-a) 34%, transparent);
+    --lm-border: rgba(255, 255, 255, 0.08);
+    --lm-border-strong: rgba(255, 255, 255, 0.14);
+    --lm-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --lm-shadow: 0 12px 32px rgba(0, 0, 0, 0.38), 0 2px 6px rgba(0, 0, 0, 0.25);
+    --lm-menu-bg: color-mix(in srgb, var(--lm-t) var(--lm-menu-alpha, 92%), transparent);
+    --lm-blur-px: var(--lm-wall-blur, 28px);
+    --lm-text: #e9edf3;
+    --lm-text-dim: rgba(233, 237, 243, 0.62);
+}
+
+/* ---- Scrollbars ---- */
+
+::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb,
+* ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.16) !important;
+    background-image: none !important;
+    border: 2px solid transparent !important;
+    border-radius: 8px !important;
+    background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:hover,
+* ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ---- Menus ---- */
+
+/* Popup menus live in their own transparent windows (html.ContextMenuPopup).
+   Only the .contextMenu box is painted; a desktop window can't be blurred,
+   so the fill is nearly opaque. */
+html{{contextMenu.ContextMenuPopup}},
+html{{contextMenu.ContextMenuPopup}} body,
+{{contextMenu.ContextMenuPopup}},
+{{MenuWrapper.MenuPopup}},
+{{SuperNavMenu.MenuPopup}} {
+    background: transparent !important;
+}
+
+/* The window is exactly the box's size: outline with an inset shadow, not a border. */
+{{contextMenu.contextMenu}} {
+    background: var(--lm-menu-bg) !important;
+    border: none !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen), 0 2px 5px 1px rgba(0, 0, 0, 0.25) !important;
+    overflow: hidden !important;
+}
+
+/* Size popup menus to their content instead of Steam's wide inline min-width. */
+html{{contextMenu.ContextMenuPopup}} {{contextMenu.contextMenu}} {
+    min-width: 132px !important;
+}
+
+html{{contextMenu.ContextMenuPopup}} {{contextMenu.contextMenuItem}} {
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+}
+
+/* the notifications panel has its own background and border */
+{{NotificationsMenu}} {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Menus drawn inside the main window (game right-click, library filter)
+   can blur what's behind them. */
+html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
+    background: color-mix(in srgb, var(--lm-t) 62%, transparent) !important;
+    backdrop-filter: blur(22px) saturate(1.4) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: var(--lm-shadow), var(--lm-sheen) !important;
+}
+
+{{contextMenu.contextMenuContents}} {
+    background: transparent !important;
+    padding: 4px !important;
+}
+
+{{MenuWrapper.MenuItem}},
+{{contextMenu.contextMenuItem}} {
+    border-radius: var(--lm-r-sm) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.12s ease !important;
+}
+
+{{MenuWrapper.MenuItem}}:hover,
+{{contextMenu.contextMenuItem}}:hover,
+{{contextMenu.contextMenuItem}}{{contextMenu.active}} {
+    background: var(--lm-selected) !important;
+    color: #fff !important;
+}
+
+{{MenuWrapper.Separator}},
+{{contextMenu.ContextMenuSeparator}},
+{{contextMenu.ContextMenuHRSeparator}} {
+    border-color: var(--lm-border) !important;
+    background: var(--lm-border) !important;
+}
+
+/* dialog dropdowns (settings, properties) */
+{{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+    background: var(--lm-menu-bg) !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.25) !important;
+}
+
+{{DialogDropDownMenu_Item.DialogDropDownMenu_Item}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:hover {
+    background: var(--lm-selected) !important;
+}
+
+/* ---- Title bar buttons ---- */
+
+.title-area-highlight {
+    display: none !important;
+}
+
+.title-bar-actions .title-area-icon {
+    border-radius: var(--lm-r-sm) !important;
+    transition: background-color 0.12s ease !important;
+}
+
+.title-bar-actions .title-area-icon:hover {
+    background: var(--lm-hover) !important;
+}
+
+.title-bar-actions .title-area-icon.closeButton:hover {
+    background: #e5484d !important;
+}
+
+/* ---- Wallpaper card and gallery (js/wallpaper.js) ---- */
+
+/* full row width (the cloned slider row sizes this column to the slider) */
+[data-lm-wallpaper] .FieldRightColumn,
+[data-lm-wallpaper] .FieldChildrenWithIcon,
+[data-lm-wallpaper] .FieldChildrenInner {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+}
+
+.lm-wp-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.lm-wp-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    background: #0b0e15 center / cover no-repeat;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.lm-wp-badge,
+.lm-gallery-badge {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 16px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+}
+
+.lm-wp-title {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    right: 10px;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lm-wp-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.lm-wp-button {
+    flex: 1 1 auto;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    white-space: nowrap;
+}
+
+.lm-wp-button.lm-wp-icon {
+    flex: none;
+    width: 34px !important;
+    padding: 0 !important;
+}
+
+.lm-wp-note {
+    font-size: 12px;
+    color: var(--lm-text-dim);
+}
+
+.lm-gallery {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 7, 12, 0.55);
+    backdrop-filter: blur(6px);
+}
+
+.lm-gallery-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(1100px, 92vw);
+    height: min(760px, 88vh);
+    border-radius: var(--lm-r);
+    background: var(--lm-menu-bg);
+    box-shadow: var(--lm-shadow), inset 0 0 0 1px var(--lm-border-strong);
+    overflow: hidden;
+}
+
+.lm-gallery-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--lm-border);
+}
+
+.lm-gallery-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--lm-text);
+    white-space: nowrap;
+}
+
+.lm-gallery-filters {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    overflow-x: auto;
+}
+
+.lm-gallery-filters button,
+.lm-gallery-close {
+    border: none;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--lm-text-dim);
+    background: var(--lm-hover);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.lm-gallery-filters button.active {
+    color: #fff;
+    background: var(--lm-selected);
+}
+
+.lm-gallery-close {
+    padding: 4px 10px;
+}
+
+.lm-gallery-close:hover,
+.lm-gallery-filters button:hover {
+    color: #fff;
+}
+
+.lm-gallery-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    align-content: start;
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+/* 16:9 via padding: aspect-ratio with overflow hidden collapses grid rows */
+.lm-gallery-card {
+    position: relative;
+    display: block;
+    height: 0;
+    padding: 56.25% 0 0;
+    border: none;
+    border-radius: var(--lm-r-sm);
+    background: #0b0e15;
+    box-shadow: inset 0 0 0 1px var(--lm-border);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.lm-gallery-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.lm-gallery-card:hover img {
+    transform: scale(1.04);
+}
+
+.lm-gallery-card:hover,
+.lm-gallery-card:focus-visible {
+    outline: 2px solid var(--lm-a);
+    outline-offset: -2px;
+}
+
+.lm-gallery-badge {
+    top: 8px;
+    bottom: auto;
+}
+
+.lm-gallery-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px 10px 7px;
+    font-size: 12px;
+    text-align: left;
+    color: #fff;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---- Morphing nav menu (js/morph-nav.js) ----
+   In the main window (.lm-morph-inpage) the panel blurs what's behind it. Over
+   web views it is drawn in the Store supernav popup (html.lm-morph-host), where
+   a frosted fill stands in for the blur. Position and size come from
+   --lm-m* (--x / --y don't take effect: Steam seems to define them). */
+
+html.lm-morph-host,
+html.lm-morph-host body {
+    background: transparent !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+html.lm-morph-host .contextMenu {
+    display: none !important;
+}
+
+.lm-morph {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: var(--lm-mw);
+    height: var(--lm-mh);
+    transform: translate(var(--lm-mx), var(--lm-my));
+    border-radius: var(--lm-r);
+    background: var(--lm-menu-bg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen);
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;   /* geometry is animated by the script */
+}
+
+/* follows the Opacity slider (62% at its default 38%) */
+.lm-morph.lm-morph-inpage {
+    z-index: 1000;
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 24%), 100%), transparent);
+    backdrop-filter: blur(22px) saturate(1.4);
+    box-shadow: var(--lm-shadow), inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen);
+}
+
+.lm-morph.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lm-morph-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    min-width: 150px;
+    padding: 4px;
+    box-sizing: border-box;
+    transition: opacity 200ms ease, transform 260ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.lm-morph-page.enter {
+    opacity: 0;
+    transform: translateX(calc(var(--lm-dir) * 28px));
+    transition: none;
+}
+
+.lm-morph-page.leave {
+    opacity: 0;
+    transform: translateX(calc(var(--lm-dir) * -28px));
+    pointer-events: none;
+}
+
+.lm-morph-item {
+    padding: 7px 18px;
+    border: none;
+    border-radius: var(--lm-r-sm);
+    background: transparent;
+    color: var(--lm-text);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+}
+
+.lm-morph-item:hover,
+.lm-morph-item:focus-visible {
+    background: var(--lm-selected);
+    color: #fff;
+    outline: none;
+}
+
+.lm-morph-item.lm-checked::after {
+    content: "✓";
+    float: right;
+    margin-left: 18px;
+    opacity: 0.85;
+}
+
+/* while a click menu is open, the title bar's blank areas take clicks that close it */
+html.lm-click-menu {{ForceOpaqueBackground.TitleBar}},
+html.lm-click-menu {{ForceOpaqueBackground.DragArea}},
+html.lm-click-menu {{ForceOpaqueBackground.SuperNavBar}},
+html.lm-click-menu {{BottomBarContainer.BottomBar}},
+html.lm-click-menu {{BottomBarContainer.DownloadStatus}} {
+    -webkit-app-region: no-drag !important;
+    app-region: no-drag !important;
+}
+
+/* the title bar / account button whose menu is open (js/morph-nav.js) */
+.lm-menu-active {
+    background: var(--lm-hover) !important;
+}
+
+.lm-morph-sep {
+    height: 1px;
+    margin: 4px 10px;
+    background: var(--lm-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lm-morph,
+    .lm-morph-page {
+        transition: none;
+    }
+}

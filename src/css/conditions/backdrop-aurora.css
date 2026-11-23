@@ -1,0 +1,9 @@
+/* Aurora from the accent color. Strong enough to read through the tint. */
+:root {
+    --lm-backdrop:
+        radial-gradient(55% 50% at 10% 15%, color-mix(in srgb, var(--lm-accent, #7cc4ff) 75%, transparent), transparent 75%),
+        radial-gradient(50% 45% at 90% 18%, rgba(160, 110, 255, 0.62), transparent 75%),
+        radial-gradient(60% 55% at 72% 100%, rgba(30, 210, 180, 0.45), transparent 72%),
+        radial-gradient(45% 40% at 28% 88%, color-mix(in srgb, var(--lm-accent, #7cc4ff) 35%, transparent), transparent 72%),
+        linear-gradient(160deg, #132038 0%, #0c1222 55%, #080b16 100%);
+}

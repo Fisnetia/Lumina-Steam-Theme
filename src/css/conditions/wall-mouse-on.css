@@ -1,0 +1,4 @@
+/* Wallpaper mouse: scenes follow the pointer (js/wallpaper.js). */
+:root {
+    --lm-wall-mouse: 1;
+}

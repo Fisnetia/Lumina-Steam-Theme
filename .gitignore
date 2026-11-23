@@ -1,0 +1,7 @@
+/dist/
+tools/classmap.json
+__pycache__/
+shots/
+/release/
+CLAUDE.md
+.claude/

@@ -1,0 +1,114 @@
+/* Menus and their items fade in together; fade out on close. */
+:root {
+    --lm-menu-close: 150ms;    /* fade-out on close (read by js/menu-anim.js) */
+}
+
+@keyframes lm-menu-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes lm-menu-fade-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+@keyframes lm-item-in {
+    from { opacity: 0; transform: translateY(-5px); }
+    to   { opacity: 1; transform: none; }
+}
+
+{{contextMenu.contextMenu}}.ready {
+    animation: lm-menu-fade 240ms ease-out backwards;
+}
+
+{{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}} {
+    animation: lm-item-in 280ms ease-out backwards;
+}
+
+/* Morphing nav menu (js/morph-nav.js) on first open. */
+.lm-morph.open {
+    animation: lm-menu-fade 240ms ease-out backwards;
+}
+
+.lm-morph.open .lm-first .lm-morph-item {
+    animation: lm-item-in 280ms ease-out backwards;
+}
+
+{{contextMenu.contextMenu}}.lm-closing {
+    animation: lm-menu-fade-out var(--lm-menu-close) ease-in forwards !important;
+    pointer-events: none !important;
+}
+
+/* Library expand: games fade in together. */
+@keyframes lm-row-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lm-row-in {
+    animation: lm-row-in 200ms ease-out backwards;
+}
+
+/* Library collapse: games fade out, rows below fade in. */
+:root {
+    --lm-row-out-dur: 120ms;
+}
+
+@keyframes lm-row-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+@keyframes lm-row-up {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lm-row-out {
+    animation: lm-row-out var(--lm-row-out-dur) ease-in forwards;
+    pointer-events: none;
+}
+
+.lm-row-up {
+    animation: lm-row-up 180ms ease-out backwards;
+}
+
+/* Game page: fades in on every switch, replayed by js/library-anim.js
+   (outside the hero's 3D context). */
+@keyframes lm-page-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+{{LeftListSizableContainer.AppDetailsMain}} > {{AppDetailsOverviewPanel.Container}} {
+    animation: lm-page-in 220ms ease-out backwards;
+}
+
+/* Collection page: rows fade in one after another (js/library-anim.js). */
+:root {
+    --lm-cap-step: 35ms;
+}
+
+@keyframes lm-cap-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lm-cap-in {
+    animation: lm-cap-in 240ms ease-out calc(var(--lm-i, 0) * var(--lm-cap-step)) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --lm-menu-close: 0ms; --lm-row-out-dur: 0ms; }
+    .lm-cap-in,
+    .lm-row-up,
+    .lm-row-in,
+    {{LeftListSizableContainer.AppDetailsMain}} > {{AppDetailsOverviewPanel.Container}},
+    .lm-morph.open,
+    .lm-morph.open .lm-first .lm-morph-item,
+    {{contextMenu.contextMenu}}.ready,
+    {{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}} {
+        animation: none !important;
+    }
+}

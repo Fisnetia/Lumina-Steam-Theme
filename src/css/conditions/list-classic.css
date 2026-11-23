@@ -1,0 +1,10 @@
+/* Game list: the classic full-height panel. */
+:root {
+    --lm-liquid: 0;
+}
+
+/* the liquid glass sliders only apply to Liquid glass */
+[data-condition="Liquid opacity"],
+[data-condition="Refraction"] {
+    display: none !important;
+}
