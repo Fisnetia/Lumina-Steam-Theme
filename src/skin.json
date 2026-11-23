@@ -83,8 +83,8 @@
     },
     "Game list": {
       "tab": "Glass",
-      "description": "Classic panel, or a floating liquid glass panel whose edges refract the backdrop.",
-      "default": "Classic",
+      "description": "Classic panel, or a floating liquid glass panel whose edges refract the backdrop; the bottom bar floats too.",
+      "default": "Liquid glass",
       "values": {
         "Classic": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-classic.css" } },
         "Liquid glass": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-liquid.css" } }
@@ -92,8 +92,8 @@
     },
     "Liquid opacity": {
       "tab": "Glass",
-      "description": "Liquid glass only: tint of the game list and the menus.",
-      "default": 24,
+      "description": "Liquid glass only: tint of the game list, the menus and the bottom bar.",
+      "default": 30,
       "slider": { "cssVariable": "--lm-liquid-alpha", "min": 0, "max": 60, "step": 2, "unit": "%" }
     },
     "Refraction": {

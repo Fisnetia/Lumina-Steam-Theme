@@ -28,7 +28,7 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 
 - **Opacity**: how dark the panels are; lower is clearer.
 - **Corner radius**: rounding of panels, buttons and menus.
-- **Game list**: *Classic* is a full-height panel; *Liquid glass* floats the list with edges that bend the backdrop, and turns the menus into liquid glass as well.
+- **Game list**: *Classic* is a full-height panel; *Liquid glass* floats the list with edges that bend the backdrop, and turns the menus and the bottom bar into liquid glass as well.
 - **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes, and how far in from the edges the backdrop bends.
 - **Accent** and **Glass tint**: the selection color and the base color of the panels.
 

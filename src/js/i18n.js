@@ -36,8 +36,8 @@
         "Smooth scrolling": "游戏列表的鼠标滚轮平滑滚动",
         "Nav menu": "商店、库、社区等菜单共用一个面板，切换时平滑变形",
         "Wallpaper mouse": "Scene 壁纸在主窗口里跟随鼠标（视差、光标特效）",
-        "Game list": "经典面板，或四周留边、边缘折射背景的悬浮液态玻璃",
-        "Liquid opacity": "仅液态玻璃：游戏栏和菜单的着色深浅",
+        "Game list": "经典面板，或四周留边、边缘折射背景的悬浮液态玻璃，底栏也随之悬浮",
+        "Liquid opacity": "仅液态玻璃：游戏栏、菜单和底栏的着色深浅",
         "Refraction": "仅液态玻璃：背景从边缘向内弯折的范围",
     };
     // A dropdown menu is translated only when its items are exactly one of these sets.
