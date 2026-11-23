@@ -95,6 +95,12 @@
     animation: lm-page-in 220ms ease-out backwards;
 }
 
+/* Steam Settings: the page body is replaced on every switch (the header stays).
+   It is the scroll container, so its contents move, not its scrollbar. */
+html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > * {
+    animation: lm-page-in 200ms ease-out backwards;
+}
+
 /* Collection page: rows fade in one after another (js/library-anim.js). */
 :root {
     --lm-cap-step: 35ms;
