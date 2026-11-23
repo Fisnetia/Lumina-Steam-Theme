@@ -46,7 +46,9 @@
      * - bar: "Steam Root Menu" etc. (title bar), open on click; while one is
      *   open, hovering another switches to it
      * - click: "Account Menu", open on click */
-    const WRAPPERS = ".SuperNavMenu, .RootMenuButton, .MenuWrapper";
+    const SUPERNAV = "{{SuperNav.SuperNavMenu}}";
+    const WRAPPERS = `${SUPERNAV}, {{RootMenuBar.RootMenuButton}}, {{MenuWrapper.MenuWrapper}}`;
+    const MENU_ITEM = "{{contextMenu.contextMenuItem}}";
     const kindOf = (title) => /Supernav$/.test(title) ? "nav" : /Root Menu$/.test(title) ? "bar" : "click";
 
     // The popup's title from the wrapper's React props; null if not one of ours.
@@ -100,11 +102,11 @@
 
     // [{ item: Element } | { separator: true }] in menu order
     const entries = (title) => {
-        const w = popupWindow(title), box = w && w.document.querySelector(".contextMenuContents");
+        const w = popupWindow(title), box = w && w.document.querySelector("{{contextMenu.contextMenuContents}}");
         if (!box) return [];
-        const list = [...box.querySelectorAll(".contextMenuItem, [class*='Separator']")]
-            .filter(el => el.classList.contains("contextMenuItem") || !el.closest(".contextMenuItem"))
-            .map(el => el.classList.contains("contextMenuItem") ? { item: el } : { separator: true });
+        const list = [...box.querySelectorAll(`${MENU_ITEM}, [class*='Separator']`)]
+            .filter(el => el.matches(MENU_ITEM) || !el.closest(MENU_ITEM))
+            .map(el => el.matches(MENU_ITEM) ? { item: el } : { separator: true });
         const items = list.filter(e => e.item);
         if (title === "Friends Root Menu" && items.length) list[list.indexOf(items[0])] = withOnlineCount(items[0]);
         if (title === "Steam Root Menu" && items.length &&
@@ -171,7 +173,7 @@
     };
 
     // Embedded web view (Store, Community) under the panel area?
-    const overWebView = (rect) => [...document.querySelectorAll(".BrowserWrapper, .Browser")].some(el => {
+    const overWebView = (rect) => [...document.querySelectorAll("{{ForceOpaqueBackground.BrowserWrapper}}, {{ForceOpaqueBackground.Browser}}")].some(el => {
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0 && r.top < rect.top + rect.height && r.bottom > rect.top
             && r.left < rect.left + rect.width && r.right > rect.left;
@@ -409,7 +411,7 @@
     // gets its leave, since the handlers below hold back mouseout; send one.
     let synthetic = false;
     const closeNative = (except) => {
-        document.querySelectorAll(".SuperNavMenu.MenuOpen").forEach(w => {
+        document.querySelectorAll(`${SUPERNAV}{{MenuWrapper.MenuOpen}}`).forEach(w => {
             if (w === except) return;   // still hovered: a deliberate fallback
             synthetic = true;
             try { w.dispatchEvent(new MouseEvent("mouseout", { bubbles: true, cancelable: true, relatedTarget: null })); }
@@ -422,7 +424,7 @@
 
     window.addEventListener("mouseover", (e) => {
         if (!enabled()) return;
-        closeNative(e.target.closest && e.target.closest(".SuperNavMenu"));
+        closeNative(e.target.closest && e.target.closest(SUPERNAV));
         const m = managed(e.target);
         if (m && m.kind === "nav") {
             if (open(m.wrapper, m.title)) e.stopImmediatePropagation();

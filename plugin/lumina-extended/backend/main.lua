@@ -29,12 +29,14 @@ int TerminateProcess(void *h, uint32_t code);
 int CloseHandle(void *h);
 uint32_t GetCurrentProcessId(void);
 int CreateDirectoryW(const uint16_t *path, void *sa);
+int MoveFileExW(const uint16_t *src, const uint16_t *dst, uint32_t flags);
 long BCryptGenRandom(void *alg, uint8_t *buf, uint32_t n, uint32_t flags);
 ]]
 local kernel32 = ffi.C
 local bcrypt = ffi.load("bcrypt")
 
 local CREATE_NO_WINDOW = 0x08000000
+local MOVEFILE_REPLACE_EXISTING = 0x1
 local bit = require("bit")
 local WALLPAPER_ENGINE = "431960"
 
@@ -131,16 +133,18 @@ local still = { version = nil }
 local server = { process = nil, port_file = nil, token = nil, base = nil }
 
 local function start_server()
-    if #roots == 0 then return end
     server.token = random_hex(16)
     kernel32.CreateDirectoryW(wide(SHARE), nil)
     server.port_file = (os.getenv("TEMP") or "C:\\Windows\\Temp") .. "\\lumina-extended-" .. server.token .. ".port"
     local script = plugin_dir() .. "\\server.ps1"
     local port = 47000 + (tonumber(server.token:sub(1, 4), 16) % 2000)
+    local all_roots = {}
+    for _, r in ipairs(roots) do all_roots[#all_roots + 1] = r end
+    all_roots[#all_roots + 1] = SHARE
     local cmd = string.format(
         'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "%s" ' ..
         '-Port %d -Token %s -Roots "%s" -ParentPid %d -PortFile "%s"',
-        script, port, server.token, table.concat(roots, "|") .. "|" .. SHARE, kernel32.GetCurrentProcessId(), server.port_file)
+        script, port, server.token, table.concat(all_roots, "|"), kernel32.GetCurrentProcessId(), server.port_file)
     local si = ffi.new("LMWE_STARTUPINFOW")
     si.cb = ffi.sizeof(si)
     local pi = ffi.new("LMWE_PROCESS_INFORMATION")
@@ -165,18 +169,18 @@ end
 -- methods
 
 function Status()
-    if #roots == 0 then
-        return json.encode({ error = "Wallpaper Engine library not found" })
-    end
     if not server.base and server.port_file then
         local port = read_file(server.port_file)
         port = port and tonumber(port:match("%d+"))
         if port then server.base = string.format("http://localhost:%d/%s/", port, server.token) end
     end
     if server.base then
-        local out = { base = server.base }
+        local out = { base = server.base, hasLibrary = #roots > 0 }
         if still.version then out.still = string.format("%s%d/still.jpg?v=%s", server.base, #roots, still.version) end
         return json.encode(out)
+    end
+    if server.process == nil then
+        return json.encode({ error = "file server failed to start" })
     end
     return json.encode({ starting = true })
 end
@@ -186,10 +190,16 @@ function SetStill(args)
     if type(data) ~= "string" or #data == 0 or #data > 8 * 1024 * 1024 then
         return json.encode({ error = "no image" })
     end
-    local f = io.open(SHARE .. "\\still.jpg", "wb")
+    local tmp = SHARE .. "\\still.tmp"
+    local dst = SHARE .. "\\still.jpg"
+    local f = io.open(tmp, "wb")
     if not f then return json.encode({ error = "cannot write" }) end
     f:write(unbase64(data))
     f:close()
+    if kernel32.MoveFileExW(wide(tmp), wide(dst), MOVEFILE_REPLACE_EXISTING) == 0 then
+        os.remove(tmp)
+        return json.encode({ error = "cannot write" })
+    end
     still.version = tostring(os.time()) .. random_hex(2)
     return json.encode({ ok = true })
 end

@@ -19,7 +19,8 @@
 
     const CAPSULES = ["{{BottomBarContainer.AddGameButton}}", "{{BottomBarContainer.DownloadStatus}}",
         "{{BottomBarContainer.FriendsButton}}"];
-    const WEB = "{{ForceOpaqueBackground.ContentFrame}} > {{ForceOpaqueBackground.BrowserWrapper}}";
+    const FRAME = "{{ForceOpaqueBackground.ContentFrame}}";
+    const WEB = `${FRAME} > {{ForceOpaqueBackground.BrowserWrapper}}`;
     const DURATION = 420, EASING = "cubic-bezier(0.25, 0.7, 0.25, 1)";
 
     // read off the stylesheets now and then, not on every mutation
@@ -56,11 +57,28 @@
         if (want !== html.classList.contains("lm-web-bar")) set(want);
     };
 
-    // runs before the next paint, so the capsules never show in the wrong place
-    new MutationObserver(sync).observe(document.body, {
-        subtree: true, childList: true, attributes: true, attributeFilter: ["style"],
-    });
-    const refresh = () => { readLiquid(); sync(); };
+    // Observe only BrowserWrapper's style and ContentFrame's direct children
+    // so unrelated mutations (e.g. game list scrolling) don't run sync.
+    let watchedFrame = null, watchedWeb = null;
+    const webObserver = new MutationObserver(sync);
+    const frameObserver = new MutationObserver(() => { watch(); sync(); });
+
+    const watch = () => {
+        const frame = document.querySelector(FRAME);
+        if (frame !== watchedFrame) {
+            frameObserver.disconnect();
+            watchedFrame = frame;
+            if (frame) frameObserver.observe(frame, { childList: true });
+        }
+        const web = document.querySelector(WEB);
+        if (web !== watchedWeb) {
+            webObserver.disconnect();
+            watchedWeb = web;
+            if (web) webObserver.observe(web, { attributes: true, attributeFilter: ["style"] });
+        }
+    };
+
+    const refresh = () => { watch(); readLiquid(); sync(); };
     setInterval(refresh, 1000);
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") refresh(); }, true);
     refresh();

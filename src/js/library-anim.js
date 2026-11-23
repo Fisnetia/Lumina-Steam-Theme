@@ -13,7 +13,8 @@
     if (window.__lmLibAnim) return;
     window.__lmLibAnim = true;
 
-    const COLLAPSED = "SingleLine";
+    const COLLAPSE = "{{CollapseIconParent}}";
+    const COLLAPSED = "{{SectionHeaderContent.SingleLine}}".slice(1);
     let replaying = false;
     let pending = null;   // the collapse currently held back (see the click handler)
 
@@ -41,7 +42,7 @@
     const gameRows = (header) => {
         const rows = [];
         for (const r of allBelow(header)) {
-            if (r.querySelector(".CollapseIconParent")) break;
+            if (r.querySelector(COLLAPSE)) break;
             rows.push(r);
         }
         return rows;
@@ -95,7 +96,7 @@
     new MutationObserver(records => {
         for (const rec of records) {
             const el = rec.target;
-            if (!el.classList || !el.classList.contains("CollapseIconParent")) continue;
+            if (!el.matches || !el.matches(COLLAPSE)) continue;
             const was = (rec.oldValue || "").split(/\s+/).includes(COLLAPSED);
             const now = el.classList.contains(COLLAPSED);
             if (was && !now) playExpand(el);
@@ -176,14 +177,14 @@
 
     document.addEventListener("click", (e) => {
         if (replaying) return;
-        const header = e.target.closest && e.target.closest(".CollapseIconParent");
+        const header = e.target.closest && e.target.closest(COLLAPSE);
         if (!header || !isIcon(e.target, header)) return;   // only the icon toggles on click
         onToggle(e, header);   // every click, whatever its click count (e.detail)
     }, true);
 
     document.addEventListener("dblclick", (e) => {
         if (replaying) return;
-        const header = e.target.closest && e.target.closest(".CollapseIconParent");
+        const header = e.target.closest && e.target.closest(COLLAPSE);
         if (!header) return;
         if (isIcon(e.target, header)) { swallow(e); return; }   // its clicks already toggled
         onToggle(e, header);
@@ -251,13 +252,13 @@
 
     const playCollection = () => {
         const main = document.querySelector(MAIN);
-        const grid = main && main.querySelector(".GridWithControls .CSSGrid");
+        const grid = main && main.querySelector("{{GridWithControls}} {{CSSGrid}}");
         if (!grid) return;
         const view = main.getBoundingClientRect();
-        const controls = grid.closest(".GridWithControls");
-        const head = [controls.parentElement.querySelector(":scope > .Header"), controls.querySelector(":scope > .CollectionOptions")]
-            .filter(Boolean);
-        const cards = [...grid.querySelectorAll(".LibraryItemBox")].map(b => [b.parentElement, b.getBoundingClientRect()])
+        const controls = grid.closest("{{GridWithControls}}");
+        const head = [controls.parentElement.querySelector(":scope > .Header"),
+            controls.querySelector(":scope > {{GridWithControls.CollectionOptions}}")].filter(Boolean);
+        const cards = [...grid.querySelectorAll("{{FeaturedCapsule.LibraryItemBox}}")].map(b => [b.parentElement, b.getBoundingClientRect()])
             .filter(([, r]) => r.bottom > view.top && r.top < view.bottom);
         const tops = [...new Set(cards.map(([, r]) => Math.round(r.top)))].sort((a, b) => a - b);
         const items = [...head.map((el, i) => [el, i]),
@@ -275,7 +276,7 @@
     };
 
     const findHistory = () => {
-        const el = document.querySelector(".SuperNavMenu");
+        const el = document.querySelector("{{SuperNav.SuperNavMenu}}");
         const key = el && Object.keys(el).find(k => k.startsWith("__reactFiber"));
         for (let f = key && el[key], i = 0; f && i < 300; f = f.return, i++) {
             const p = f.memoizedProps;

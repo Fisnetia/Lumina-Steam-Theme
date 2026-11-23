@@ -1,5 +1,6 @@
 /* Windows acrylic from the dwmx plugin: every layer must be transparent. */
 :root {
+    --lm-backdrop-mode: acrylic;
     --lm-backdrop: none;
     --lm-menu-alpha: 62%;
 }

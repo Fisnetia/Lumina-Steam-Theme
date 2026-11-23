@@ -12,17 +12,20 @@
 
     let timer = 0;
 
-    const findMenu = () =>
-        document.documentElement.classList.contains("ContextMenuPopup")
-            ? document.querySelector(".contextMenu")
-            : null;
+    const POPUP = "{{contextMenu.ContextMenuPopup}}";
+    const MENU = "{{contextMenu.contextMenu}}";
+    const CONTENTS = "{{contextMenu.contextMenuContents}}";
+    const ITEM = "{{contextMenu.contextMenuItem}}";
+    const isPopup = () => document.documentElement.matches(POPUP);
+
+    const findMenu = () => isPopup() ? document.querySelector(MENU) : null;
 
     /* ---- restart a skipped open animation ---- */
 
     const restartStuck = () => {
         const menu = findMenu();
         if (!menu || !menu.classList.contains("ready")) return;
-        const els = [menu, ...menu.querySelectorAll(".contextMenuItem")];
+        const els = [menu, ...menu.querySelectorAll(ITEM)];
         const stuck = els.filter(e =>
             getComputedStyle(e).animationName !== "none" && e.getAnimations().length === 0);
         if (!stuck.length) return;
@@ -74,7 +77,7 @@
     new MutationObserver(records => {
         for (const rec of records) {
             const el = rec.target;
-            if (!el.classList || !el.classList.contains("contextMenu") || !el.classList.contains("lm-closing")) continue;
+            if (!el.matches || !el.matches(MENU) || !el.classList.contains("lm-closing")) continue;
             const was = (rec.oldValue || "").split(/\s+/).includes("ready");
             if (!was && el.classList.contains("ready")) {
                 reopened = true;
@@ -92,7 +95,7 @@
      * One whose window ends at the anchor opens upward: its animations run
      * from the bottom (.lm-up). Steam keeps the anchor in the menu's props. */
     const anchorY = (menu) => {
-        const el = menu.querySelector(".contextMenuContents") || menu;
+        const el = menu.querySelector(CONTENTS) || menu;
         const key = Object.keys(el).find(k => k.startsWith("__reactFiber"));
         for (let f = key && el[key], i = 0; f && i < 16; f = f.return, i++) {
             const p = f.memoizedProps;
@@ -102,7 +105,7 @@
     };
 
     const setDirection = (menu) => {
-        if (!document.documentElement.classList.contains("ContextMenuPopup")) return;
+        if (!isPopup()) return;
         const y = anchorY(menu);
         if (y === null) return;
         const top = window.screenY, bottom = top + window.innerHeight;
@@ -118,7 +121,7 @@
     /* runs before paint, so the values are set when the animation starts */
     const numberItems = (menu) => {
         setDirection(menu);
-        const items = menu.querySelectorAll(".contextMenuItem");
+        const items = menu.querySelectorAll(ITEM);
         items.forEach((it, i) => {
             it.style.setProperty("--lm-i", String(i));
             it.style.setProperty("--lm-n", String(items.length));
@@ -128,7 +131,7 @@
     new MutationObserver(records => {
         for (const rec of records) {
             const el = rec.target;
-            if (!el.classList || !el.classList.contains("contextMenu") || !el.classList.contains("ready")) continue;
+            if (!el.matches || !el.matches(MENU) || !el.classList.contains("ready")) continue;
             if (!(rec.oldValue || "").split(/\s+/).includes("ready")) numberItems(el);
         }
     }).observe(document.documentElement, {
@@ -183,7 +186,7 @@
 
     /* Steam removes these menus from the DOM. A copy without .ready is put back
        in place to play .lm-closing, then removed. */
-    if (!document.documentElement.classList.contains("ContextMenuPopup")) {
+    if (!isPopup()) {
         const ghost = (menu, parent, next) => {
             if (!parent.isConnected || menu.dataset.lmGhost) return;
             const ms = closeDuration(parent);
@@ -202,7 +205,7 @@
         new MutationObserver(records => {
             for (const rec of records) {
                 for (const n of rec.removedNodes) {
-                    if (n.nodeType === 1 && n.classList.contains("contextMenu") && n.classList.contains("ready")) {
+                    if (n.nodeType === 1 && n.matches(MENU) && n.classList.contains("ready")) {
                         ghost(n, rec.target, rec.nextSibling);
                     }
                 }

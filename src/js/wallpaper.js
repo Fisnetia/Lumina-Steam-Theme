@@ -18,7 +18,7 @@
     window.__lmWallpaper = true;
 
     const html = document.documentElement;
-    if (html.classList.contains("ContextMenuPopup")) return;
+    if (html.matches("{{contextMenu.ContextMenuPopup}}")) return;
 
     const DB = "lumina", STORE = "kv";
     const MAX_SIDE = 2560, QUALITY = 0.88, POSTER_SIDE = 1280;
@@ -151,7 +151,10 @@
             let s;
             try { s = await callPlugin("Status"); } catch { return null; }   // not enabled
             if (s && s.base) return (plugin = s);
-            if (!s || !s.starting) { pluginIssue = T.noLibrary; return null; }
+            if (!s || !s.starting) {
+                pluginIssue = s && /library/i.test(s.error || "") ? T.noLibrary : T.serverDown;
+                return null;
+            }
             await new Promise(r => setTimeout(r, 500));
         }
         pluginIssue = T.serverDown;
@@ -169,8 +172,13 @@
     let scene = null;    // webwallgl instance
     let engine = null;
 
-    const wallpaperMode = () =>
-        getComputedStyle(html).getPropertyValue("--lm-backdrop-mode").trim() === "wallpaper";
+    let backdropMode = "";
+    const readBackdropMode = () => {   // empty while stylesheets reload: keep the last value
+        const v = getComputedStyle(html).getPropertyValue("--lm-backdrop-mode").trim();
+        if (v) backdropMode = v;
+        return backdropMode;
+    };
+    const wallpaperMode = () => readBackdropMode() === "wallpaper";
     const host = () => isFriends ? document.body : document.querySelector(FRAME);
     const blurPx = () => parseFloat(getComputedStyle(html).getPropertyValue("--lm-blur-px")) || 0;
     const sceneDpr = () => { const b = blurPx(); return b >= 16 ? 0.5 : b >= 6 ? 0.75 : 1; };
@@ -587,10 +595,17 @@
         document.querySelector(".lm-gallery")?.remove();
         const root = document.createElement("div");
         root.className = "lm-gallery";
-        const urlsHere = [];
+        const blobUrls = new Map();
+        const previewUrl = (p) => {
+            if (typeof p === "string") return p;
+            if (!p) return null;
+            if (!blobUrls.has(p)) blobUrls.set(p, URL.createObjectURL(p));
+            return blobUrls.get(p);
+        };
         const close = () => {
             root.remove();
-            urlsHere.forEach(u => URL.revokeObjectURL(u));
+            blobUrls.forEach(u => URL.revokeObjectURL(u));
+            blobUrls.clear();
             document.removeEventListener("keydown", onKey, true);
         };
         const onKey = (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
@@ -623,8 +638,8 @@
                 const img = document.createElement("img");
                 img.loading = "lazy";
                 img.decoding = "async";
-                if (typeof it.preview === "string") img.src = it.preview;
-                else if (it.preview) { const u = URL.createObjectURL(it.preview); urlsHere.push(u); img.src = u; }
+                const src = previewUrl(it.preview);
+                if (src) img.src = src;
                 const badge = document.createElement("span");
                 badge.className = "lm-gallery-badge";
                 badge.textContent = kindLabel(it.kind);
@@ -674,7 +689,8 @@
     };
 
     const pickEngine = async () => {
-        if (await findPlugin()) {
+        const p = await findPlugin();
+        if (p && p.hasLibrary !== false) {
             note(T.readingLibrary);
             try {
                 const got = await callPlugin("List");
@@ -693,8 +709,9 @@
             } catch (err) { report(err); }
             return;
         }
-        // No plugin: pick one item folder, or the whole library folder. If the
-        // plugin is enabled but can't serve the library, say why first.
+        if (p && p.hasLibrary === false) pluginIssue = T.noLibrary;
+        // No plugin or no WE library: pick one item folder, or the whole library folder.
+        // If the plugin is enabled but can't serve the library, say why first.
         if (pluginIssue) note(pluginIssue);
         const input = document.createElement("input");
         input.type = "file";
@@ -781,6 +798,8 @@
     };
 
     const backdropIsWallpaper = (anchor) => {
+        const mode = readBackdropMode();
+        if (mode) return mode === "wallpaper";
         const shown = anchor.querySelector(".DialogDropDown_CurrentDisplay");
         return !shown || WALLPAPER_VALUES.includes(shown.textContent.trim());
     };

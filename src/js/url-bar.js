@@ -36,7 +36,7 @@
     };
 
     // web views mount their URL bar lazily
-    const scan = () => document.querySelectorAll(".URLBar:not([data-lm-url])").forEach(hook);
+    const scan = () => document.querySelectorAll("{{ForceOpaqueBackground.URLBar}}:not([data-lm-url])").forEach(hook);
     scan();
     setInterval(scan, 1000);
 })();
