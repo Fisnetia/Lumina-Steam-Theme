@@ -30,9 +30,11 @@ html.lm-liquid-ready {{GameListHomeAndSearch.Container}} {
     backdrop-filter: url(#lm-liquid) var(--lm-liquid-tone);
 }
 
-/* Right library pane (home, collections, game pages): floating liquid glass
-   card matching the game list's height, corner radius and rim light. The rim
-   lives on ::after so scrolled covers and game heroes stay framed inside it. */
+/* Right library pane (home, collections, game pages): floating rounded glass
+   card matching the game list's height, corner radius and rim light. Kept free
+   of backdrop-filter: the backdrop is already blurred once behind the window,
+   and an SVG displacement filter across the full viewport pane is costly. The
+   rim lives on ::after so scrolled covers and game heroes stay framed inside it. */
 html {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
     box-sizing: border-box;
     flex: 1 1 auto;
@@ -42,12 +44,7 @@ html {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
     overflow: hidden !important;
     border-radius: calc(var(--lm-r) * 1.4) !important;
     background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
-    backdrop-filter: var(--lm-liquid-tone);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
-}
-
-html.lm-liquid-main-ready {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
-    backdrop-filter: url(#lm-liquid-main) var(--lm-liquid-tone);
 }
 
 html {{LeftListSizableContainer.AppDetailsTransitionGroup}}::after {
