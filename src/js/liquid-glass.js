@@ -6,11 +6,14 @@
  * radius. Within a bevel along the edge, pixels sample the backdrop from
  * further inside, strongest at the rim, so it bends like a thick pane. The
  * offset stays under half the bevel, so sampling never folds back on itself
- * (a fold shows as a seam inside the bevel).
+ * (a fold shows as a seam inside the bevel). Red, green and blue are offset
+ * by slightly different amounts, and a thin band at the rim is brightened,
+ * which gives the edge a faint fringe coloured by the backdrop.
  *
- * Two panes: the game list (map redrawn after the column is resized) and the
- * in-page menu panel of js/morph-nav.js (redrawn every frame while it morphs;
- * it is small). Each sets its ready class on <html> once its filter exists.
+ * Panes: the game list and the three bottom bar capsules (maps redrawn after
+ * resizing settles), and the in-page menu panel of js/morph-nav.js (redrawn
+ * every frame while it morphs; it is small). Each sets its ready class on
+ * <html> once its filter exists.
  */
 (() => {
     if (window.__lmLiquid) return;
@@ -29,10 +32,13 @@
         return on;
     };
 
-    // RG = displacement (128 is none), pointing inward near the rounded edge
+    const RIM = 4;     // width of the coloured rim, px
+
+    // RG = displacement (128 is none), pointing inward near the rounded edge;
+    // B = the rim band, strongest at the edge
     const drawMap = (W, H, R, bevelPx) => {
         const w = Math.max(1, Math.round(W * RES)), h = Math.max(1, Math.round(H * RES));
-        const r = Math.min(R * RES, w / 2, h / 2), bevel = bevelPx * RES;
+        const r = Math.min(R * RES, w / 2, h / 2), bevel = bevelPx * RES, rim = RIM * RES;
         const c = document.createElement("canvas");
         c.width = w; c.height = h;
         const g = c.getContext("2d"), img = g.createImageData(w, h), d = img.data;
@@ -47,8 +53,9 @@
                 nx *= Math.sign(px); ny *= Math.sign(py);
                 const t = inside < bevel ? 1 - Math.max(inside, 0) / bevel : 0;
                 const s = t * t * 127;
+                const k = inside < rim ? 1 - Math.max(inside, 0) / rim : 0;
                 const i = (y * w + x) * 4;
-                d[i] = 128 - nx * s; d[i + 1] = 128 - ny * s; d[i + 2] = 128; d[i + 3] = 255;
+                d[i] = 128 - nx * s; d[i + 1] = 128 - ny * s; d[i + 2] = Math.round(k * k * 255); d[i + 3] = 255;
             }
         }
         g.putImageData(img, 0, 0);
@@ -74,6 +81,40 @@
         return strength;
     };
 
+    // Dispersion: red, green and blue are displaced by decreasing amounts and
+    // added back together, which leaves a thin colour fringe at the rim. Red
+    // takes the full scale, so no channel passes the monotonic limit.
+    const SPREAD = 0.14;
+    const displace = (scale, result) =>
+        `<feDisplacementMap in="SourceGraphic" in2="map" scale="${scale}" xChannelSelector="R" yChannelSelector="G" result="${result}"/>`;
+    const channel = (src, row, result) => {
+        const rows = ["0 0 0 0 0", "0 0 0 0 0", "0 0 0 0 0"];
+        rows[row] = ["1 0 0 0 0", "0 1 0 0 0", "0 0 1 0 0"][row];
+        return `<feColorMatrix in="${src}" type="matrix" values="${rows.join(" ")} 0 0 0 1 0" result="${result}"/>`;
+    };
+    const add = (a, b, result) =>
+        `<feComposite in="${a}" in2="${b}" operator="arithmetic" k2="1" k3="1" result="${result}"/>`;
+    const dispersion = (scale) => {
+        if (!scale) return displace(0, "body");
+        const s = [scale, scale * (1 - SPREAD), scale * (1 - 2 * SPREAD)].map(v => v.toFixed(1));
+        return displace(s[0], "dr") + displace(s[1], "dg") + displace(s[2], "db") +
+            channel("dr", 0, "r") + channel("dg", 1, "g") + channel("db", 2, "b") +
+            add("r", "g", "rg") + add("rg", "b", "body");
+    };
+
+    // Coloured rim: within the band in the map's B channel, the dispersed
+    // backdrop is saturated, brightened and tinted slightly blue, so the
+    // fringe shows over a blurred backdrop too.
+    const rimLight =
+        `<feColorMatrix in="map" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="band"/>` +
+        `<feColorMatrix in="body" type="saturate" values="2.2" result="sat"/>` +
+        `<feComponentTransfer in="sat" result="lit">` +
+        `<feFuncR type="linear" slope="1.25" intercept="0.02"/>` +
+        `<feFuncG type="linear" slope="1.25" intercept="0.03"/>` +
+        `<feFuncB type="linear" slope="1.25" intercept="0.07"/></feComponentTransfer>` +
+        `<feComposite in="lit" in2="band" operator="in" result="edge"/>` +
+        `<feComposite in="edge" in2="body" operator="over"/>`;
+
     // One refracting pane, its bevel width = Refraction x reach.
     // live: redraw on every size change (once per frame) instead of after
     // resizing settles.
@@ -98,7 +139,7 @@
                 primitiveUnits: "userSpaceOnUse", "color-interpolation-filters": "sRGB" })) f.setAttribute(k, v);
             f.innerHTML =
                 `<feImage href="${drawMap(W, H, R, bevel)}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="map"/>` +
-                `<feDisplacementMap in="SourceGraphic" in2="map" scale="${scale}" xChannelSelector="R" yChannelSelector="G"/>`;
+                dispersion(scale) + rimLight;
             html.classList.add(ready);
         };
 
@@ -134,6 +175,11 @@
                reach: 0.92, live: false }),   // 46px at 50%
         pane({ selector: ".lm-morph.lm-morph-inpage", id: "lm-liquid-menu", ready: "lm-liquid-menu-ready",
                reach: 0.56, live: true }),    // 28px at 50%
+        // bottom bar capsules, 36px tall
+        ...[["{{BottomBarContainer.AddGameButton}}", "add"], ["{{BottomBarContainer.DownloadStatus}}", "dl"],
+            ["{{BottomBarContainer.FriendsButton}}", "friends"]].map(([selector, name]) =>
+            pane({ selector, id: `lm-liquid-${name}`, ready: `lm-liquid-${name}-ready`,
+                   reach: 0.24, live: false })),   // 12px at 50%
     ];
 
     // the library mounts and unmounts the list; the menu panel appears on first use;
