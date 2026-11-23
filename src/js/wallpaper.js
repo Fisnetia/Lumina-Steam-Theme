@@ -191,9 +191,11 @@
             document.visibilityState === "visible") layer.play().catch(() => {});
     };
 
+    // Plugin videos come from another origin; CORS keeps them readable for frame capture.
     const showVideo = (src) => {
         layer = document.createElement("video");
         layer.className = "lm-video-layer";
+        if (/^https?:/.test(src)) layer.crossOrigin = "anonymous";
         Object.assign(layer, { muted: true, loop: true, autoplay: true, playsInline: true, src });
         layer.setAttribute("aria-hidden", "true");
         layer.disablePictureInPicture = true;
@@ -224,7 +226,9 @@
     /* ---- stills of moving wallpapers ----
      * Scenes run in the main window only; elsewhere, and under the scene layer,
      * the backdrop is a still: a frame of the running scene, or until one is
-     * captured the first frame of the preview (often an animated GIF). */
+     * captured the first frame of the preview (often an animated GIF).
+     * Wallpaper Engine videos get a frame the same way: their preview is a
+     * small thumbnail. */
 
     const frameKey = (meta) => JSON.stringify([meta.source, meta.kind, meta.id || meta.title || ""]);
 
@@ -233,6 +237,28 @@
         const bmp = await createImageBitmap(blob);   // a GIF decodes to its first frame
         try { return await toJpeg(bmp, bmp.width, bmp.height, FRAME_SIDE, QUALITY); }
         finally { bmp.close(); }
+    };
+
+    // Stores a captured frame and shows it as the still, here and in the other windows.
+    const keepFrame = async (blob, key, current) => {
+        const [meta] = await read("meta");
+        if (!current() || !blob || !meta || frameKey(meta) !== key) return;
+        await write({ frame: { key, blob } });
+        const u = URL.createObjectURL(blob);
+        urls.push(u);
+        setStill(u);
+        if (channel) channel.postMessage("wallpaper");
+    };
+
+    // Once per wallpaper, a few seconds into playback.
+    const captureVideoFrame = (video, key) => {
+        video.addEventListener("playing", () => setTimeout(async () => {
+            if (layer !== video || !video.videoWidth) return;
+            try {
+                const blob = await toJpeg(video, video.videoWidth, video.videoHeight, FRAME_SIDE, QUALITY);
+                await keepFrame(blob, key, () => layer === video);
+            } catch (err) { console.warn("[Lumina] video frame:", err); }
+        }, FRAME_DELAY), { once: true });
     };
 
     // Once per wallpaper, after the scene has had time to settle. webwallgl's
@@ -251,13 +277,7 @@
             for (let i = 0; i < px.length && !lit; i += 4 * 997) lit = px[i] + px[i + 1] + px[i + 2] > 0;
             if (!lit) { if (tries > 1) captureFrame(inst, key, tries - 1); return; }   // nothing drawn yet
             const blob = await new Promise(r => c.toBlob(r, "image/jpeg", QUALITY));
-            const [meta] = await read("meta");
-            if (scene !== inst || !blob || !meta || frameKey(meta) !== key) return;
-            await write({ frame: { key, blob } });
-            const u = URL.createObjectURL(blob);
-            urls.push(u);
-            setStill(u);
-            if (channel) channel.postMessage("wallpaper");
+            await keepFrame(blob, key, () => scene === inst);
         } catch (err) { console.warn("[Lumina] scene frame:", err); }
     }, FRAME_DELAY);
 
@@ -366,7 +386,8 @@
         const base = meta && meta.source === "plugin" ? itemBase(meta.id) : null;
 
         // Flat backdrop still: scenes and web wallpapers use the captured frame
-        // or their preview's first frame; an animated picture keeps moving
+        // or their preview's first frame, videos the captured frame once there
+        // is one; an animated picture keeps moving
         // only in the main window, where it is the wallpaper itself.
         const key = meta && frameKey(meta);
         const frame = frame0 && frame0.key === key ? frame0.blob : null;
@@ -376,6 +397,8 @@
         let flat = null;
         if (meta && (meta.kind === "scene" || meta.kind === "web")) {
             flat = frame || (src && await firstFrame(src).catch(() => null));
+        } else if (meta && meta.kind === "video" && frame) {
+            flat = frame;
         } else if (gif && !(isMain && meta.kind === "picture")) {
             flat = await firstFrame(src).catch(() => null);
         }
@@ -394,7 +417,10 @@
             setStill(flat ? blobUrl(flat) : still);
             liveKind = !!base && (meta.kind === "video" || ((meta.kind === "scene" || meta.kind === "web") && isMain));
             if (base && wallpaperMode()) {
-                if (meta.kind === "video") showVideo(base + encodePath(meta.file));
+                if (meta.kind === "video") {
+                    showVideo(base + encodePath(meta.file));
+                    if (isMain && !frame) captureVideoFrame(layer, key);
+                }
                 else if ((meta.kind === "scene" || meta.kind === "web") && isMain) {
                     live(() => showScene(W => W.httpSource(base)));
                 }
