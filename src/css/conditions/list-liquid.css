@@ -151,10 +151,10 @@ html {{ScrollToTopButton.ScrollToTopButton}} {
     translate: 0 calc(-1 * var(--lm-bar-space));
 }
 
-/* the game list ends above the left capsule, a little further than the gap */
-html {{GameListHomeAndSearch.Container}} {
-    height: calc(100% - var(--lm-float-gap) - var(--lm-bar-space) - 4px) !important;
-    margin-bottom: calc(var(--lm-bar-space) + 4px);
+/* the game list runs behind the left capsule like the pages on the right;
+   its end scrolls clear of the capsule */
+html {{GameListHomeAndSearch.Container}} .ReactVirtualized__Grid__innerScrollContainer {
+    margin-bottom: var(--lm-bar-space);
 }
 
 /* the web view stays mounted, hidden by an inline display: none */
