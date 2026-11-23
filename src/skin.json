@@ -2,7 +2,7 @@
   "name": "Lumina",
   "author": "Fina",
   "description": "Translucent glass over a living backdrop: aurora, pictures, videos, or Wallpaper Engine scenes and web wallpapers. 流光：玻璃界面与流动的壁纸。",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "tags": ["Dark", "Transparent", "Blur", "Rounded"],
   "RootColors": "css/root-colors.css",
   "UseDefaultPatches": true,
