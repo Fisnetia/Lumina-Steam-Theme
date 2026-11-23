@@ -39,7 +39,7 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 - **Smooth scrolling**: mouse-wheel smoothing in the game list.
 - **Wallpaper mouse**: Wallpaper Engine scenes follow the mouse (parallax and cursor effects).
 
-The Lumina Extended plugin reads the Wallpaper Engine library in place (no copying, web wallpapers included) and shows the current wallpaper behind the Store and Community pages.
+The Lumina Extended plugin reads the Wallpaper Engine library in place (no copying, web wallpapers included) and shows the current wallpaper behind the Store and Community pages. Enable it under Plugins in Millennium's settings. If *Wallpaper Engine…* still opens a folder picker, the wallpaper card says why; `Steam\millennium\logs\lumina-extended_log.log` lists the library folders it found.
 
 ---
 

@@ -53,6 +53,8 @@
             default: "Default",
             failed: "Live wallpaper failed to load. Showing preview.",
             pluginOff: "Companion plugin not running. Showing default.",
+            noLibrary: "Companion plugin found no Wallpaper Engine library. Choose its folder instead.",
+            serverDown: "Companion plugin's file server did not start. Choose a folder instead.",
             tooBig: (mb) => `File exceeds the ${mb} MB limit.`,
             readingVideo: "Reading video…", savingScene: "Saving scene…", savingVideo: "Saving video…",
             noPkg: "Missing scene.pkg.", noVideo: "Video file not found.",
@@ -74,6 +76,8 @@
             default: "默认",
             failed: "动态壁纸加载失败，已显示预览图",
             pluginOff: "配套插件未运行，已使用默认壁纸",
+            noLibrary: "配套插件未找到 Wallpaper Engine 壁纸库，请手动选择文件夹",
+            serverDown: "配套插件的文件服务未能启动，请手动选择文件夹",
             tooBig: (mb) => `文件超过 ${mb} MB 上限`,
             readingVideo: "正在读取视频…", savingScene: "正在保存 Scene…", savingVideo: "正在保存视频…",
             noPkg: "缺少 scene.pkg", noVideo: "未找到视频文件",
@@ -128,6 +132,7 @@
     /* ---- plugin ---- */
 
     let plugin = null;   // { base } while the plugin's server runs
+    let pluginIssue = "";   // why findPlugin failed while the plugin is enabled
 
     // Millennium's IPC lives in SharedJSContext, which opened this window.
     const callPlugin = async (method, args = {}) => {
@@ -141,13 +146,15 @@
     // Retries while the server is still starting.
     const findPlugin = async () => {
         plugin = null;
+        pluginIssue = "";
         for (let i = 0; i < 12; i++) {
             let s;
-            try { s = await callPlugin("Status"); } catch { return null; }
+            try { s = await callPlugin("Status"); } catch { return null; }   // not enabled
             if (s && s.base) return (plugin = s);
-            if (!s || !s.starting) return null;
+            if (!s || !s.starting) { pluginIssue = T.noLibrary; return null; }
             await new Promise(r => setTimeout(r, 500));
         }
+        pluginIssue = T.serverDown;
         return null;
     };
 
@@ -686,7 +693,9 @@
             } catch (err) { report(err); }
             return;
         }
-        // No plugin: pick one item folder, or the whole library folder.
+        // No plugin: pick one item folder, or the whole library folder. If the
+        // plugin is enabled but can't serve the library, say why first.
+        if (pluginIssue) note(pluginIssue);
         const input = document.createElement("input");
         input.type = "file";
         input.webkitdirectory = true;
