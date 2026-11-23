@@ -6,11 +6,14 @@
 
 html,
 body,
-{{ForceOpaqueBackground.OuterFrame}} {
+{{ForceOpaqueBackground.OuterFrame}},
+html.MillenniumWindow_Settings,
+html.MillenniumWindow_Settings body {
     background: transparent !important;
 }
 
 {{ForceOpaqueBackground.OuterFrame}}::before,
-html.friendsui-container body::before {
+html.friendsui-container body::before,
+html.MillenniumWindow_Settings body::before {
     display: none !important;
 }

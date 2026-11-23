@@ -144,6 +144,67 @@ html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
     background: var(--lm-selected) !important;
 }
 
+/* ---- Steam Settings window ----
+   Its own window, like the friends list: the backdrop on body::before
+   (filled in by the backdrop conditions), glass panels over it. */
+html.MillenniumWindow_Settings,
+html.MillenniumWindow_Settings body {
+    background: #07090f !important;
+}
+
+html.MillenniumWindow_Settings body {
+    isolation: isolate;
+}
+
+html.MillenniumWindow_Settings body::before {
+    content: "";
+    position: fixed;
+    inset: calc(var(--lm-blur-px) * -2);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--lm-backdrop, linear-gradient(160deg, #0e1424, #06080e));
+    filter: blur(var(--lm-blur-px)) saturate(1.15);
+}
+
+html.MillenniumWindow_Settings .PagedSettingsDialog_PageListColumn {
+    background: var(--lm-panel-strong) !important;
+    border-right: 1px solid var(--lm-border);
+    box-shadow: var(--lm-sheen);
+}
+
+html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem {
+    border-radius: var(--lm-r-sm);
+}
+
+html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem:hover {
+    background: var(--lm-hover) !important;
+}
+
+html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem.Active {
+    background: var(--lm-selected) !important;
+}
+
+html.MillenniumWindow_Settings .PagedSettingDialog_ContentColumn,
+html.MillenniumWindow_Settings .PagedSettingsDialog_PageContent {
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+}
+
+html.MillenniumWindow_Settings .PagedSettingsDialog_PageContent {
+    background: transparent !important;
+}
+
+/* setting rows and the big buttons on the Account page */
+html.MillenniumWindow_Settings .Field.Background,
+html.MillenniumWindow_Settings .SettingsDialogFatButton {
+    background: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm);
+}
+
+html.MillenniumWindow_Settings .SettingsDialogFatButton:hover {
+    background: var(--lm-hover) !important;
+}
+
 /* ---- Title bar buttons ---- */
 
 .title-area-highlight {

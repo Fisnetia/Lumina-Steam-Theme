@@ -6,7 +6,8 @@
 }
 
 {{ForceOpaqueBackground.OuterFrame}}::before,
-html.friendsui-container body::before {
+html.friendsui-container body::before,
+html.MillenniumWindow_Settings body::before {
     background-image:
         linear-gradient(rgba(6, 8, 14, 0.18), rgba(6, 8, 14, 0.18)),
         var(--lm-wallpaper, url("../../images/wallpaper.jpg")) !important;
