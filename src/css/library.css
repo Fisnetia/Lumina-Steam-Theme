@@ -216,10 +216,9 @@ html.lm-nav-compact {{SuperNav.MenuButton}} {
 }
 
 /* minimize, maximize, close: a glass capsule like the menus on the left */
-/* their box has a fixed width (flex-basis): the capsule (102px) and 10px
-   after it; the account button's box already leaves room before it */
+/* their box has a fixed width (flex-basis): the capsule (102px) and 10px after it */
 {{ForceOpaqueBackground.WindowControls}} {
-    flex: 0 0 108px !important;
+    flex: 0 0 112px !important;
 }
 
 .title-bar-actions {
@@ -282,19 +281,164 @@ html {{TitleBarControls.AccountMenu}} .avatarHolder .avatarStatus.avatarStatus {
 
 {{TitleBarControls.AccountMenu}} .avatarHolder .avatar {
     box-sizing: border-box;
-    width: 22px !important;
-    height: 22px !important;
-    margin: 0 0 0 3px;
+    width: 19px !important;
+    height: 19px !important;
+    margin: 0;
     border: none !important;
     border-radius: 50% !important;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 0 0 2.5px var(--lm-status) !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 0 0 2px var(--lm-status) !important;
 }
 
-/* account, notifications, announcements */
+/* alerts, announcements, notifications, account: a glass capsule matching
+   the menus, nav and window buttons */
+{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}} {
+    box-sizing: border-box;
+    height: var(--lm-capsule-h);
+    margin-right: 8px !important;
+    padding: 0 4px;
+    gap: 2px;
+    align-items: center;
+    background: var(--lm-panel-strong);
+    border: 1px solid var(--lm-border-strong);
+    border-radius: 999px;
+    box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.BranchBar}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.SupportAlertsButton}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.OSEndOfLifeAlertsButton}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.ParentalToggleButton}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.KioskModeToggleButton}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.AnnouncementsButton}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.TransportErrorButton}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.NotificationButtonContainer}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.AccountMenu}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.SoundtrackControls}},
+{{TitleBarControls.TitleBarControls}} {{TitleBarControls.LowDiskWarning}} {
+    margin-right: 0 !important;
+}
+
+{{TitleBarControls.TitleBarControls}} {{MenuWrapper.MenuWrapper}} {
+    border-radius: 999px;
+}
+
 {{TitleBarControls.AccountMenu}},
 {{TitleBarControls.NotificationsButton}},
-{{TitleBarControls.AnnouncementsButton}} {
-    border-radius: var(--lm-r-sm) !important;
+{{TitleBarControls.AnnouncementsButton}},
+{{TitleBarControls.SupportAlertsButton}},
+{{TitleBarControls.OSEndOfLifeAlertsButton}},
+{{TitleBarControls.LowDiskWarning}},
+{{TitleBarControls.TransportErrorButton}},
+{{TitleBarControls.SoundtrackControls}},
+{{TitleBarControls.VRToggle}},
+{{TitleBarControls.ParentalToggleButton}},
+{{TitleBarControls.KioskModeToggleButton}} {
+    box-sizing: border-box;
+    height: 24px !important;
+    max-height: 24px !important;
+    border-radius: 999px !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+{{TitleBarControls.AccountMenu}},
+{{TitleBarControls.NotificationsButton}},
+{{TitleBarControls.AnnouncementsButton}},
+{{TitleBarControls.SoundtrackControls}},
+{{TitleBarControls.VRToggle}},
+{{TitleBarControls.ParentalToggleButton}},
+{{TitleBarControls.KioskModeToggleButton}} {
+    background-color: transparent !important;
+}
+
+{{TitleBarControls.AnnouncementsButton}},
+{{TitleBarControls.NotificationsButton}},
+{{TitleBarControls.SoundtrackControls}} {
+    padding: 0 9px !important;
+}
+
+{{TitleBarControls.AccountMenu}} {
+    padding: 0 9px 0 3px !important;
+}
+
+{{TitleBarControls.AccountMenu}}:hover,
+{{TitleBarControls.NotificationsButton}}:not({{TitleBarControls.Disabled}}):hover,
+{{TitleBarControls.AnnouncementsButton}}:hover,
+{{TitleBarControls.SoundtrackControls}}:hover,
+{{TitleBarControls.VRToggle}}:hover,
+{{TitleBarControls.ParentalToggleButton}}:hover,
+{{TitleBarControls.KioskModeToggleButton}}:hover {
+    background-color: var(--lm-hover) !important;
+}
+
+/* status and alert pills */
+{{TitleBarControls.AccountMenu}}.ingame {
+    background-color: rgba(116, 178, 36, 0.24) !important;
+}
+
+{{TitleBarControls.AccountMenu}}.ingame:hover {
+    background-color: rgba(116, 178, 36, 0.36) !important;
+}
+
+{{TitleBarControls.NotificationsButton}}{{TitleBarControls.HasNew}} {
+    padding: 0 10px !important;
+    background-color: rgba(116, 178, 36, 0.38) !important;
+    box-shadow: inset 0 0 0 1px rgba(154, 214, 72, 0.34);
+}
+
+{{TitleBarControls.NotificationsButton}}{{TitleBarControls.HasNew}}:not({{TitleBarControls.Disabled}}):hover {
+    background-color: rgba(116, 178, 36, 0.56) !important;
+}
+
+{{TitleBarControls.AnnouncementsButton}}{{TitleBarControls.Active}} {
+    background-color: color-mix(in srgb, var(--lm-a) 36%, transparent) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lm-a) 45%, transparent);
+    color: #fff !important;
+}
+
+{{TitleBarControls.AnnouncementsButton}}{{TitleBarControls.Active}}:hover {
+    background-color: color-mix(in srgb, var(--lm-a) 52%, transparent) !important;
+}
+
+{{TitleBarControls.SupportAlertsButton}},
+{{TitleBarControls.OSEndOfLifeAlertsButton}},
+{{TitleBarControls.LowDiskWarning}},
+{{TitleBarControls.TransportErrorButton}} {
+    padding: 0 10px !important;
+    background-color: rgba(215, 72, 72, 0.42) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 130, 130, 0.32);
+    color: #fff !important;
+}
+
+{{TitleBarControls.SupportAlertsButton}}:hover,
+{{TitleBarControls.OSEndOfLifeAlertsButton}}:hover,
+{{TitleBarControls.LowDiskWarning}}:hover,
+{{TitleBarControls.TransportErrorButton}}:hover {
+    background-color: rgba(229, 72, 77, 0.62) !important;
+}
+
+{{TitleBarControls.SupportAlertsButton}}{{TitleBarControls.AckOnlyAlerts}} {
+    background-color: rgba(214, 173, 48, 0.36) !important;
+    box-shadow: inset 0 0 0 1px rgba(245, 210, 90, 0.36);
+}
+
+{{TitleBarControls.SupportAlertsButton}}{{TitleBarControls.AckOnlyAlerts}}:hover {
+    background-color: rgba(214, 173, 48, 0.54) !important;
+}
+
+{{TitleBarControls.SoundtrackControls}}{{TitleBarControls.Playing}} {
+    background-color: rgba(173, 102, 187, 0.38) !important;
+}
+
+{{TitleBarControls.SoundtrackControls}}{{TitleBarControls.Playing}}:hover {
+    background-color: rgba(173, 102, 187, 0.54) !important;
+}
+
+{{TitleBarControls.VRToggle}}{{TitleBarControls.Running}} {
+    background-color: rgba(116, 178, 36, 0.38) !important;
+}
+
+{{TitleBarControls.VRToggle}}{{TitleBarControls.Running}}:hover {
+    background-color: rgba(116, 178, 36, 0.56) !important;
 }
 
 /* ---- Library layout ---- */

@@ -237,11 +237,12 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     background: var(--lm-hover) !important;
 }
 
-/* Title bar capsules (menus, nav, window buttons) and the URL bar: liquid
-   glass like the bottom bar (filters #lm-liquid-menus, -nav, -window, -url).
-   The border turns clear so their size doesn't change. */
+/* Title bar capsules (menus, nav, controls, window buttons) and the URL bar:
+   liquid glass like the bottom bar (filters #lm-liquid-menus, -nav, -controls,
+   -window, -url). The border turns clear so their size doesn't change. */
 html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}},
 html {{ForceOpaqueBackground.SuperNavBar}},
+html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}},
 html .title-bar-actions,
 html {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
     background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
@@ -260,6 +261,10 @@ html.lm-liquid-menus-ready {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBac
 
 html.lm-liquid-nav-ready {{ForceOpaqueBackground.SuperNavBar}} {
     backdrop-filter: url(#lm-liquid-nav) var(--lm-pill-tone);
+}
+
+html.lm-liquid-controls-ready {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}} {
+    backdrop-filter: url(#lm-liquid-controls) var(--lm-pill-tone);
 }
 
 html.lm-liquid-window-ready .title-bar-actions {

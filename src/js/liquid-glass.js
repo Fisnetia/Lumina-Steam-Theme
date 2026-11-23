@@ -194,7 +194,9 @@
         ...[["{{BottomBarContainer.AddGameButton}}", "add"], ["{{BottomBarContainer.DownloadStatus}}", "dl"],
             ["{{BottomBarContainer.FriendsButton}}", "friends"],
             ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}}", "menus"],
-            ["{{ForceOpaqueBackground.SuperNavBar}}", "nav"], [".title-bar-actions", "window"],
+            ["{{ForceOpaqueBackground.SuperNavBar}}", "nav"],
+            ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}}", "controls"],
+            [".title-bar-actions", "window"],
             ["{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}}", "url"]].map(([selector, name]) =>
             pane({ selector, id: `lm-liquid-${name}`, ready: `lm-liquid-${name}-ready`,
                    reach: 0.24 })),   // 12px at 50%
