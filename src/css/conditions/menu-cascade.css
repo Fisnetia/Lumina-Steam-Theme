@@ -43,6 +43,38 @@
         backwards;
 }
 
+/* Menus that open upward (.lm-up from js/menu-anim.js: the tray menu, menus
+   flipped above the pointer) unroll from the bottom edge, the bottom item
+   first, and roll back down on close. */
+@keyframes lm-menu-unroll-up {
+    from { clip-path: inset(100% -60px -60px -60px); }
+    to   { clip-path: inset(-60px); }
+}
+
+@keyframes lm-menu-rolldown {
+    from { clip-path: inset(-60px); opacity: 1; }
+    to   { clip-path: inset(100% -60px -60px -60px); opacity: 0; }
+}
+
+@keyframes lm-item-in-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+{{contextMenu.contextMenu}}.ready.lm-up {
+    animation-name: lm-menu-unroll-up;
+}
+
+{{contextMenu.contextMenu}}.ready.lm-up {{contextMenu.contextMenuItem}} {
+    animation-name: lm-item-in-up;
+    animation-delay: calc(var(--lm-item-start) + (var(--lm-n, 1) - 1 - var(--lm-i, 0)) *
+        min(var(--lm-item-step), var(--lm-item-spread) / max(var(--lm-n, 1) - 1, 1)));
+}
+
+{{contextMenu.contextMenu}}.lm-up.lm-closing {
+    animation-name: lm-menu-rolldown !important;
+}
+
 /* Morphing nav menu (js/morph-nav.js): same unroll and cascade on first open. */
 .lm-morph.open {
     animation: lm-menu-unroll var(--lm-menu-unroll) cubic-bezier(0.25, 0.7, 0.25, 1) backwards;

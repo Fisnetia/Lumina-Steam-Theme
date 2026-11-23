@@ -79,8 +79,37 @@
 
     /* ---- number items for the cascade (--lm-i, --lm-n) ---- */
 
+    /* ---- direction ----
+     * Popup menus hang from an anchor point (the pointer, or the tray icon).
+     * One whose window ends at the anchor opens upward: its animations run
+     * from the bottom (.lm-up). Steam keeps the anchor in the menu's props. */
+    const anchorY = (menu) => {
+        const el = menu.querySelector(".contextMenuContents") || menu;
+        const key = Object.keys(el).find(k => k.startsWith("__reactFiber"));
+        for (let f = key && el[key], i = 0; f && i < 16; f = f.return, i++) {
+            const p = f.memoizedProps;
+            if (p && typeof p.clientY === "number") return p.clientY;
+        }
+        return null;
+    };
+
+    const setDirection = (menu) => {
+        if (!document.documentElement.classList.contains("ContextMenuPopup")) return;
+        const y = anchorY(menu);
+        if (y === null) return;
+        const top = window.screenY, bottom = top + window.innerHeight;
+        menu.classList.toggle("lm-up", Math.abs(bottom - y) < Math.abs(top - y));
+    };
+
+    // Steam may move the window after .ready, before showing it
+    document.addEventListener("visibilitychange", () => {
+        const menu = findMenu();
+        if (document.visibilityState === "visible" && menu && menu.classList.contains("ready")) setDirection(menu);
+    });
+
     /* runs before paint, so the values are set when the animation starts */
     const numberItems = (menu) => {
+        setDirection(menu);
         const items = menu.querySelectorAll(".contextMenuItem");
         items.forEach((it, i) => {
             it.style.setProperty("--lm-i", String(i));

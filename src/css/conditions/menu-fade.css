@@ -26,6 +26,16 @@
     animation: lm-item-in 280ms ease-out backwards;
 }
 
+/* menus that open upward (.lm-up from js/menu-anim.js) rise into place */
+@keyframes lm-item-in-up {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: none; }
+}
+
+{{contextMenu.contextMenu}}.ready.lm-up {{contextMenu.contextMenuItem}} {
+    animation-name: lm-item-in-up;
+}
+
 /* Morphing nav menu (js/morph-nav.js) on first open. */
 .lm-morph.open {
     animation: lm-menu-fade 240ms ease-out backwards;
