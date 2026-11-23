@@ -182,9 +182,13 @@
         if (layer) { layer.remove(); layer = null; }
     };
 
+    // A video removed from the document is paused, so it is resumed after
+    // being moved into a re-rendered frame.
     const placeLayer = () => {
         const where = layer && wallpaperMode() ? host() : null;
         if (layer && where && layer.parentNode !== where) where.prepend(layer);
+        if (layer && layer.tagName === "VIDEO" && layer.isConnected && layer.paused &&
+            document.visibilityState === "visible") layer.play().catch(() => {});
     };
 
     const showVideo = (src) => {
@@ -198,12 +202,13 @@
     };
 
     const showScene = async (makeSource) => {
-        const W = await loadEngine();
         layer = document.createElement("div");
         layer.className = "lm-scene-layer";
         layer.setAttribute("aria-hidden", "true");
         placeLayer();
         const el = layer;
+        const W = await loadEngine();
+        if (layer !== el) return null;
         const inst = await W.mount(el, {
             source: makeSource(W), fit: "cover", fps: SCENE_FPS, renderDpr: sceneDpr(),
             volume: 0, autoplay: document.visibilityState === "visible",
@@ -350,9 +355,11 @@
     }
 
     let applying = 0;
+    let liveKind = false;   // the current wallpaper has a moving layer in wallpaper mode
 
     const apply = async () => {
         const run = ++applying;
+        liveKind = false;
         const [file, poster, meta0, frame0] = await read("wallpaper", "poster", "meta", "frame");
         const meta = meta0 || (file ? { kind: /^video\//.test(file.type) ? "video" : "picture", source: "local" } : null);
         if (meta && meta.source === "plugin" && !plugin) await findPlugin();
@@ -385,6 +392,7 @@
             else still = meta.preview ? base + encodePath(meta.preview) : null;
             state = { kind: meta.kind, title: meta.title || "", still, error };
             setStill(flat ? blobUrl(flat) : still);
+            liveKind = !!base && (meta.kind === "video" || ((meta.kind === "scene" || meta.kind === "web") && isMain));
             if (base && wallpaperMode()) {
                 if (meta.kind === "video") showVideo(base + encodePath(meta.file));
                 else if ((meta.kind === "scene" || meta.kind === "web") && isMain) {
@@ -395,6 +403,7 @@
             still = meta.kind === "picture" ? (file && blobUrl(file)) : (poster && blobUrl(poster));
             state = { kind: meta.kind, title: meta.title || "", still, error };
             setStill(flat ? blobUrl(flat) : still);
+            liveKind = !!file && (meta.kind === "video" || (meta.kind === "scene" && isMain));
             if (file && wallpaperMode()) {
                 if (meta.kind === "video") showVideo(blobUrl(file));
                 else if (meta.kind === "scene" && isMain) live(() => showScene(W => W.fileSource(file, meta.project)));
@@ -757,11 +766,28 @@
         refreshCard();
     };
 
-    // The settings page and the backdrop frame are re-rendered by React.
+    // Follows the backdrop mode: the moving layer is added on entering
+    // wallpaper mode and removed on leaving it. While stylesheets reload the
+    // mode reads empty for a moment, so leaving is confirmed after a delay.
+    let leaving = 0;
+    const syncLayer = () => {
+        if (wallpaperMode()) {
+            clearTimeout(leaving); leaving = 0;
+            if (!layer && liveKind && !state.error) { liveKind = false; apply(); }
+            else placeLayer();
+        } else if (layer && !leaving) {
+            leaving = setTimeout(() => { leaving = 0; if (!wallpaperMode()) clearLayer(); }, 1000);
+        }
+    };
+
+    // The settings page and the backdrop frame are re-rendered by React;
+    // stylesheet links change in head.
     let pending = 0;
-    new MutationObserver(() => {
+    const schedule = () => {
         if (pending) return;
-        pending = setTimeout(() => { pending = 0; mountCard(); placeLayer(); }, 250);
-    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+        pending = setTimeout(() => { pending = 0; mountCard(); syncLayer(); }, 250);
+    };
+    new MutationObserver(schedule).observe(html, { childList: true, subtree: true, characterData: true });
+    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") schedule(); }, true);
     mountCard();
 })();
