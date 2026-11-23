@@ -45,6 +45,10 @@
 
     /* ---- delay the hide for the close animation (popup windows) ---- */
 
+    /* The hide is skipped only if the menu opens again (.ready added back)
+     * while it closes. A menu that still has .ready when the hide starts, as
+     * when Steam hides a menu it has just created, is closing, not reopened. */
+    let reopened = false;
     const W = window.SteamClient && window.SteamClient.Window;
     if (W && typeof W.HideWindow === "function") {
         const realHide = W.HideWindow;
@@ -52,30 +56,34 @@
         W.HideWindow = function (...args) {
             const menu = findMenu();
             const ms = menu && document.visibilityState === "visible" ? closeDuration(menu) : 0;
+            clearTimeout(timer);
+            timer = 0;
             if (!ms) return realHide.apply(this, args);
 
-            clearTimeout(timer);
+            reopened = false;
             menu.classList.add("lm-closing");
             timer = setTimeout(() => {
                 timer = 0;
-                if (menu.classList.contains("ready")) {
-                    menu.classList.remove("lm-closing");   // re-opened meanwhile
-                    return;
-                }
-                realHide.apply(this, args);
+                menu.classList.remove("lm-closing");
+                if (!reopened) realHide.apply(this, args);
             }, ms);
         };
     }
 
-    // reopened: drop the closing state
-    new MutationObserver(() => {
-        const menu = findMenu();
-        if (menu && menu.classList.contains("ready") && menu.classList.contains("lm-closing")) {
-            clearTimeout(timer);
-            timer = 0;
-            menu.classList.remove("lm-closing");
+    // reopened while closing: keep it shown
+    new MutationObserver(records => {
+        for (const rec of records) {
+            const el = rec.target;
+            if (!el.classList || !el.classList.contains("contextMenu") || !el.classList.contains("lm-closing")) continue;
+            const was = (rec.oldValue || "").split(/\s+/).includes("ready");
+            if (!was && el.classList.contains("ready")) {
+                reopened = true;
+                clearTimeout(timer);
+                timer = 0;
+                el.classList.remove("lm-closing");
+            }
         }
-    }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    }).observe(document.documentElement, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ["class"] });
 
     /* ---- number items for the cascade (--lm-i, --lm-n) ---- */
 

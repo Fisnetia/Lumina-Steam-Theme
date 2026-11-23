@@ -100,7 +100,7 @@ tools/                           构建、打包、调试和测试脚本
 
 - 下拉菜单、托盘菜单都是单独的透明小窗口。`ContextMenuPopup` 是这个窗口 `<html>` 上的类，不能给它或外层容器涂底色，否则整个方形窗口都会被涂实，圆角后面露出方角。只给 `.contextMenu` 这一层上色。独立窗口模糊不到背后，所以底色接近不透明。
 - Steam 会复用菜单窗口和里面的元素，普通 CSS 动画只播第一次。每次打开时 Steam 给 `.contextMenu` 加上 `ready` 类，动画绑在它上面。
-- 收回动画纯 CSS 做不了：去掉 `ready` 后约 30ms，Steam 就调用弹窗的 `SteamClient.Window.HideWindow`。`menu-anim.js` 包住这个调用：先加 `lm-closing` 播收回动画，等 `--lm-menu-close` 的时长过去再隐藏；途中再次打开就取消隐藏。
+- 收回动画纯 CSS 做不了：去掉 `ready` 后约 30ms，Steam 就调用弹窗的 `SteamClient.Window.HideWindow`。`menu-anim.js` 包住这个调用：先加 `lm-closing` 播收回动画，等 `--lm-menu-close` 的时长过去再隐藏；途中再次打开就取消隐藏。"再次打开"要看 `ready` 是否在收回途中被重新加上，不能看 `ready` 和 `lm-closing` 是否同时存在：Steam 预创建隐藏菜单时，会对还带着 `ready` 的菜单调用 `HideWindow`，按后者判断会取消隐藏，窗口就留在屏幕上（默认位置在右下角）关不掉。
 - 画在主窗口内部的菜单（库的筛选、游戏右键菜单）关闭时节点直接被删。`menu-anim.js` 在删除的那一刻（绘制之前）原位放回一个副本播收回动画。阴影很深，裁剪范围要比菜单框多出 60px。
 - 菜单窗口在 Steam 启动时预先建好。第一次打开时，Chromium 偶尔只算出了动画样式却没启动动画，`menu-anim.js` 在显示后的第一帧检查并重新触发。
 - Steam 测量弹出菜单尺寸的时机不固定，热重载 CSS 后窗口可能还是旧尺寸；改了菜单尺寸要重启 Steam 再看。
