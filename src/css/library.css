@@ -413,6 +413,36 @@
     background: var(--lm-a) !important;
 }
 
+/* ---- Downloads ---- */
+
+/* mostly text, so it gets a panel tint instead of sitting on the backdrop */
+{{DownloadsPage.DownloadsPage}} {
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+}
+
+{{DownloadsPage.SectionItem}}:hover {
+    background: var(--lm-hover) !important;
+    border-radius: var(--lm-r-sm) !important;
+}
+
+/* the row of the current download */
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {
+    background: var(--lm-panel-soft) !important;
+}
+
+/* the current download, with its graph */
+{{DownloadsPage.Section}}{{DownloadsPage.Active}} {
+    background: var(--lm-panel-soft) !important;
+    border-bottom: 1px solid var(--lm-border);
+}
+
+/* nothing downloading: a blue gradient stands in for the game's hero */
+{{GraphAndStats.HeroAndLogo}}{{GraphAndStats.Empty}} {
+    background: transparent !important;
+    background-image: none !important;
+}
+
 /* ---- Library home ---- */
 
 {{LibraryHome.Container}},

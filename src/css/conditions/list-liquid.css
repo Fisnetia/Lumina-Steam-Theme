@@ -143,7 +143,8 @@ html.lm-liquid-friends-ready {{BottomBarContainer.FriendsButton}} {
 
 /* pages scroll behind the capsules but can still scroll clear of them */
 html {{LibraryHome.InnerContainer}},
-html {{AppDetailsOverviewPanel.ScrollContainer}} {
+html {{AppDetailsOverviewPanel.ScrollContainer}},
+html {{DownloadsPage.ItemLists}} {
     padding-bottom: var(--lm-bar-space) !important;
 }
 
