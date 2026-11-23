@@ -61,13 +61,41 @@
         return null;
     };
 
+    /* Millennium adds its two Steam menu items when the menu renders after its
+     * patch is in place. Steam may render the menu before that, and the
+     * native menu, which would render it again, never opens here; the items
+     * are then added the same way, before Exit. A detached element stands in
+     * for each, so a click reaches it like a real item. */
+    const opener = () => { try { return window.opener; } catch { return null; } };
+    const millenniumItems = () => {
+        const o = opener();
+        if (!o || !o.Millennium || !o.SteamUIStore || !o.SteamClient) return [];
+        const make = (text, run) => {
+            const el = document.createElement("div");
+            el.textContent = text;
+            el.addEventListener("click", run);
+            return { item: el };
+        };
+        return [
+            make("Millennium", () => o.SteamUIStore.Navigate("/millennium/settings")),
+            make("Millennium Library Manager", () => o.SteamClient.URL.ExecuteSteamURL("steam://millennium/sidebar")),
+            { separator: true },
+        ];
+    };
+
     // [{ item: Element } | { separator: true }] in menu order
     const entries = (title) => {
         const w = popupWindow(title), box = w && w.document.querySelector(".contextMenuContents");
         if (!box) return [];
-        return [...box.querySelectorAll(".contextMenuItem, [class*='Separator']")]
+        const list = [...box.querySelectorAll(".contextMenuItem, [class*='Separator']")]
             .filter(el => el.classList.contains("contextMenuItem") || !el.closest(".contextMenuItem"))
             .map(el => el.classList.contains("contextMenuItem") ? { item: el } : { separator: true });
+        const items = list.filter(e => e.item);
+        if (title === "Steam Root Menu" && items.length &&
+            !items.some(e => e.item.textContent.includes("Millennium"))) {
+            list.splice(list.lastIndexOf(items[items.length - 1]), 0, ...millenniumItems());
+        }
+        return list;
     };
 
     // the menus of one kind, which share a panel area

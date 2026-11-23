@@ -116,6 +116,8 @@ tools/                           构建、打包、调试和测试脚本
 
 弹出菜单的方向：Steam 把锚点（鼠标或托盘图标的位置）放在菜单组件的 props 里（`clientY`），窗口底边贴着锚点就是向上展开（托盘菜单、靠近屏幕底部被翻到上方的菜单），`menu-anim.js` 给它加 `.lm-up`，展开、菜单项和关闭动画都改为从底边开始。Steam 没有给出方向的类名，`bPreferPopTop` 只是偏好。
 
+Millennium 在 Steam 菜单里的两项（Millennium、Millennium Library Manager）是它的补丁在菜单渲染时插入的；Steam 若在补丁就位前预渲染了菜单，原生菜单又从不打开，这两项就一直不出现。菜单里没有时，`morph-nav.js` 在 Exit 前补上，点击分别调用 `SteamUIStore.Navigate("/millennium/settings")` 和 `steam://millennium/sidebar`，与 Millennium 自己的处理一致。
+
 同一个面板也接管了标题栏菜单（Steam、视图、好友、游戏、帮助）和账户菜单，这些是点击打开：标题栏菜单打开后划过相邻菜单名会切换；点面板外、Esc 或窗口失焦时关闭。打开期间窗口的拖动区域临时失效，否则在标题栏空白处按下鼠标会被系统当成拖动窗口，网页收不到。Add a Game 的菜单是 Steam 每次点击时临时生成的，接管要等它生成才能读到内容，比原生慢一拍，所以保留原生菜单。这个菜单每次都新建一个标题为 "Menu" 的弹窗，左上角在鼠标处，主窗口拿回焦点（早于 mousedown）时关闭，随后的 click 又会把它打开。所以按下时弹窗仍可见，或主窗口从它那里拿回焦点不到 400ms，按钮上的这次按下整组拦下（`menu-anim.js`）。判断要看弹窗窗口本身：按下时菜单 DOM 已被清空。弹窗盖住的那部分按钮，点击直接进弹窗，由 Steam 自己处理。
 
 ## 液态玻璃（liquid-glass.js）
