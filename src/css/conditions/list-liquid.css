@@ -10,7 +10,7 @@
 html {{GameListHomeAndSearch.Container}} {
     box-sizing: border-box;
     height: calc(100% - 2 * var(--lm-float-gap)) !important;
-    margin: var(--lm-float-gap);   /* the same gap on the divider side */
+    margin: var(--lm-float-gap) 3px var(--lm-float-gap) var(--lm-float-gap);   /* 3px + 2px divider + 3px = 8px gap */
     /* keeps the Home box 8px from the rounded corner, so its corner is concentric */
     padding: 4px 2px 2px;
     overflow: hidden;
@@ -28,6 +28,43 @@ html {{GameListHomeAndSearch.Container}} {
 
 html.lm-liquid-ready {{GameListHomeAndSearch.Container}} {
     backdrop-filter: url(#lm-liquid) var(--lm-liquid-tone);
+}
+
+/* Right library pane (home, collections, game pages): floating liquid glass
+   card matching the game list's height, corner radius and rim light. The rim
+   lives on ::after so scrolled covers and game heroes stay framed inside it. */
+html {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: auto !important;
+    height: auto !important;
+    margin: var(--lm-float-gap) var(--lm-float-gap) var(--lm-float-gap) 3px;
+    overflow: hidden !important;
+    border-radius: calc(var(--lm-r) * 1.4) !important;
+    background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
+    backdrop-filter: var(--lm-liquid-tone);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.lm-liquid-main-ready {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
+    backdrop-filter: url(#lm-liquid-main) var(--lm-liquid-tone);
+}
+
+html {{LeftListSizableContainer.AppDetailsTransitionGroup}}::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 20;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+html {{LeftListSizableContainer.AppDetailsMain}} {
+    border-top: none !important;
 }
 
 /* Menus (js/morph-nav.js) get the same pane: clearer fill, rim light and
@@ -275,7 +312,14 @@ html.lm-liquid-url-ready {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueB
     backdrop-filter: url(#lm-liquid-url) var(--lm-pill-tone);
 }
 
-/* the panel floats, so the column divider only shows on hover */
-{{LeftListSizableContainer.LibraryWindowDivider}} {
+/* the panels float, so the column divider only shows on hover */
+html {{LeftListSizableContainer.LibraryWindowDivider}} {
+    height: calc(100% - 2 * var(--lm-float-gap));
+    margin: var(--lm-float-gap) 0;
+    border-radius: 999px;
     background-color: transparent !important;
+}
+
+html {{LeftListSizableContainer.LibraryWindowDivider}}:hover {
+    background-color: color-mix(in srgb, var(--lm-a) 55%, transparent) !important;
 }

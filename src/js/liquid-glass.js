@@ -188,6 +188,8 @@
     const panes = [
         pane({ selector: "{{GameListHomeAndSearch.Container}}", id: "lm-liquid", ready: "lm-liquid-ready",
                reach: 0.92 }),   // 46px at 50%
+        pane({ selector: "{{LeftListSizableContainer.AppDetailsTransitionGroup}}", id: "lm-liquid-main", ready: "lm-liquid-main-ready",
+               reach: 0.92 }),   // 46px at 50%
         pane({ selector: ".lm-morph.lm-morph-inpage", id: "lm-liquid-menu", ready: "lm-liquid-menu-ready",
                reach: 0.56 }),    // 28px at 50%
         // bottom bar capsules (36px tall) and title bar capsules (32px)
