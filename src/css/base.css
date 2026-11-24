@@ -152,11 +152,21 @@ html.MillenniumWindow_Settings body {
     background: var(--lm-base-bg, #07090f) !important;
 }
 
-html.MillenniumWindow_Settings body {
+/* other dialog windows (system info, product code, About, add a non-Steam
+   game...) take the same backdrop; they aren't made transparent for desktop
+   acrylic, so their base stays dark */
+html.ModalDialogPopup:not(.MillenniumWindow_Settings),
+html.ModalDialogPopup:not(.MillenniumWindow_Settings) body {
+    background: #07090f !important;
+}
+
+html.MillenniumWindow_Settings body,
+html.ModalDialogPopup body {
     isolation: isolate;
 }
 
-html.MillenniumWindow_Settings body::before {
+html.MillenniumWindow_Settings body::before,
+html.ModalDialogPopup body::before {
     content: "";
     position: fixed;
     inset: calc(var(--lm-blur-px) * -2);
@@ -255,6 +265,106 @@ html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton.Active {
 
 .title-bar-actions .title-area-icon.closeButton:hover {
     background: #e5484d !important;
+}
+
+/* ---- Dialogs ----
+   Steam's dialog layout: a glass panel over the window's backdrop in dialog
+   windows, and over the library, blurring it, for modals in the main window
+   (account switcher). Buttons, inputs and lists inside follow the theme. */
+html.ModalDialogPopup:not(.MillenniumWindow_Settings) .DialogContent._DialogLayout {
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+}
+
+/* the modal's accent line on top, and its shadow's corners */
+.ModalPosition_TopBar {
+    display: none !important;
+}
+
+.ModalPosition_Content {
+    border-radius: var(--lm-r);
+}
+
+html.MillenniumWindow_MainSteamWindow .DialogContent._DialogLayout {
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 24%), 100%), transparent) !important;
+    background-image: none !important;
+    backdrop-filter: blur(22px) saturate(1.4);
+    border-radius: var(--lm-r);
+    box-shadow: var(--lm-shadow), inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+}
+
+.DialogContent .DialogButton,
+{{LoginForm.SubmitButton}} {
+    background: var(--lm-panel-strong) !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.12s ease;
+}
+
+.DialogContent .DialogButton:not(:disabled):hover,
+{{LoginForm.SubmitButton}}:not(:disabled):hover {
+    background: var(--lm-hover) !important;
+}
+
+.DialogContent .DialogButton.Primary,
+{{LoginForm.SubmitButton}} {
+    background: color-mix(in srgb, var(--lm-a) 45%, transparent) !important;
+    color: #fff !important;
+}
+
+.DialogContent .DialogButton.Primary:not(:disabled):hover,
+{{LoginForm.SubmitButton}}:not(:disabled):hover {
+    background: color-mix(in srgb, var(--lm-a) 60%, transparent) !important;
+}
+
+.DialogContent .DialogButton:disabled {
+    opacity: 0.45;
+}
+
+html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"], :not([type])),
+.DialogContent input:is([type="text"], [type="password"], [type="search"], :not([type])),
+{{LoginForm.TextInput}} {
+    background: var(--lm-panel-soft) !important;
+    border: none !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border) !important;
+    color: var(--lm-text) !important;
+}
+
+/* lists and scrolling panels Steam fills with its own grey */
+{{HardwareSurveyDialog.HardwareSurveySections}},
+{{AddNonSteamGameDialog.GameList}} {
+    background: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm);
+}
+
+{{AddNonSteamGameDialog.Header}} {
+    background: var(--lm-panel-strong) !important;
+}
+
+/* Login window: not a dialog window; its root and form carry Steam's dark
+   gradient. The client's backdrop goes behind them, as in dialog windows. */
+{{LoginStaticBackground}} {
+    isolation: isolate;
+    background: #07090f !important;
+}
+
+{{LoginStaticBackground}}::before {
+    content: "";
+    position: fixed;
+    inset: calc(var(--lm-blur-px) * -2);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--lm-backdrop, linear-gradient(160deg, #0e1424, #06080e));
+    filter: blur(var(--lm-blur-px)) saturate(1.15);
+}
+
+{{EmbeddedRootFooter.EmbeddedRoot}} {
+    background: var(--lm-panel) !important;
+    background-image: none !important;
 }
 
 /* ---- Wallpaper card and gallery (js/wallpaper.js) ---- */
