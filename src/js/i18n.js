@@ -19,7 +19,7 @@
         "Blur": "模糊", "Opacity": "不透明度", "Corner radius": "圆角",
         "Menu animation": "菜单动画", "Smooth scrolling": "平滑滚动", "Nav menu": "导航菜单",
         "Wallpaper mouse": "壁纸鼠标响应", "Desktop blur": "桌面模糊", "Game list": "玻璃材质",
-        "Liquid opacity": "液态玻璃不透明度", "Refraction": "折射强度",
+        "Liquid opacity": "液态玻璃不透明度", "Refraction": "折射强度", "Acrylic blur": "模糊",
         "Nav position": "导航位置", "URL bar": "URL 栏",
     };
     // color pickers (root-colors.css)
@@ -30,20 +30,21 @@
         "Base color of the panels; their opacity is a separate slider.": "面板底色，深浅由不透明度控制",
     };
     const DESCRIPTIONS = {
-        "Backdrop": "玻璃面板后方的背景。桌面亚克力需启用配套插件 Lumina Extended 以透出系统桌面",
-        "Blur": "背景模糊程度",
-        "Wallpaper mouse": "Scene 壁纸在主窗口里跟随鼠标（视差、光标特效）",
-        "Desktop blur": "桌面透出时的系统模糊强度：轻模糊保留更多桌面轮廓，强模糊为重磨砂亚克力",
-        "Game list": "液态玻璃在边缘折射背景；亚克力为重模糊磨砂，带细微噪点（无需插件）",
-        "Liquid opacity": "悬浮液态玻璃面板、菜单和胶囊的着色深浅",
-        "Refraction": "背景从边缘向内弯折的范围",
+        "Backdrop": "玻璃后面的背景。桌面亚克力需启用 Lumina Extended 插件",
+        "Blur": "背景的模糊程度",
+        "Wallpaper mouse": "Scene 壁纸跟随鼠标",
+        "Desktop blur": "透出桌面时的模糊强度",
+        "Game list": "液态玻璃：边缘折射；亚克力：磨砂模糊",
+        "Liquid opacity": "液态玻璃的着色深浅",
+        "Refraction": "边缘折射的范围",
+        "Acrylic blur": "亚克力的模糊程度",
         "Opacity": "面板着色深浅，越低越通透",
-        "Corner radius": "面板、按钮和菜单的圆角大小",
-        "Nav position": "商店、库、社区胶囊的位置。居中：在标题栏里，放不下时换到第二行；靠左、靠右：在第二行，网页上与 URL 栏同一行",
-        "URL bar": "常驻：库等 Steam 页面也保留 URL 栏，显示页面路径，切换页面时布局不跳动；仅网页：只在商店、社区等网页上显示",
-        "Menu animation": "菜单、库分类展开收起与切换游戏时的动画",
-        "Nav menu": "商店、库、社区等菜单共用一个面板，切换时平滑变形",
-        "Smooth scrolling": "游戏列表的鼠标滚轮平滑滚动",
+        "Corner radius": "面板、按钮和菜单的圆角",
+        "Nav position": "商店、库、社区胶囊的位置；靠左、靠右时在第二行",
+        "URL bar": "常驻：库等页面也显示 URL 栏和页面路径",
+        "Menu animation": "菜单、分类展开收起和切换游戏的动画",
+        "Nav menu": "变形：导航菜单共用一个面板，切换时变形",
+        "Smooth scrolling": "游戏列表的滚轮平滑滚动",
     };
     // A dropdown menu is translated only when its items match one of these sets.
     const BACKDROP_OPTIONS = { "Wallpaper": "壁纸", "Aurora": "极光", "Acrylic": "桌面亚克力" };

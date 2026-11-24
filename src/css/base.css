@@ -294,6 +294,7 @@ html.MillenniumWindow_MainSteamWindow .DialogContent._DialogLayout {
 }
 
 .DialogContent .DialogButton,
+{{AdvancedSearchPane}} .DialogButton,
 {{LoginForm.SubmitButton}} {
     background: var(--lm-panel-strong) !important;
     background-image: none !important;
@@ -305,22 +306,26 @@ html.MillenniumWindow_MainSteamWindow .DialogContent._DialogLayout {
 }
 
 .DialogContent .DialogButton:not(:disabled):hover,
+{{AdvancedSearchPane}} .DialogButton:not(:disabled):hover,
 {{LoginForm.SubmitButton}}:not(:disabled):hover {
     background: var(--lm-hover) !important;
 }
 
 .DialogContent .DialogButton.Primary,
+{{AdvancedSearchPane}} .DialogButton.Primary,
 {{LoginForm.SubmitButton}} {
     background: color-mix(in srgb, var(--lm-a) 45%, transparent) !important;
     color: #fff !important;
 }
 
 .DialogContent .DialogButton.Primary:not(:disabled):hover,
+{{AdvancedSearchPane}} .DialogButton.Primary:not(:disabled):hover,
 {{LoginForm.SubmitButton}}:not(:disabled):hover {
     background: color-mix(in srgb, var(--lm-a) 60%, transparent) !important;
 }
 
-.DialogContent .DialogButton:disabled {
+.DialogContent .DialogButton:disabled,
+{{AdvancedSearchPane}} .DialogButton.Disabled {
     opacity: 0.45;
 }
 

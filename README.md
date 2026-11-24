@@ -20,16 +20,17 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 
 **Backdrop**
 
-- **Backdrop**: what shows behind the glass. *Wallpaper* (default) takes a picture, a video or a Wallpaper Engine scene; *Aurora* is an animated gradient in the accent color; *Acrylic* is Windows desktop blur and requires the Lumina Extended plugin.
+- **Backdrop**: what shows behind the glass. *Aurora* (default) is a live, code-drawn aurora in the accent color; *Wallpaper* takes a picture, a video or a Wallpaper Engine scene; *Acrylic* is Windows desktop blur and requires the Lumina Extended plugin.
 - **Wallpaper**: a picture or video file, or an item from the Wallpaper Engine library. Scenes run live in Steam; other windows show a still of them.
-- **Blur**: how much the backdrop is blurred (default 4 px).
+- **Blur**: how much the backdrop is blurred (default 0 px).
 - **Wallpaper mouse**: Wallpaper Engine scenes follow the mouse (parallax and cursor effects).
 - **Desktop blur** (Acrylic backdrop only): *Soft* (default) uses lighter Windows DWM blur that keeps desktop shapes clearer; *Strong* uses heavier frosted acrylic.
 
 **Interface**
 
-- **Game list**: *Liquid glass* bends the backdrop along the edges; *Acrylic* uses frosted blur with fine grain (no plugin needed). Both share the same floating cards, capsules and bottom bar.
+- **Game list**: *Acrylic* (default) uses frosted blur with fine grain; *Liquid glass* bends the backdrop along the edges (heavier on performance). Both share the same floating cards, capsules and bottom bar.
 - **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes, and how far in from the edges the backdrop bends.
+- **Blur** (Acrylic only): how much the panels and menus blur what's behind them (default 4 px); capsules blur a little less.
 - **Opacity**: how dark the panels are; lower is clearer.
 - **Corner radius**: rounding of panels, buttons and menus.
 - **Nav position**: where the Store / Library / Community capsule sits. *Center* puts it in the title bar (on a second row when the window is too narrow); *Left* and *Right* put it on a second row, which on web pages it shares with the URL bar at the other end.

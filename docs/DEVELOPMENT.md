@@ -71,6 +71,7 @@ src/js/liquid-glass.js           液态玻璃的折射滤镜（游戏栏、菜�
 src/js/wallpaper.js              壁纸设置卡片、WE 预览图墙，各窗口的图片 / 视频 / Scene / 网页壁纸；设置行显隐；同步桌面亚克力
 src/js/i18n.js                   中文界面下的设置页文字
 src/js/root-has.js               把 Steam 的 :root:has() 颜色规则改成静态的 :root 规则（性能）
+src/js/aurora.js                 极光背景：WebGL 着色器，主窗口、好友、对话框和登录窗口
 src/vendor/webwallgl/            Wallpaper Engine 场景渲染引擎（MIT，第三方，原样复制）
 plugin/lumina-extended/          可选配套插件：壁纸库列表、本机文件服务、共享背景静态图、桌面亚克力
 tools/                           构建、打包、调试和测试脚本
@@ -118,6 +119,13 @@ tools/                           构建、打包、调试和测试脚本
 - 挂载过程中窗口可能从隐藏变为可见，所以挂载完成时如果窗口已经可见，要主动恢复播放。
 - 视频、Scene、网页壁纸在窗口最小化或隐藏时暂停。实测（3D 引擎占用，8 秒平均）：静态图片 0%，Scene 约 2%，视频约 2%（视频解码不算在内）。液态玻璃开启后多几个百分点。
 
+## 极光
+
+- `aurora.js` 用 WebGL 片元着色器画极光：深色夜空上几条光带，光带中线随低频噪声摆动，下沿亮、向上拖出竖直光丝并淡出，颜色从下沿过渡到紫色；主光带用强调色。
+- 按窗口 1/4 的分辨率渲染再放大，最多 30 帧，窗口隐藏时暂停，系统要求减少动画时只画一帧。时间取系统时钟（`Date.now()`），各窗口显示同一时刻；着色器用 highp，时间值大了也不会量化。
+- 挂载位置：主窗口在外框里，登录窗口在 `LoginStaticBackground` 里，好友和对话框窗口在 `body` 里（`position: fixed`）；菜单弹窗跳过。Steam 的窗口共用一个渲染进程和它的 WebGL 上下文上限，上下文丢失时移除画布，退回样式表里的静态渐变。
+- 背景一动，液态玻璃面板的 SVG 折射就要每帧重算，开销与视频壁纸相近；亚克力材质下几乎没有额外开销。
+
 ## 配套插件 lumina-extended
 
 - 后端是 Lua：读 Steam 的 `libraryfolders.vdf` 找到所有 `steamapps/workshop/content/431960`（以及 Wallpaper Engine 的 `projects/myprojects`），提供 `Status`、`List`、`SetStill`、`PatchAcrylic`。主题通过 `Millennium.callServerMethod` 调用（主窗口里它在 `window.opener`，也就是 SharedJSContext 上）。
@@ -129,7 +137,7 @@ tools/                           构建、打包、调试和测试脚本
 "背景"选"亚克力"时，Steam 窗口透出桌面，由 Windows DWM 模糊。原先依赖 dwmx 插件，现在由 `lumina-extended` 提供：
 
 - 窗口要能透明：插件前端包住 `window.open`，亚克力背景下把 `createflags` 为 4114（对话框类，带 `ApplyBrowserScaleToDimensions`）或 2（隐藏弹窗）的窗口改成 274（`Composited | Resizable | Hidden`）；主窗口原生就是 274。是否亚克力由后端记录（`PatchAcrylic` 收到的开关），前端每 2 秒用 `AcrylicState` 取一次，`window.open` 里同步判断。其它背景下窗口保持原样，免去不必要的合成。
-- 后端 `PatchAcrylic`：用 `FindWindowExW` 按类名 `SDL_app`（Steam 的 CEF 顶层窗口）遍历，进程号属于 `steamwebhelper.exe` 的才处理（进程号缓存，遇到没见过的进程号才拍一次 ToolHelp 快照），再排除工具窗口、不激活窗口和没有标题栏 / 可调边框的窗口（菜单等弹窗），调用 `SetWindowCompositionAttribute(WCA_ACCENT_POLICY)`。轻模糊用 `ACCENT_ENABLE_BLURBEHIND`（flags 0），强模糊用 `ACCENT_ENABLE_ACRYLICBLURBEHIND`（flags 2，颜色需要非零透明度，Windows 11 上透明度为 0 时不生效）。同时设暗色、圆角，并把 `DWMWA_SYSTEMBACKDROP_TYPE` 设为无。已处理的窗口按句柄、参数和可见性记下，重复调用跳过：隐藏窗口处理一次，显示后的下一次调用再处理一次。单次调用约 2ms，传入开关和模式时不读配置，不到 1ms。
+- 后端 `PatchAcrylic`：用 `FindWindowExW` 按类名 `SDL_app`（Steam 的 CEF 顶层窗口）遍历，进程号属于 `steamwebhelper.exe` 的才处理（进程号缓存，遇到没见过的进程号才拍一次 ToolHelp 快照），再排除工具窗口、不激活窗口和没有标题栏 / 可调边框的窗口（菜单等弹窗），调用 `SetWindowCompositionAttribute(WCA_ACCENT_POLICY)`。轻模糊用 `ACCENT_ENABLE_BLURBEHIND`（flags 0），强模糊用 `ACCENT_ENABLE_ACRYLICBLURBEHIND`（flags 2，颜色需要非零透明度，Windows 11 上透明度为 0 时不生效）。同时设暗色、圆角，并把 `DWMWA_SYSTEMBACKDROP_TYPE` 设为无。同时关掉窗口的最小化 / 还原动画（`DWMWA_TRANSITIONS_FORCEDISABLED`）：DWM 播放这两种动画用的是窗口快照，不带强调模糊，透明的页面会让桌面清晰地透出来；取消亚克力时恢复动画。已处理的窗口按句柄、参数和可见性记下，重复调用跳过：隐藏窗口处理一次，显示后的下一次调用再处理一次。单次调用约 2ms，传入开关和模式时不读配置，不到 1ms。
 - 实测（Windows 11 26300，主窗口）：只调 SWCA 就能透出桌面，暗色、`DWMSBT_NONE`、`DwmExtendFrameIntoClientArea(0)` 加不加、先后顺序都不影响画面；不调 SWCA 时是黑底。
 - 参数 `{ enabled, mode }`，缺省时读 Millennium 的 `config.json`（当前主题为 lumina 时的 `Backdrop` 和 `Desktop blur`）。传入的值优先：切换设置后 Millennium 写配置可能晚于样式表重载。
 - 调用时机：插件前端加载后 0.5 / 2 / 5 秒各一次；新开窗口后 300ms 和 1500ms 各一次，连续打开的窗口合并计时（新窗口要等显示后才能处理）；主窗口 `wallpaper.js` 在背景模式或 `--lm-acrylic-mode` 变化时调用；设置窗口里改"桌面模糊"下拉时立即调用。离开亚克力背景时还原所有处理过的窗口，插件卸载时也会还原。

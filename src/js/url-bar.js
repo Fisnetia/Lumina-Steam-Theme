@@ -44,11 +44,18 @@
     // click (Steam copies the real address and shows "Copied!") leaves the
     // Steam path on the clipboard instead.
     const TRACKING = /^data:text\/html.*?tracking:[^:]*:(\/.*?)-->/;
+    // the route, for the blank page shown before the first tracked one
+    const route = () => {
+        try { return (window.opener || window).SteamUIStore.WindowStore.MainWindowInstance.m_history.location.pathname; }
+        catch { return ""; }
+    };
     const steamPath = (text) => {
+        if (!text.startsWith("data:text/html")) return null;
         let decoded = text;
         try { decoded = decodeURIComponent(text); } catch {}
         const m = TRACKING.exec(decoded);
-        return m ? "steam:/" + m[1] : null;
+        const path = m ? m[1] : route();
+        return "steam:/" + (path || "/");
     };
     const rewrite = (bar) => {
         const url = bar.querySelector("{{ForceOpaqueBackground.URL}}");
