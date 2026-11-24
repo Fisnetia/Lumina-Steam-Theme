@@ -3,6 +3,6 @@
   "name": "lumina-extended",
   "common_name": "Lumina Extended",
   "description": "Optional companion to the Lumina theme: browse your Wallpaper Engine library and use its scene, video and web wallpapers without copying them.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "backendType": "lua"
 }
