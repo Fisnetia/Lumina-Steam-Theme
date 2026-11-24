@@ -29,6 +29,10 @@
     },
     {
       "MatchRegexString": "^Steam$",
+      "TargetJs": "js/root-has.js"
+    },
+    {
+      "MatchRegexString": "^Steam$",
       "TargetJs": "js/library-anim.js"
     },
     {

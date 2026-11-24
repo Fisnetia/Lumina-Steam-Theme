@@ -28,13 +28,18 @@
     const HOST_TITLE = "Store Supernav";
     const CLOSE_DELAY = 160, FADE = 160, SHIFT = 260, GAP = 6, MARGIN = 28;
     // nav-morph.css sets 1, nav-native.css 0; empty while the theme's
-    // stylesheets reload, then the last value holds
+    // stylesheets reload, then the last value holds. Read on stylesheet loads
+    // and once a second, not in the pointer handlers: reading a style there
+    // forces a style pass whenever Steam is re-rendering.
     let morphOn = false;
-    const enabled = () => {
+    const readEnabled = () => {
         const v = getComputedStyle(html).getPropertyValue("--lm-morph-nav").trim();
         if (v) morphOn = v === "1";
-        return morphOn;
     };
+    const enabled = () => morphOn;
+    readEnabled();
+    setInterval(readEnabled, 1000);
+    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") readEnabled(); }, true);
 
     /* ---- Steam's menus ---- */
 
