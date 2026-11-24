@@ -11,10 +11,11 @@ Steam 的界面类名都是哈希值（比如 `._3mz8wQ6Q44B8P7pzPP4Iyw`），�
 {{TopBar}}                            /* 定义了 TopBar 的模块里的 TopBar 类 */
 ```
 
-构建脚本读取本机 Steam 的 `steamui` 文件，提取当前版本的类名对照表，把占位符换成真实类名，输出到 `dist/`。某个名字在当前 Steam 里找不到时，构建直接报错，不会悄悄失效。
+构建脚本读取本机 Steam 的 `steamui` 文件（自动识别旧版 Webpack 与新版 ESM 模块构建），提取当前版本的类名对照表，把占位符换成真实类名，输出到 `dist/`。某个名字在当前 Steam 里找不到时，构建直接报错，不会悄悄失效。
 
 ```powershell
 python tools/build.py                  # 构建到 dist/ 并安装进 Millennium 的 themes 目录
+python tools/build.py --steamui DIR    # 指定其他 steamui 目录（如 Steam Beta 副本）
 python tools/build.py --plugin         # 同时安装插件；旧名 lumina-we 的安装目录会被删除
 python tools/build.py --offline        # 复用 tools/classmap.json，不重新解析 Steam
 python tools/package.py                # 打包成 release/Lumina-<版本>.zip（主题 + 插件 + 安装说明）

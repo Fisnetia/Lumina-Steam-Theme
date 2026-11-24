@@ -256,7 +256,7 @@
         if (!grid) return;
         const view = main.getBoundingClientRect();
         const controls = grid.closest("{{GridWithControls}}");
-        const head = [controls.parentElement.querySelector(":scope > .Header"),
+        const head = [controls.parentElement.querySelector(":scope > {{ContainerScroll.Header}}"),
             controls.querySelector(":scope > {{GridWithControls.CollectionOptions}}")].filter(Boolean);
         const cards = [...grid.querySelectorAll("{{FeaturedCapsule.LibraryItemBox}}")].map(b => [b.parentElement, b.getBoundingClientRect()])
             .filter(([, r]) => r.bottom > view.top && r.top < view.bottom);

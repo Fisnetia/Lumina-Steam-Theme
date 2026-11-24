@@ -83,9 +83,9 @@ def check_skin(skin):
     return missing
 
 
-def build(offline=False):
+def build(offline=False, steamui=None):
     if not offline or not os.path.exists(classmap.OUT):
-        classmap.build()
+        classmap.build(steamui=steamui or classmap.STEAMUI)
     modules = classmap.load()
     resolve = resolver(modules)
 
@@ -174,7 +174,8 @@ def install_plugin():
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    ok = build(offline="--offline" in sys.argv)
+    steamui = sys.argv[sys.argv.index("--steamui") + 1] if "--steamui" in sys.argv else None
+    ok = build(offline="--offline" in sys.argv, steamui=steamui)
     if ok and "--no-install" not in sys.argv:
         ok = install()
         if ok and "--plugin" in sys.argv:

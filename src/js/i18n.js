@@ -73,8 +73,8 @@
         for (const row of document.querySelectorAll("[data-condition]")) {
             const key = row.getAttribute("data-condition");
             if (!LABELS[key]) continue;
-            swap(row.querySelector(".FieldLabel"), LABELS);
-            const desc = row.querySelector(".FieldDescription");
+            swap(row.querySelector("{{GamepadDialogContent.FieldLabel}}"), LABELS);
+            const desc = row.querySelector("{{GamepadDialogContent.FieldDescription}}");
             const node = desc && [...desc.childNodes].find(n => n.nodeType === 3 && n.nodeValue.trim());
             if (node && DESCRIPTIONS[key] && node.nodeValue !== DESCRIPTIONS[key]) node.nodeValue = DESCRIPTIONS[key];
             swap(row.querySelector(".DialogDropDown_CurrentDisplay"), VALUES);
@@ -82,12 +82,12 @@
         // the tab picker above the rows
         document.querySelectorAll(".DialogDropDown_CurrentDisplay").forEach(el => swap(el, LABELS));
         // color pickers are Field rows without data-condition
-        document.querySelectorAll(".Field:not([data-condition])").forEach(el => swap(el, COLORS));
+        document.querySelectorAll("{{GamepadDialogContent.Field}}:not([data-condition])").forEach(el => swap(el, COLORS));
     };
 
     const translateMenus = () => {
-        for (const menu of document.querySelectorAll(".contextMenu")) {
-            const texts = [...menu.querySelectorAll(".contextMenuItem")].map(i => i.textContent.trim());
+        for (const menu of document.querySelectorAll("{{contextMenu.contextMenu}}")) {
+            const texts = [...menu.querySelectorAll("{{contextMenu.contextMenuItem}}")].map(i => i.textContent.trim());
             const set = OPTION_SETS.find(s => {
                 const keys = Object.keys(s), zh = Object.values(s);
                 return texts.length === keys.length && texts.every(t => keys.includes(t) || zh.includes(t));

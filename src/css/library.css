@@ -255,7 +255,7 @@ html.lm-nav-compact {{SuperNav.MenuButton}} {
 
 /* account avatar: round, its status a ring around it instead of a bar on the
    right (Steam's status colors) */
-{{TitleBarControls.AccountMenu}} .avatarHolder {
+{{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {
     --lm-status: rgb(109, 207, 246);
     align-items: center;
     width: auto !important;
@@ -263,23 +263,23 @@ html.lm-nav-compact {{SuperNav.MenuButton}} {
     transform: none !important;   /* Steam scales it to 0.86 */
 }
 
-{{TitleBarControls.AccountMenu}} .avatarHolder.ingame {
+{{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}}.ingame {
     --lm-status: rgb(140, 214, 29);
 }
 
-{{TitleBarControls.AccountMenu}} .avatarHolder.awayOrSnooze {
+{{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}}.awayOrSnooze {
     --lm-status: rgba(109, 207, 246, 0.5);
 }
 
-{{TitleBarControls.AccountMenu}} .avatarHolder.offline {
+{{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}}.offline {
     --lm-status: rgb(137, 137, 137);
 }
 
-html {{TitleBarControls.AccountMenu}} .avatarHolder .avatarStatus.avatarStatus {
+html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHolder.avatarStatus}}{{avatarHolder.avatarStatus}} {
     display: none !important;
 }
 
-{{TitleBarControls.AccountMenu}} .avatarHolder .avatar {
+{{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHolder.avatar}} {
     box-sizing: border-box;
     width: 19px !important;
     height: 19px !important;

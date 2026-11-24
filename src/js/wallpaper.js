@@ -767,9 +767,9 @@
     // matches Steam's Field styling.
     const buildCard = (template) => {
         const r = template.cloneNode(true);
-        const label = r.querySelector(".FieldLabel");
-        const desc = r.querySelector(".FieldDescription");
-        const slot = r.querySelector(".FieldChildrenInner");
+        const label = r.querySelector("{{GamepadDialogContent.FieldLabel}}");
+        const desc = r.querySelector("{{GamepadDialogContent.FieldDescription}}");
+        const slot = r.querySelector("{{GamepadDialogContent.FieldChildrenInner}}");
         if (!label || !slot) return null;
         r.removeAttribute("data-condition");
         r.setAttribute("data-lm-wallpaper", "");

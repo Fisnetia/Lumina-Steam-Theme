@@ -166,42 +166,42 @@ html.MillenniumWindow_Settings body::before {
     filter: blur(var(--lm-blur-px)) saturate(1.15);
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListColumn {
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingsDialog_PageListColumn}} {
     background: var(--lm-panel-strong) !important;
     border-right: 1px solid var(--lm-border);
     box-shadow: var(--lm-sheen);
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem {
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingsDialog_PageListItem}} {
     border-radius: var(--lm-r-sm);
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem:hover {
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingsDialog_PageListItem}}:hover {
     background: var(--lm-hover) !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem.Active {
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingsDialog_PageListItem}}{{PagedSettingsDialog_PageListItem.Active}} {
     background: var(--lm-selected) !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingDialog_ContentColumn,
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageContent {
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingDialog_ContentColumn}},
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingsDialog_PageContent}} {
     background: var(--lm-panel) !important;
     background-image: none !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageContent {
+html.MillenniumWindow_Settings {{PagedSettingsDialog.PagedSettingsDialog_PageContent}} {
     background: transparent !important;
 }
 
 /* setting rows and the big buttons on the Account page */
-html.MillenniumWindow_Settings .Field.Background,
-html.MillenniumWindow_Settings .SettingsDialogFatButton {
+html.MillenniumWindow_Settings {{GamepadDialogContent.Field}}{{GamepadDialogContent.Background}},
+html.MillenniumWindow_Settings {{SettingsDialogFatButton}} {
     background: var(--lm-panel-soft) !important;
     border-radius: var(--lm-r-sm);
 }
 
-html.MillenniumWindow_Settings .SettingsDialogFatButton:hover {
+html.MillenniumWindow_Settings {{SettingsDialogFatButton}}:hover {
     background: var(--lm-hover) !important;
 }
 
@@ -227,9 +227,9 @@ html.MillenniumWindow_Settings .SettingsDialogFatButton:hover {
 /* ---- Wallpaper card and gallery (js/wallpaper.js) ---- */
 
 /* full row width (the cloned slider row sizes this column to the slider) */
-[data-lm-wallpaper] .FieldRightColumn,
-[data-lm-wallpaper] .FieldChildrenWithIcon,
-[data-lm-wallpaper] .FieldChildrenInner {
+[data-lm-wallpaper] {{GamepadDialogContent.FieldRightColumn}},
+[data-lm-wallpaper] {{GamepadDialogContent.FieldChildrenWithIcon}},
+[data-lm-wallpaper] {{GamepadDialogContent.FieldChildrenInner}} {
     flex: 1 1 auto;
     width: 100%;
     max-width: none;
@@ -452,7 +452,7 @@ html.lm-morph-host body {
     overflow: hidden !important;
 }
 
-html.lm-morph-host .contextMenu {
+html.lm-morph-host {{contextMenu.contextMenu}} {
     display: none !important;
 }
 
