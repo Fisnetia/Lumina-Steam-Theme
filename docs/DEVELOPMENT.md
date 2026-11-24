@@ -93,6 +93,13 @@ tools/                           构建、打包、调试和测试脚本
 - 液态玻璃：低模糊加 SVG 折射滤镜（见下文"液态玻璃"），`--lm-liquid: 1`。
 - 亚克力：`backdrop-filter` 重模糊（面板 24px、胶囊 20px）加一层 SVG `feTurbulence` 噪点（data URI，透明度 3.5%），不用滤镜也不需要插件，`--lm-liquid: 0`。右侧大面板两种材质都不加 `backdrop-filter`，只用着色，避免整块视口模糊的开销。
 
+## 对话框
+
+- Steam 的对话框窗口（系统信息、产品代码、关于、添加非 Steam 游戏等）`<html>` 都带 `ModalDialogPopup`，Steam 设置窗口也是其中之一。它们和设置窗口一样在 `body::before` 画模糊背景，`.DialogContent._DialogLayout` 换成半透明面板。这些窗口不在插件改写的窗口标志之列（如系统信息是 18 = `Resizable | Hidden`，没有合成位），桌面亚克力透不出来，所以底色固定为深色，亚克力模式下就是深色底。
+- 主窗口里的模态框（账户切换）用同一个布局类，改为真实模糊的玻璃面板。顶边那条 1px 渐变线（`ModalPosition_TopBar`）隐藏，外层 `ModalPosition_Content` 的阴影跟着改成圆角。
+- 登录窗口不是对话框窗口（`<html>` 上没有 `ModalDialogPopup`），根元素是 `LoginStaticBackground`：在它的 `::before` 上画同样的模糊背景，它和表单 `EmbeddedRoot` 上 Steam 的深色渐变去掉。
+- 按钮（`DialogButton`，`Primary` 用强调色）、输入框、列表面板（系统信息、添加非 Steam 游戏）统一换成主题样式；登录界面的输入框和登录按钮是另一个模块的类，单独列出。
+
 ## 壁纸
 
 - 主题写不了自己的文件夹，所以不装插件时，壁纸存在 IndexedDB 里（所有 Steam 窗口同源），单个文件上限 600 MB，用 BroadcastChannel 通知各窗口刷新。`wallpaper.js` 复制一个滑块行（`InlineWrapShiftsChildrenBelow`）作为模板，在"背景"后面插入壁纸卡片。
