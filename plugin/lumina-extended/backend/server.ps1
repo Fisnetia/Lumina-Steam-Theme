@@ -67,6 +67,27 @@ $handler = {
         $res.AddHeader('Accept-Ranges', 'bytes')
         $res.AddHeader('Cache-Control', 'private, max-age=60')
 
+        # Web wallpapers run inside a blob: iframe (different origin from this
+        # server), so local images loaded via new Image() without crossOrigin
+        # taint 2D/WebGL canvases. Set crossOrigin="anonymous" only for URLs on
+        # this local server's origin (external URLs stay untouched).
+        if (($ext -eq '.html' -or $ext -eq '.htm') -and -not $req.Headers['Range']) {
+            $fi = [IO.FileInfo]::new($full)
+            if ($fi.Length -le 2MB) {
+                $html = [IO.File]::ReadAllText($full, [Text.Encoding]::UTF8)
+                $shim = '<script data-lm-cors="1">(function(){var o="";try{o=new URL(document.baseURI).origin;}catch(e){}if(!o||o==="null")return;function loc(u){try{return new URL(String(u),document.baseURI).origin===o;}catch(e){return false;}}function wrap(P){if(!P)return;var d=Object.getOwnPropertyDescriptor(P,"src");if(d&&d.set)Object.defineProperty(P,"src",{configurable:true,enumerable:d.enumerable,get:d.get,set:function(v){if(!this.crossOrigin&&loc(v))this.crossOrigin="anonymous";d.set.call(this,v);}});}wrap(HTMLImageElement.prototype);wrap(HTMLMediaElement.prototype);var sa=Element.prototype.setAttribute;Element.prototype.setAttribute=function(k,v){if(String(k).toLowerCase()==="src"&&(this instanceof HTMLImageElement||this instanceof HTMLMediaElement)&&!this.crossOrigin&&loc(v))this.crossOrigin="anonymous";return sa.call(this,k,v);};})();</script>'
+                if ($html -match '(?i)<head(?:\s[^>]*)?>') {
+                    $html = [regex]::Replace($html, '(?i)(<head(?:\s[^>]*)?>)', "`$1$shim", 1)
+                } else {
+                    $html = $shim + $html
+                }
+                $bytes = [Text.Encoding]::UTF8.GetBytes($html)
+                $res.ContentLength64 = $bytes.Length
+                if ($req.HttpMethod -ne 'HEAD') { $res.OutputStream.Write($bytes, 0, $bytes.Length) }
+                return
+            }
+        }
+
         $fs = [IO.File]::Open($full, 'Open', 'Read', 'ReadWrite')
         try {
             $size = $fs.Length
