@@ -218,7 +218,7 @@
         if (document.visibilityState === "visible") layer.play().catch(() => {});
     };
 
-    const showScene = async (makeSource) => {
+    const showScene = async (makeSource, fps = SCENE_FPS) => {
         layer = document.createElement("div");
         layer.className = "lm-scene-layer";
         layer.setAttribute("aria-hidden", "true");
@@ -227,7 +227,7 @@
         const W = await loadEngine();
         if (layer !== el) return null;
         const inst = await W.mount(el, {
-            source: makeSource(W), fit: "cover", fps: SCENE_FPS, renderDpr: sceneDpr(),
+            source: makeSource(W), fit: "cover", fps, renderDpr: sceneDpr(),
             volume: 0, autoplay: document.visibilityState === "visible",
         });
         if (layer !== el) { inst.destroy({ releasePkgCache: true }); return null; }
@@ -437,7 +437,9 @@
                     if (isMain && !frame) captureVideoFrame(layer, key);
                 }
                 else if ((meta.kind === "scene" || meta.kind === "web") && isMain) {
-                    live(() => showScene(W => W.httpSource(base)));
+                    // webwallgl's <60 fps rAF throttle shares one timestamp across all
+                    // callbacks, starving web wallpapers with multiple rAF loops
+                    live(() => showScene(W => W.httpSource(base), meta.kind === "web" ? 60 : SCENE_FPS));
                 }
             }
         } else if (meta) {
