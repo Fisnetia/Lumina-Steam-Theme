@@ -1,0 +1,24 @@
+/* URL bar: always shown. Over library and other Steam pages the web view
+   stays mounted but hidden (inline display: none); its URL bar row is shown
+   above them instead of the spacer, with the reload button hidden. Its
+   address is rewritten to the Steam path by js/url-bar.js. */
+:root {
+    --lm-url-always: 1;
+}
+
+html {{ForceOpaqueBackground.ContentFrame}} > {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    order: -1;
+}
+
+html {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] > :not({{ForceOpaqueBackground.URLBar}}),
+html {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] {{ForceOpaqueBackground.ReloadButton}} {
+    display: none !important;
+}
+
+html {{ForceOpaqueBackground.LocalContentContainer}} {{ForceOpaqueBackground.URLBarReplacement}} {
+    display: none !important;
+}

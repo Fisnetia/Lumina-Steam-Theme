@@ -59,28 +59,38 @@ src/css/root-colors.css          取色器（强调色、玻璃着色）
 src/css/base.css                 所有窗口共用：变量、滚动条、菜单、变形菜单面板
 src/css/library.css              主窗口：标题栏、库、游戏详情页
 src/css/friends.css              好友列表和聊天窗口
-src/css/conditions/              各设置项对应的 CSS（背景、菜单动画、游戏栏等）
+src/css/conditions/              各设置项对应的 CSS（背景、玻璃材质、菜单动画等）
 src/js/menu-anim.js              菜单动画补丁：补播首次打开的动画、延迟隐藏弹窗播收回动画
 src/js/library-anim.js           库分类展开、折叠动画，切换游戏和打开分类页时的进场动画
 src/js/smooth-scroll.js          库游戏列表的鼠标滚轮平滑滚动
 src/js/morph-nav.js              变形菜单：导航、标题栏菜单、账户菜单
 src/js/url-bar.js                URL 栏胶囊换地址时的宽度动画
-src/js/nav-fit.js                导航胶囊按「导航位置」摆放；放不下时先在空隙里挪、再收紧，最后才换行
+src/js/nav-fit.js                导航胶囊按「导航位置」摆放：居中时放不下先在空隙里挪、再收紧，最后才换行；靠左 / 靠右放在第二行，与 URL 栏同一行
 src/js/bottom-bar.js             网页显示时底栏胶囊融合成通宽的矮底栏（FLIP 动画）
 src/js/liquid-glass.js           液态玻璃的折射滤镜（游戏栏、菜单面板、底栏和顶栏胶囊）
-src/js/wallpaper.js              壁纸设置卡片、WE 预览图墙，各窗口的图片 / 视频 / Scene / 网页壁纸
+src/js/wallpaper.js              壁纸设置卡片、WE 预览图墙，各窗口的图片 / 视频 / Scene / 网页壁纸；设置行显隐；同步桌面亚克力
 src/js/i18n.js                   中文界面下的设置页文字
 src/vendor/webwallgl/            Wallpaper Engine 场景渲染引擎（MIT，第三方，原样复制）
-plugin/lumina-extended/          可选配套插件：壁纸库列表、本机文件服务、共享背景静态图
+plugin/lumina-extended/          可选配套插件：壁纸库列表、本机文件服务、共享背景静态图、桌面亚克力
 tools/                           构建、打包、调试和测试脚本
 ```
 
 ## 设置
 
 - Millennium 的主题设置只支持下拉、开关、滑块（`"slider": { cssVariable, min, max, step, unit }`，值直接写成 `:root` 上的 CSS 变量）和取色器。键名和选项值是英文（也是配置键），中文由 `i18n.js` 在中文界面下改写显示文字。改键名会重置用户的设置。
-- 设置页画在主窗口里，每个设置项是 Steam 的 Field 组件，带 `data-condition="设置项名"`。Millennium 没有按条件显示设置项的功能：液态玻璃的两个滑块由"经典"对应的条件样式隐藏。
-- 下拉项通过条件 CSS 生效，脚本读条件 CSS 里的变量（如 `--lm-morph-nav`、`--lm-liquid`、`--lm-wall-mouse`）。主题样式表重载期间变量会短暂读不到，这时沿用上一次的值。
-- 标题栏等深色面板的不透明度是"不透明度 + 17%"，主窗口内的菜单面板是"不透明度 + 24%"；液态玻璃模式下两者改用"液态玻璃不透明度"。
+- 主题设置页画在主窗口里（Millennium 的设置路由），每个设置项是 Steam 的 Field 组件，带 `data-condition="设置项名"`。`i18n.js`、`wallpaper.js` 的设置部分在所有窗口里运行；下拉菜单可能是 `contextMenu`，也可能是 `DialogDropDownMenu`，两种都要处理。Steam 自己的设置窗口（`html.MillenniumWindow_Settings`）只有玻璃样式。
+- 标签页：背景 / 界面 / 动效。界面标签页的"玻璃材质"（键名 `Game list`）有液态玻璃和亚克力两个值，原来的"经典"已删除。
+- Millennium 没有按条件显示设置项的功能。`wallpaper.js` 在设置窗口里读当前下拉值，给相关的行设 `data-lm-hidden`：亚克力背景隐藏"模糊"，非壁纸背景隐藏"壁纸鼠标响应"和壁纸卡片，"桌面模糊"只在亚克力背景下显示，亚克力材质隐藏液态玻璃的两个滑块。条件 CSS 里有同样的隐藏规则（`:not([data-lm-hidden="0"])`），在脚本处理之前生效；下拉值刚改、样式表还没重载时以脚本为准。
+- 翻译和行的显隐都在 MutationObserver 回调里同步完成（绘制之前），回调末尾 `takeRecords()` 丢掉自己改动产生的记录，避免循环。
+- 下拉项通过条件 CSS 生效，脚本读条件 CSS 里的变量（如 `--lm-morph-nav`、`--lm-liquid`、`--lm-wall-mouse`、`--lm-acrylic-mode`）。主题样式表重载期间变量会短暂读不到，这时沿用上一次的值。
+- 同一个英文选项在不同设置里的中文不同（`Soft`：平滑滚动为"柔和"，桌面模糊为"轻模糊"；`Acrylic`：背景为"桌面亚克力"，玻璃材质为"亚克力"）。当前值按行查 `ROW_VALUES`，展开的菜单按整组选项匹配。 `i18n.js` 翻译当前值时把原来的键存进 `data-lm-value`，`wallpaper.js` 判断设置值时读它（显示的是英文时直接用文字），两边不再各维护一份中英对照。
+- 面板不透明度：液态玻璃材质下面板、菜单、胶囊用"液态玻璃不透明度"；亚克力材质下用"不透明度"，标题栏胶囊加 8%，底栏胶囊加 10%，菜单面板和网页底栏加 16%。
+
+## 玻璃材质
+
+- 悬浮布局（左右两栏圆角卡片、8px 间距、底栏胶囊、网页模式下合成的通宽底栏、页面底部留白）写在 `library.css`，两种材质共用。`list-liquid.css` / `list-acrylic.css` 只写材质：底色、模糊、边缘光、阴影。
+- 液态玻璃：低模糊加 SVG 折射滤镜（见下文"液态玻璃"），`--lm-liquid: 1`。
+- 亚克力：`backdrop-filter` 重模糊（面板 24px、胶囊 20px）加一层 SVG `feTurbulence` 噪点（data URI，透明度 3.5%），不用滤镜也不需要插件，`--lm-liquid: 0`。右侧大面板两种材质都不加 `backdrop-filter`，只用着色，避免整块视口模糊的开销。
 
 ## 壁纸
 
@@ -94,9 +104,28 @@ tools/                           构建、打包、调试和测试脚本
 
 ## 配套插件 lumina-extended
 
-- 后端是 Lua：读 Steam 的 `libraryfolders.vdf` 找到所有 `steamapps/workshop/content/431960`（以及 Wallpaper Engine 的 `projects/myprojects`），提供 `Status`、`List`、`SetStill`。主题通过 `Millennium.callServerMethod` 调用（主窗口里它在 `window.opener`，也就是 SharedJSContext 上）。
+- 后端是 Lua：读 Steam 的 `libraryfolders.vdf` 找到所有 `steamapps/workshop/content/431960`（以及 Wallpaper Engine 的 `projects/myprojects`），提供 `Status`、`List`、`SetStill`、`PatchAcrylic`。主题通过 `Millennium.callServerMethod` 调用（主窗口里它在 `window.opener`，也就是 SharedJSContext 上）。
 - 文件由后端用 Windows API 隐藏启动的 `backend/server.ps1`（PowerShell `HttpListener`）提供：只监听 `localhost`，网址必须带 128 位随机令牌，只允许访问壁纸库目录和共享目录内的文件，支持 Range；插件进程退出时它也退出。
 - 商店、社区是另一个网站，读不到客户端的 IndexedDB。主窗口每次换背景静态图时，通过 `SetStill` 把它交给插件，存在临时文件夹的 `lumina-extended-share`（文件服务的最后一个根目录）；网页从 `Status().still` 取地址，作为模糊加深的背景（至少 12px，只在壁纸模式下）。
+
+### 桌面亚克力
+
+"背景"选"亚克力"时，Steam 窗口透出桌面，由 Windows DWM 模糊。原先依赖 dwmx 插件，现在由 `lumina-extended` 提供：
+
+- 窗口要能透明：插件前端包住 `window.open`，亚克力背景下把 `createflags` 为 4114（对话框类，带 `ApplyBrowserScaleToDimensions`）或 2（隐藏弹窗）的窗口改成 274（`Composited | Resizable | Hidden`）；主窗口原生就是 274。是否亚克力由后端记录（`PatchAcrylic` 收到的开关），前端每 2 秒用 `AcrylicState` 取一次，`window.open` 里同步判断。其它背景下窗口保持原样，免去不必要的合成。
+- 后端 `PatchAcrylic`：用 `FindWindowExW` 按类名 `SDL_app`（Steam 的 CEF 顶层窗口）遍历，进程号属于 `steamwebhelper.exe` 的才处理（进程号缓存，遇到没见过的进程号才拍一次 ToolHelp 快照），再排除工具窗口、不激活窗口和没有标题栏 / 可调边框的窗口（菜单等弹窗），调用 `SetWindowCompositionAttribute(WCA_ACCENT_POLICY)`。轻模糊用 `ACCENT_ENABLE_BLURBEHIND`（flags 0），强模糊用 `ACCENT_ENABLE_ACRYLICBLURBEHIND`（flags 2，颜色需要非零透明度，Windows 11 上透明度为 0 时不生效）。同时设暗色、圆角，并把 `DWMWA_SYSTEMBACKDROP_TYPE` 设为无。已处理的窗口按句柄、参数和可见性记下，重复调用跳过：隐藏窗口处理一次，显示后的下一次调用再处理一次。单次调用约 2ms，传入开关和模式时不读配置，不到 1ms。
+- 实测（Windows 11 26300，主窗口）：只调 SWCA 就能透出桌面，暗色、`DWMSBT_NONE`、`DwmExtendFrameIntoClientArea(0)` 加不加、先后顺序都不影响画面；不调 SWCA 时是黑底。
+- 参数 `{ enabled, mode }`，缺省时读 Millennium 的 `config.json`（当前主题为 lumina 时的 `Backdrop` 和 `Desktop blur`）。传入的值优先：切换设置后 Millennium 写配置可能晚于样式表重载。
+- 调用时机：插件前端加载后 0.5 / 2 / 5 秒各一次；新开窗口后 300ms 和 1500ms 各一次，连续打开的窗口合并计时（新窗口要等显示后才能处理）；主窗口 `wallpaper.js` 在背景模式或 `--lm-acrylic-mode` 变化时调用；设置窗口里改"桌面模糊"下拉时立即调用。离开亚克力背景时还原所有处理过的窗口，插件卸载时也会还原。
+- 主题这边：`backdrop-acrylic.css` 把 `--lm-base-bg` 设为透明，主窗口外框、好友窗口、设置窗口的底色和背景层都去掉。
+
+## 标题栏导航位置
+
+- 导航胶囊 `SuperNavBar` 在 `TopBar` 里，URL 栏在下面的 `BrowserWrapper` 里，自成一行。`ContentFrame` 是 `overflow: hidden`，URL 栏移不到上面去。
+- 靠左 / 靠右（`html.lm-nav-row`）：第二行借用下面那一行，网页上是 URL 栏那一行，库等页面是 `LocalContentContainer` 顶部的占位 `URLBarReplacement`（原本 12px，加高到胶囊高度）。导航胶囊绝对定位到这一行的一端（`z-index` 高于后面的 `ContentFrame`，否则点不到），URL 栏靠另一端，最大宽度扣掉胶囊宽度 `--lm-nav-w`。
+- URL 栏固定为胶囊高度（32px）；Extendium 的扩展按钮 31px，其中 7px 是透明内边距，裁掉 1px 看不出来。
+- URL 栏常驻（`url-always.css`）：库等页面上网页视图并没有卸载，只是 `BrowserWrapper` 带内联 `display: none`，里面的原生 URL 栏还在，地址是一个内部追踪页 `data:text/html,…<!--tracking:<id>:/library/home-->`。常驻时把这个 `BrowserWrapper` 显示出来，只留 URL 栏（`order: -1` 放到库内容上面，`height: auto` 去掉 Steam 给的满高，网页视图和刷新按钮隐藏），并隐藏库的占位行 `URLBarReplacement`。`url-bar.js` 在绘制前把追踪地址改写成 `steam://` 加路径（它的 MutationObserver 建在宽度动画之前，先改写再量宽度）；点击地址时 Steam 照常复制并弹出"已复制！"，随后把剪贴板换成 `steam://` 路径。
+- URL 栏末尾的笔按钮（`url-bar.js`）：点了把地址换成输入框，回车跳转，Esc 或失焦取消。网页地址用 `MainWindowInstance.m_Navigator.SteamWeb(url)` 在主窗口的网页视图里打开（没写协议时补 `https://`）；`steam://` 加库、下载、控制台等路由的路径走 `SteamUIStore.Navigate(路径)`；其它 `steam://` 链接交给 `SteamClient.URL.ExecuteSteamURL`。输入框的按键不往上冒泡，免得触发 Steam 的快捷键；按钮的 mousedown 取消默认行为，点它关闭时输入框不会先失焦。
 
 ## 菜单
 
@@ -126,14 +155,15 @@ Millennium 在 Steam 菜单里的两项（Millennium、Millennium Library Manage
 
 - 折射是 SVG `feDisplacementMap`，作为 `backdrop-filter: url(#id)` 使用，位移图按面板尺寸和圆角用 canvas 生成：边缘一圈（折射带）里的像素从更靠内的位置取样，越靠边越强。
 - 位移必须小于折射带宽度的一半左右（平方衰减时边缘位移 ≤ 0.45 × 宽度），否则取样位置不再单调，画面会在折射带里对折，出现一条接缝。往外取样不可行：`backdrop-filter` 取不到元素外的画面，只会拉长边缘像素。
-- 色散：红、绿、蓝三个通道分别位移（红色用满强度，绿、蓝各减 14%），再相加合成。背景已经模糊，单靠色散几乎看不出彩边，所以位移图的 B 通道另画一条贴边 4px 的细带，在带内把色散后的画面提高饱和度和亮度、略加蓝色，彩边的颜色仍取自背后的内容。
-- 底栏（液态玻璃模式）：`BottomBarContainer` 绝对定位贴底，三个按钮各是一个胶囊、各有一个滤镜，页面内容和左侧游戏栏都延伸到胶囊下面滚动；库首页和游戏详情页的滚动容器、游戏列表的 `innerScrollContainer` 加了底部留白（react-virtualized 不会把多出的滚动距离拉回去）。商店、社区是盖在主窗口上的网页视图，主窗口画不到它们上面，所以 `BrowserWrapper` 可见时内容区仍停在胶囊上方。`BrowserWrapper` 在库页也挂在 DOM 里，只是带内联 `display: none`，判断时要排除。
+- 色散：红、绿、蓝三个通道分别位移（红色用满强度，绿、蓝各减 14%），再相加合成。相加时各通道的透明度设为 1，合成后再乘上红色那一份的透明度；如果带着各自的透明度相加，半透明背景（桌面亚克力）上透明度会变成三倍、颜色变成三分之一，面板发黑。背景已经模糊，单靠色散几乎看不出彩边，所以位移图的 B 通道另画一条贴边 4px 的细带，在带内把色散后的画面提高饱和度和亮度、略加蓝色，彩边的颜色仍取自背后的内容。
+- 底栏（布局在 `library.css`，两种材质共用）：`BottomBarContainer` 绝对定位贴底，三个按钮各是一个胶囊，液态玻璃下各有一个滤镜，页面内容和左侧游戏栏都延伸到胶囊下面滚动；库首页和游戏详情页的滚动容器、游戏列表的 `innerScrollContainer` 加了底部留白（react-virtualized 不会把多出的滚动距离拉回去）。商店、社区是盖在主窗口上的网页视图，主窗口画不到它们上面，所以 `BrowserWrapper` 可见时内容区仍停在胶囊上方。`BrowserWrapper` 在库页也挂在 DOM 里，只是带内联 `display: none`，判断时要排除。
 - 面板尺寸变化时，先在 ResizeObserver 回调里把现有位移图拉伸到新尺寸（只改几个属性），尺寸稳定 120ms 后再按新尺寸重画。每帧重画并解码位移图会掉帧：菜单变形时实测平均帧耗时 21～25ms，拉伸只要 14～18ms，接近只有模糊时的水平。另有每秒一次的检查，补上窗口隐藏期间错过的尺寸变化。
+- 每秒的检查只读一次样式变量（开关、折射强度、圆角），只负责发现新挂载的元素和设置变化；已挂载面板的尺寸变化交给 ResizeObserver，窗口重新可见或样式表重新加载时整体重建一次。
 
 ## 库
 
 - 游戏列表是 react-virtualized 虚拟列表：每行绝对定位，只渲染看得到的部分，行会复用。展开分类时 `library-anim.js` 监听分类标题去掉 `SingleLine` 类的那一刻，给下面的行加 `lm-row-in`。
 - 折叠分两段：Steam 响应折叠图标上的 `click`，脚本先拦下点击让游戏淡出，再重放点击；折叠后下面的行从原位置（`--lm-shift`）滑上来。
 - 双击：原生 Steam 双击图标会触发 click、click、dblclick，切换三次。主题只吞掉图标上的 `dblclick`；不能按点击计数（`detail` ≥ 2）去吞，鼠标不动时计数会一直累加。
-- 平滑滚动：Steam 的鼠标滚轮一格直接跳 100px，`smooth-scroll.js` 接管游戏列表的滚轮，每帧把 `scrollTop` 往目标推一段；用 `wheelDelta` 是否为 120 的倍数区分滚轮和触控板。连续滚动时主线程耗时约为原生的 2 倍多（几乎都是 Steam 的样式重算），但掉帧更少。
+- 平滑滚动：Steam 的鼠标滚轮一格直接跳 100px，`smooth-scroll.js` 接管游戏列表的滚轮，每帧把 `scrollTop` 往目标推一段；用 `wheelDelta` 是否为 120 的倍数区分滚轮和触控板。连续滚动时主线程耗时约为原生的 2 倍多（几乎都是 Steam 的样式重算），但掉帧更少。 阻塞式（非 passive）的滚轮监听挂在游戏列表元素上，而不是整个文档，其它地方的滚动不用等主线程；列表元素由文档上的 passive `mouseover` / `wheel` 监听在指针到达时找到并绑定（列表重建后第一格滚轮是原生滚动）。
 - 切换游戏、打开分类页时，Steam 会在路由变化后的一帧或更久才渲染完，所以先把页面藏起来（`lm-page-wait`），等内容变化后连续两帧按时再播放进场动画。

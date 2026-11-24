@@ -149,7 +149,7 @@ html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
    (filled in by the backdrop conditions), glass panels over it. */
 html.MillenniumWindow_Settings,
 html.MillenniumWindow_Settings body {
-    background: #07090f !important;
+    background: var(--lm-base-bg, #07090f) !important;
 }
 
 html.MillenniumWindow_Settings body {
@@ -205,6 +205,39 @@ html.MillenniumWindow_Settings .SettingsDialogFatButton:hover {
     background: var(--lm-hover) !important;
 }
 
+/* a row Steam builds without Field (Downloads: game update timing) */
+html.MillenniumWindow_Settings {{FakeContainer}} {
+    background: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm);
+}
+
+/* segmented choices (Library: UI element size) */
+html.MillenniumWindow_Settings .Shared_Radio_Group {
+    gap: 2px;
+    padding: 3px;
+    background: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm);
+}
+
+html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton {
+    background: transparent !important;
+    background-image: none !important;
+    border-radius: calc(var(--lm-r-sm) - 2px) !important;
+    box-shadow: none !important;
+    color: var(--lm-text-dim) !important;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton:hover {
+    background: var(--lm-hover) !important;
+    color: var(--lm-text) !important;
+}
+
+html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton.Active {
+    background: var(--lm-selected) !important;
+    color: #fff !important;
+}
+
 /* ---- Title bar buttons ---- */
 
 .title-area-highlight {
@@ -225,6 +258,10 @@ html.MillenniumWindow_Settings .SettingsDialogFatButton:hover {
 }
 
 /* ---- Wallpaper card and gallery (js/wallpaper.js) ---- */
+
+[data-lm-hidden="1"] {
+    display: none !important;
+}
 
 /* full row width (the cloned slider row sizes this column to the slider) */
 [data-lm-wallpaper] .FieldRightColumn,

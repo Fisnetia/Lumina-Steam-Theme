@@ -25,7 +25,7 @@
     const MAX_FILE_MB = 600;
     const SCENE_FPS = 30;
     const FRAME_SIDE = 1280, FRAME_DELAY = 2500;
-    const CONDITION = "Backdrop", WALLPAPER_VALUES = ["Wallpaper", "壁纸"];
+    const CONDITION = "Backdrop";
     const PLUGIN = "lumina-extended";
     const FRAME = "{{ForceOpaqueBackground.OuterFrame}}";
     const isMain = html.classList.contains("MillenniumWindow_MainSteamWindow");
@@ -797,34 +797,98 @@
         return r;
     };
 
-    const backdropIsWallpaper = (anchor) => {
-        const mode = readBackdropMode();
-        if (mode) return mode === "wallpaper";
-        const shown = anchor.querySelector(".DialogDropDown_CurrentDisplay");
-        return !shown || WALLPAPER_VALUES.includes(shown.textContent.trim());
+    // A dropdown row's value as its config key: English text as shown, or the
+    // key js/i18n.js keeps in data-lm-value when it shows a translation
+    const rowValue = (row) => {
+        const shown = row && row.querySelector(".DialogDropDown_CurrentDisplay");
+        if (!shown) return "";
+        const text = shown.textContent.trim();
+        return /^[ -~]*$/.test(text) ? text : (shown.dataset.lmValue || "");
     };
 
-    const mountCard = () => {
-        const anchor = document.querySelector(`[data-condition="${CONDITION}"]`);
-        if (card && card.isConnected) {
-            if (anchor) card.style.display = backdropIsWallpaper(anchor) ? "" : "none";
-            return;
+    const BACKDROPS = { Wallpaper: "wallpaper", Aurora: "aurora", Acrylic: "acrylic" };
+    const selectedBackdrop = (anchor) => BACKDROPS[rowValue(anchor)] || readBackdropMode() || "wallpaper";
+
+    const setHidden = (el, hidden) => {
+        if (!el) return;
+        const val = hidden ? "1" : "0";
+        if (el.dataset.lmHidden !== val) el.dataset.lmHidden = val;
+    };
+
+    let lastSettingsBlur = "";
+    const syncSettings = () => {
+        const backdropAnchor = document.querySelector(`[data-condition="${CONDITION}"]`);
+        if (backdropAnchor) {
+            const mode = selectedBackdrop(backdropAnchor);
+            setHidden(document.querySelector('[data-condition="Blur"]'), mode === "acrylic");
+            setHidden(document.querySelector('[data-condition="Wallpaper mouse"]'), mode !== "wallpaper");
+            const desktopBlurRow = document.querySelector('[data-condition="Desktop blur"]');
+            setHidden(desktopBlurRow, mode !== "acrylic");
+            if (desktopBlurRow && mode === "acrylic") {
+                const target = { Strong: "acrylic", Soft: "blur" }[rowValue(desktopBlurRow)] || "";
+                if (target && target !== lastSettingsBlur) {
+                    const prev = lastSettingsBlur;
+                    lastSettingsBlur = target;
+                    if (prev) {
+                        callPlugin("PatchAcrylic", { spec: JSON.stringify({ enabled: true, mode: target }) }).catch(() => {});
+                    }
+                }
+            }
+            if (card && card.isConnected) {
+                setHidden(card, mode !== "wallpaper");
+            } else if (!document.querySelector("[data-lm-wallpaper]")) {
+                const slider = document.querySelector("[data-condition] .MillenniumThemeSliderValue");
+                const c = buildCard((slider && slider.closest("[data-condition]")) || backdropAnchor);
+                if (c) {
+                    card = c;
+                    setHidden(card, mode !== "wallpaper");
+                    backdropAnchor.after(card);
+                    refreshCard();
+                }
+            }
+        } else {
+            lastSettingsBlur = "";
+            if (card && card.isConnected) {
+                card.remove();
+                card = null;
+            }
         }
-        if (document.querySelector("[data-lm-wallpaper]") || !anchor) return;
-        const slider = document.querySelector("[data-condition] .MillenniumThemeSliderValue");
-        const c = buildCard((slider && slider.closest("[data-condition]")) || anchor);
-        if (!c) return;
-        card = c;
-        card.style.display = backdropIsWallpaper(anchor) ? "" : "none";
-        anchor.after(card);
-        refreshCard();
+
+        const glassAnchor = document.querySelector('[data-condition="Game list"]');
+        if (glassAnchor) {
+            const value = rowValue(glassAnchor);
+            const isAcrylic = value === "Acrylic", isLiquid = value === "Liquid glass";
+            if (isAcrylic || isLiquid) {
+                setHidden(document.querySelector('[data-condition="Liquid opacity"]'), isAcrylic);
+                setHidden(document.querySelector('[data-condition="Refraction"]'), isAcrylic);
+            }
+        }
     };
 
     // Follows the backdrop mode: the moving layer is added on entering
-    // wallpaper mode and removed on leaving it. While stylesheets reload the
+    // wallpaper mode and removed on leaving it, and DWM desktop acrylic is
+    // synced through the companion plugin. While stylesheets reload the
     // mode reads empty for a moment, so leaving is confirmed after a delay.
     let leaving = 0;
+    let lastAcrylicKey = "";
+    const readAcrylicMode = () => {
+        const v = getComputedStyle(html).getPropertyValue("--lm-acrylic-mode").trim();
+        return v === "acrylic" ? "acrylic" : "blur";
+    };
+    const syncAcrylic = () => {
+        if (!isMain) return;
+        const mode = readBackdropMode();
+        if (!mode) return;
+        const on = mode === "acrylic";
+        const blurMode = on ? readAcrylicMode() : "blur";
+        const key = on ? blurMode : "off";
+        if (key === lastAcrylicKey) return;
+        lastAcrylicKey = key;
+        callPlugin("PatchAcrylic", { spec: JSON.stringify({ enabled: on, mode: blurMode }) })
+            .catch(() => { if (lastAcrylicKey === key) lastAcrylicKey = ""; });
+    };
     const syncLayer = () => {
+        syncAcrylic();
         if (wallpaperMode()) {
             clearTimeout(leaving); leaving = 0;
             if (!layer && liveKind && !state.error) { liveKind = false; apply(); }
@@ -835,13 +899,20 @@
     };
 
     // The settings page and the backdrop frame are re-rendered by React;
-    // stylesheet links change in head.
+    // stylesheet links change in head. syncSettings runs before paint so
+    // switching tabs or dropdown options updates dependent rows immediately.
     let pending = 0;
-    const schedule = () => {
+    const scheduleLayer = () => {
         if (pending) return;
-        pending = setTimeout(() => { pending = 0; mountCard(); syncLayer(); }, 250);
+        pending = setTimeout(() => { pending = 0; syncSettings(); syncLayer(); }, 250);
     };
-    new MutationObserver(schedule).observe(html, { childList: true, subtree: true, characterData: true });
-    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") schedule(); }, true);
-    mountCard();
+    const mo = new MutationObserver(() => {
+        syncSettings();
+        mo.takeRecords();   // drop our own card / attribute mutations
+        scheduleLayer();
+    });
+    mo.observe(html, { childList: true, subtree: true, characterData: true });
+    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") scheduleLayer(); }, true);
+    syncSettings();
+    syncAcrylic();
 })();

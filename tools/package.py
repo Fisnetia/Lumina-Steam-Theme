@@ -27,11 +27,12 @@ NOTES = """Lumina {version}（Steam 主题，需要 Millennium）
      插件：启用 Lumina Extended（可选，见下）
 
 插件 Lumina Extended（可选）
-  用来直接读取 Wallpaper Engine 的壁纸库：Scene、视频、网页壁纸都不用复制文件。
+  直接读取 Wallpaper Engine 的壁纸库：Scene、视频、网页壁纸都不用复制文件；
+  在商店、社区页面后显示当前壁纸；背景选“桌面亚克力”时让 Steam 窗口透出桌面。
   不装也能用：图片、视频和 Scene 壁纸可以在主题设置里手动选择。
 
 设置
-  在 Millennium 的主题设置里，分为背景 / 玻璃 / 动效三个标签页。
+  在 Millennium 的主题设置里，分为背景 / 界面 / 动效三个标签页。
   默认背景是壁纸模式，用自带的默认壁纸；可以换成自己的图片、视频或 WE 壁纸。
 
 说明

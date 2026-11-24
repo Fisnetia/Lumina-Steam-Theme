@@ -1,20 +1,28 @@
-/* Windows acrylic from the dwmx plugin: every layer must be transparent. */
+/* Windows desktop acrylic via the lumina-extended plugin: every root layer stays transparent. */
 :root {
     --lm-backdrop-mode: acrylic;
     --lm-backdrop: none;
-    --lm-menu-alpha: 62%;
+    --lm-base-bg: transparent;
 }
 
 html,
 body,
-{{ForceOpaqueBackground.OuterFrame}},
-html.MillenniumWindow_Settings,
-html.MillenniumWindow_Settings body {
+html {{ForceOpaqueBackground.OuterFrame}},
+html.friendsui-container.friendsui-container,
+html.friendsui-container.friendsui-container body,
+html.MillenniumWindow_Settings.MillenniumWindow_Settings,
+html.MillenniumWindow_Settings.MillenniumWindow_Settings body {
     background: transparent !important;
 }
 
-{{ForceOpaqueBackground.OuterFrame}}::before,
-html.friendsui-container body::before,
-html.MillenniumWindow_Settings body::before {
+html {{ForceOpaqueBackground.OuterFrame}}::before,
+html.friendsui-container.friendsui-container body::before,
+html.MillenniumWindow_Settings.MillenniumWindow_Settings body::before {
+    display: none !important;
+}
+
+/* desktop acrylic blur is controlled by Windows DWM */
+[data-condition="Blur"]:not([data-lm-hidden="0"]),
+[data-condition="Wallpaper mouse"]:not([data-lm-hidden="0"]) {
     display: none !important;
 }

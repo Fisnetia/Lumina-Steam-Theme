@@ -8,3 +8,8 @@
         radial-gradient(45% 40% at 28% 88%, color-mix(in srgb, var(--lm-accent, #7cc4ff) 35%, transparent), transparent 72%),
         linear-gradient(160deg, #132038 0%, #0c1222 55%, #080b16 100%);
 }
+
+[data-condition="Wallpaper mouse"]:not([data-lm-hidden="0"]),
+[data-condition="Desktop blur"]:not([data-lm-hidden="0"]) {
+    display: none !important;
+}

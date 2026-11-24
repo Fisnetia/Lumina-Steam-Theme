@@ -1,12 +1,14 @@
 --[[
-  lumina-extended: lists the Wallpaper Engine library and serves its files to the
-  Lumina theme through a local server (server.ps1).
+  lumina-extended: companion plugin for the Lumina theme.
+  - Lists the Wallpaper Engine library and serves its files through server.ps1
+  - Shares a backdrop still for Store / Community web pages
+  - Applies Windows DWM desktop acrylic to Steam windows in Acrylic backdrop mode
 
   Status() -> { base = "http://localhost:<port>/<token>/" } | { starting = true } | { error }
   List()   -> [ { id = "<root>/<folder>", title, type, file, preview } ]
-  SetStill({ data = <base64 JPEG> }) -> { ok }: a still of the client's backdrop,
-           served as Status().still for web pages (Store, Community), which
-           can't read the client's storage
+  SetStill({ data = <base64 JPEG> }) -> { ok }
+  PatchAcrylic({ enabled = <bool?> }) -> { ok, enabled, patched }
+  AcrylicState() -> { enabled }: the last state PatchAcrylic was asked for
 ]]
 
 local logger = require("logger")
@@ -22,21 +24,92 @@ typedef struct {
     void *hStdInput, *hStdOutput, *hStdError;
 } LMWE_STARTUPINFOW;
 typedef struct { void *hProcess, *hThread; uint32_t dwProcessId, dwThreadId; } LMWE_PROCESS_INFORMATION;
+typedef struct {
+    uint32_t dwSize;
+    uint32_t cntUsage;
+    uint32_t th32ProcessID;
+    uintptr_t th32DefaultHeapID;
+    uint32_t th32ModuleID;
+    uint32_t cntThreads;
+    uint32_t th32ParentProcessID;
+    int32_t pcPriClassBase;
+    uint32_t dwFlags;
+    uint16_t szExeFile[260];
+} LMWE_PROCESSENTRY32W;
+typedef struct {
+    int32_t nAccentState;
+    int32_t nFlags;
+    uint32_t nColor;
+    int32_t nAnimationId;
+} LMWE_ACCENTPOLICY;
+typedef struct {
+    int32_t nAttribute;
+    void *pData;
+    size_t ulDataSize;
+} LMWE_WINDOWCOMPOSITIONATTRIBDATA;
+
+typedef struct {
+    int32_t cxLeftWidth;
+    int32_t cxRightWidth;
+    int32_t cyTopHeight;
+    int32_t cyBottomHeight;
+} LMWE_MARGINS;
+
 int CreateProcessW(const uint16_t *app, uint16_t *cmd, void *pa, void *ta, int inherit, uint32_t flags,
                    void *env, const uint16_t *cwd, LMWE_STARTUPINFOW *si, LMWE_PROCESS_INFORMATION *pi);
 int MultiByteToWideChar(uint32_t cp, uint32_t flags, const char *s, int n, uint16_t *w, int wn);
+int WideCharToMultiByte(uint32_t cp, uint32_t flags, const uint16_t *w, int wn, char *s, int sn,
+                        const char *def, int *used);
 int TerminateProcess(void *h, uint32_t code);
 int CloseHandle(void *h);
 uint32_t GetCurrentProcessId(void);
 int CreateDirectoryW(const uint16_t *path, void *sa);
 int MoveFileExW(const uint16_t *src, const uint16_t *dst, uint32_t flags);
+void *CreateToolhelp32Snapshot(uint32_t flags, uint32_t pid);
+int Process32FirstW(void *snap, LMWE_PROCESSENTRY32W *entry);
+int Process32NextW(void *snap, LMWE_PROCESSENTRY32W *entry);
+void *FindWindowExW(void *parent, void *after, const uint16_t *cls, const uint16_t *title);
+uint32_t GetWindowThreadProcessId(void *hwnd, uint32_t *pid);
+int GetWindowTextW(void *hwnd, uint16_t *buf, int max);
+int GetClassNameW(void *hwnd, uint16_t *buf, int max);
+int IsWindowVisible(void *hwnd);
+int32_t GetWindowLongW(void *hwnd, int index);
+int SetWindowCompositionAttribute(void *hwnd, LMWE_WINDOWCOMPOSITIONATTRIBDATA *data);
+int32_t DwmSetWindowAttribute(void *hwnd, uint32_t attr, const void *val, uint32_t size);
+int32_t DwmExtendFrameIntoClientArea(void *hwnd, const LMWE_MARGINS *margins);
 long BCryptGenRandom(void *alg, uint8_t *buf, uint32_t n, uint32_t flags);
 ]]
-local kernel32 = ffi.C
+local kernel32 = ffi.load("kernel32")
 local bcrypt = ffi.load("bcrypt")
+local ok_u32, user32 = pcall(ffi.load, "user32")
+local ok_dwm, dwmapi = pcall(ffi.load, "dwmapi")
+if not ok_u32 then user32 = nil end
+if not ok_dwm then dwmapi = nil end
+local has_swca = user32 ~= nil and pcall(function() return user32.SetWindowCompositionAttribute end)
+local has_dwma = dwmapi ~= nil and pcall(function() return dwmapi.DwmSetWindowAttribute end)
+local has_dwm_ext = dwmapi ~= nil and pcall(function() return dwmapi.DwmExtendFrameIntoClientArea end)
 
 local CREATE_NO_WINDOW = 0x08000000
 local MOVEFILE_REPLACE_EXISTING = 0x1
+local TH32CS_SNAPPROCESS = 0x00000002
+local INVALID_HANDLE = ffi.cast("void*", ffi.cast("intptr_t", -1))
+local WCA_ACCENT_POLICY = 19
+local ACCENT_DISABLED = 0
+local ACCENT_ENABLE_BLURBEHIND = 3
+local ACCENT_ENABLE_ACRYLICBLURBEHIND = 4
+local ACCENT_FLAG_GRADIENT = 0x02   -- acrylic: use nColor as the tint
+local DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+local DWMWA_WINDOW_CORNER_PREFERENCE = 33
+local DWMWA_SYSTEMBACKDROP_TYPE = 38
+local DWMWCP_ROUND = 2
+local DWMSBT_NONE = 1
+local GWL_STYLE = -16
+local GWL_EXSTYLE = -20
+local WS_THICKFRAME = 0x00040000
+local WS_CAPTION = 0x00C00000
+local WS_EX_TOOLWINDOW = 0x00000080
+local WS_EX_NOACTIVATE = 0x08000000
+local DEFAULT_ACRYLIC_COLOR = 0x55221712   -- ABGR: ~33% #121722 (non-zero alpha required on Win11)
 local bit = require("bit")
 local WALLPAPER_ENGINE = "431960"
 
@@ -228,6 +301,218 @@ function List()
     return json.encode(items)
 end
 
+-- Windows DWM desktop acrylic (64-bit safe FFI, callback-free window walk)
+
+local proc_entry = ffi.new("LMWE_PROCESSENTRY32W")
+local name_buf = ffi.new("char[260]")
+local wide_buf = ffi.new("uint16_t[260]")
+local pid_buf = ffi.new("uint32_t[1]")
+local accent_policy = ffi.new("LMWE_ACCENTPOLICY")
+local comp_data = ffi.new("LMWE_WINDOWCOMPOSITIONATTRIBDATA")
+comp_data.nAttribute = WCA_ACCENT_POLICY
+comp_data.pData = ffi.cast("void*", accent_policy)
+comp_data.ulDataSize = ffi.sizeof(accent_policy)
+local corner_pref = ffi.new("int32_t[1]", DWMWCP_ROUND)
+local dark_mode = ffi.new("int32_t[1]", 1)
+local backdrop_type = ffi.new("int32_t[1]", DWMSBT_NONE)
+local margins_zero = ffi.new("LMWE_MARGINS", 0, 0, 0, 0)
+
+local acrylic_active = false
+local acrylic_wanted = false   -- what the theme last asked for; read by the frontend
+local acrylic_mode = ""
+local patched_hwnds = {}   -- hwnd string -> "<mode>:<color>:<flags>:<v|h>" last applied
+
+local function narrow(wstr)
+    local n = kernel32.WideCharToMultiByte(65001, 0, wstr, -1, name_buf, 260, nil, nil)
+    return n > 0 and ffi.string(name_buf) or ""
+end
+
+local function read_acrylic_config()
+    local raw = read_file(millennium.steam_path() .. "\\millennium\\config\\config.json")
+    if not raw then return false, "blur" end
+    local ok, cfg = pcall(json.decode, raw)
+    if not ok or type(cfg) ~= "table" then return false, "blur" end
+    local themes = cfg.themes
+    if type(themes) ~= "table" or themes.activeTheme ~= "lumina" then return false, "blur" end
+    local conds = type(themes.conditions) == "table" and themes.conditions.lumina
+    if type(conds) ~= "table" then return false, "blur" end
+    local enabled = conds.Backdrop == "Acrylic"
+    local mode = conds["Desktop blur"] == "Strong" and "acrylic" or "blur"
+    return enabled, mode
+end
+
+-- Steam's CEF top-level windows (main, friends, chat, settings) share this class
+local SDL_CLASS = wide("SDL_app")
+local webhelper_pids = {}   -- pid -> true | false
+
+local function refresh_pids()
+    webhelper_pids = {}
+    local snap = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+    if snap == INVALID_HANDLE then return end
+    pcall(function()
+        proc_entry.dwSize = ffi.sizeof(proc_entry)
+        local more = kernel32.Process32FirstW(snap, proc_entry)
+        while more ~= 0 do
+            if narrow(proc_entry.szExeFile):lower() == "steamwebhelper.exe" then
+                webhelper_pids[tonumber(proc_entry.th32ProcessID)] = true
+            end
+            more = kernel32.Process32NextW(snap, proc_entry)
+        end
+    end)
+    kernel32.CloseHandle(snap)
+end
+
+-- unknown pids trigger at most one process snapshot per walk
+local function is_webhelper(pid, walk)
+    local known = webhelper_pids[pid]
+    if known ~= nil then return known end
+    if not walk.refreshed then
+        walk.refreshed = true
+        refresh_pids()
+    end
+    known = webhelper_pids[pid] == true
+    webhelper_pids[pid] = known
+    return known
+end
+
+local function patch_hwnd(hwnd, enabled, mode, color, flags)
+    local hkey = tostring(hwnd)
+    if not enabled then
+        if not patched_hwnds[hkey] then return false, 0 end
+        if has_dwma then
+            backdrop_type[0] = DWMSBT_NONE
+            dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, backdrop_type, 4)
+        end
+        if has_dwm_ext then dwmapi.DwmExtendFrameIntoClientArea(hwnd, margins_zero) end
+        if has_swca then
+            accent_policy.nAccentState = ACCENT_DISABLED
+            accent_policy.nFlags = 0
+            accent_policy.nColor = 0
+            accent_policy.nAnimationId = 0
+            user32.SetWindowCompositionAttribute(hwnd, comp_data)
+        end
+        patched_hwnds[hkey] = nil
+        return true, 0
+    end
+
+    -- a hidden window is patched once, then again once it is shown
+    local vis = user32.IsWindowVisible(hwnd) ~= 0
+    local skey = string.format("%s:%s:%s:%s", mode, tostring(color or ""), tostring(flags or ""), vis and "v" or "h")
+    if patched_hwnds[hkey] == skey then
+        return true, 0
+    end
+
+    if has_dwma then
+        dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, dark_mode, 4)
+        dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, corner_pref, 4)
+        backdrop_type[0] = DWMSBT_NONE
+        dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, backdrop_type, 4)
+    end
+    if has_dwm_ext then
+        dwmapi.DwmExtendFrameIntoClientArea(hwnd, margins_zero)
+    end
+    if not has_swca then return false, -1 end
+    accent_policy.nAccentState = mode == "blur" and ACCENT_ENABLE_BLURBEHIND or ACCENT_ENABLE_ACRYLICBLURBEHIND
+    accent_policy.nFlags = flags or (mode == "blur" and 0 or ACCENT_FLAG_GRADIENT)
+    accent_policy.nColor = color or (mode == "blur" and 0 or DEFAULT_ACRYLIC_COLOR)
+    accent_policy.nAnimationId = 0
+    local ok = user32.SetWindowCompositionAttribute(hwnd, comp_data) ~= 0
+    if ok then patched_hwnds[hkey] = skey end
+    return ok, ok and 0 or -1
+end
+
+local function is_app_window(hwnd)
+    local style = user32.GetWindowLongW(hwnd, GWL_STYLE)
+    local ex = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+    if bit.band(ex, WS_EX_TOOLWINDOW) ~= 0 or bit.band(ex, WS_EX_NOACTIVATE) ~= 0 then
+        return false
+    end
+    return bit.band(style, WS_THICKFRAME) ~= 0 or bit.band(style, WS_CAPTION) ~= 0
+end
+
+local function apply_acrylic(enabled, opts)
+    if not user32 then return 0, nil, "user32 unavailable" end
+    local walk = {}
+    local mode = (opts and opts.mode) or "blur"
+    local color = opts and opts.color or nil
+    local flags = opts and opts.flags or nil
+    local inspect = opts and opts.inspect or false
+    local info = inspect and {} or nil
+    local patched = 0
+    local hwnd = user32.FindWindowExW(nil, nil, SDL_CLASS, nil)
+    local guard = 0
+    while hwnd ~= nil and guard < 4096 do
+        guard = guard + 1
+        user32.GetWindowThreadProcessId(hwnd, pid_buf)
+        if is_webhelper(tonumber(pid_buf[0]), walk) and (not enabled or is_app_window(hwnd)) then
+            local ok, hr = patch_hwnd(hwnd, enabled, mode, color, flags)
+            if ok then patched = patched + 1 end
+            if inspect and user32.IsWindowVisible(hwnd) ~= 0 then
+                local tn = user32.GetWindowTextW(hwnd, wide_buf, 260)
+                local title = tn > 0 and narrow(wide_buf) or ""
+                local cn = user32.GetClassNameW(hwnd, wide_buf, 260)
+                local cls = cn > 0 and narrow(wide_buf) or ""
+                info[#info + 1] = {
+                    pid = tonumber(pid_buf[0]),
+                    title = title,
+                    cls = cls,
+                    style = user32.GetWindowLongW(hwnd, GWL_STYLE),
+                    ex = user32.GetWindowLongW(hwnd, GWL_EXSTYLE),
+                    ok = ok,
+                    hr = hr,
+                }
+            end
+        end
+        hwnd = user32.FindWindowExW(nil, hwnd, SDL_CLASS, nil)
+    end
+    local prev = acrylic_active
+    local prev_mode = acrylic_mode
+    if not enabled then patched_hwnds = {} end
+    acrylic_active = enabled and patched > 0
+    acrylic_mode = acrylic_active and mode or ""
+    if acrylic_active ~= prev or acrylic_mode ~= prev_mode then
+        logger:info(string.format("[lumina-extended] desktop acrylic %s (%d windows, mode=%s)",
+            acrylic_active and "enabled" or "disabled", patched, mode))
+    end
+    return patched, info, nil
+end
+
+function PatchAcrylic(spec)
+    if type(spec) == "table" and type(spec.spec) == "string" then spec = spec.spec end
+    local opts = {}
+    if type(spec) == "string" and #spec > 0 then
+        local ok, parsed = pcall(json.decode, spec)
+        if ok and type(parsed) == "table" then opts = parsed end
+    elseif type(spec) == "table" then
+        opts = spec
+    elseif type(spec) == "boolean" then
+        opts.enabled = spec
+    end
+    -- passed values take precedence over config.json
+    local enabled, mode = opts.enabled, opts.mode
+    if type(enabled) ~= "boolean" or type(mode) ~= "string" then
+        local cfg_enabled, cfg_mode = read_acrylic_config()
+        if type(enabled) ~= "boolean" then enabled = cfg_enabled end
+        if type(mode) ~= "string" then mode = cfg_mode end
+    end
+    opts.mode = mode
+    acrylic_wanted = enabled
+    if not enabled and not acrylic_active and not opts.inspect then
+        return json.encode({ ok = true, enabled = false, patched = 0 })
+    end
+    local patched, info, err = apply_acrylic(enabled, opts)
+    if err then
+        return json.encode({ ok = false, enabled = enabled, error = err })
+    end
+    local out = { ok = true, enabled = enabled, patched = patched, mode = opts.mode }
+    if info then out.windows = info end
+    return json.encode(out)
+end
+
+function AcrylicState()
+    return json.encode({ enabled = acrylic_wanted })
+end
+
 -- lifecycle
 
 local function on_load()
@@ -240,6 +525,7 @@ local function on_load()
 end
 
 local function on_unload()
+    if acrylic_active then pcall(apply_acrylic, false) end
     stop_server()
 end
 

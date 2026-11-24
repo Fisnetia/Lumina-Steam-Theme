@@ -1,0 +1,4 @@
+/* URL bar: only on web pages (Steam's own). */
+:root {
+    --lm-url-always: 0;
+}

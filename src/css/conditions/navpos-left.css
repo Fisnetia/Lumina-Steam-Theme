@@ -1,4 +1,14 @@
 /* Nav position: left (read by js/nav-fit.js). */
 :root {
     --lm-nav-pos: left;
+    --lm-nav-row-left: var(--lm-float-gap);
+}
+
+/* the URL bar shares the second row from the other end (css/library.css) */
+html.lm-nav-row {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    align-self: flex-end;
+}
+
+html.lm-nav-row {{ForceOpaqueBackground.LocalContentContainer}} {{ForceOpaqueBackground.URLBarReplacement}} {
+    justify-content: flex-end;
 }

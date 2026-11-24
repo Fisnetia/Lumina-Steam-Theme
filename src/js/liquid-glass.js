@@ -24,11 +24,19 @@
     const NS = "http://www.w3.org/2000/svg";
     const RES = 0.5;   // map resolution
 
-    let on = false;
-    const enabled = () => {   // empty while stylesheets reload: keep the last value
-        const v = getComputedStyle(html).getPropertyValue("--lm-liquid").trim();
+    // Settings, read once per check from the stylesheets; empty while they
+    // reload, so the last values are kept
+    let on = false, strength = 50, settings = "";
+    const readSettings = () => {
+        const cs = getComputedStyle(html);
+        const v = cs.getPropertyValue("--lm-liquid").trim();
         if (v) on = v === "1";
-        return on;
+        const r = parseFloat(cs.getPropertyValue("--lm-refraction"));   // 0-100, 50 by default
+        if (!Number.isNaN(r)) strength = Math.min(Math.max(r, 0), 100);
+        const key = `${on}|${strength}|${cs.getPropertyValue("--lm-radius").trim()}`;
+        const changed = key !== settings;
+        settings = key;
+        return changed;
     };
 
     const RIM = 4;     // width of the coloured rim, px
@@ -72,24 +80,17 @@
         return svg;
     };
 
-    // Refraction slider, 0-100 (50 by default); empty while stylesheets reload
-    let strength = 50;
-    const refraction = () => {
-        const v = parseFloat(getComputedStyle(html).getPropertyValue("--lm-refraction"));
-        if (!Number.isNaN(v)) strength = Math.min(Math.max(v, 0), 100);
-        return strength;
-    };
-
     // Dispersion: red, green and blue are displaced by decreasing amounts and
     // added back together, which leaves a thin colour fringe at the rim. Red
-    // takes the full scale, so no channel passes the monotonic limit.
+    // takes the full scale, so no channel passes the monotonic limit. The
+    // channels are added with alpha 1, then the sum takes the red pass's alpha.
     const SPREAD = 0.14;
     const displace = (scale, result) =>
         `<feDisplacementMap in="SourceGraphic" in2="map" scale="${scale}" xChannelSelector="R" yChannelSelector="G" result="${result}"/>`;
     const channel = (src, row, result) => {
         const rows = ["0 0 0 0 0", "0 0 0 0 0", "0 0 0 0 0"];
         rows[row] = ["1 0 0 0 0", "0 1 0 0 0", "0 0 1 0 0"][row];
-        return `<feColorMatrix in="${src}" type="matrix" values="${rows.join(" ")} 0 0 0 1 0" result="${result}"/>`;
+        return `<feColorMatrix in="${src}" type="matrix" values="${rows.join(" ")} 0 0 0 0 1" result="${result}"/>`;
     };
     const add = (a, b, result) =>
         `<feComposite in="${a}" in2="${b}" operator="arithmetic" k2="1" k3="1" result="${result}"/>`;
@@ -98,7 +99,8 @@
         const s = [scale, scale * (1 - SPREAD), scale * (1 - 2 * SPREAD)].map(v => v.toFixed(1));
         return displace(s[0], "dr") + displace(s[1], "dg") + displace(s[2], "db") +
             channel("dr", 0, "r") + channel("dg", 1, "g") + channel("db", 2, "b") +
-            add("r", "g", "rg") + add("rg", "b", "body");
+            add("r", "g", "rg") + add("rg", "b", "rgb") +
+            `<feComposite in="rgb" in2="dr" operator="in" result="body"/>`;
     };
 
     // Coloured rim: within the band in the map's B channel, the dispersed
@@ -139,8 +141,8 @@
             if (!el || !el.isConnected) return;
             const W = Math.round(el.offsetWidth), H = Math.round(el.offsetHeight);
             const R = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
-            const bevel = Math.max(1, Math.round(refraction() * reach));
-            const scale = refraction() ? Math.round(bevel * 0.9) : 0;
+            const bevel = Math.max(1, Math.round(strength * reach));
+            const scale = strength ? Math.round(bevel * 0.9) : 0;
             const key = `${W}x${H}r${R}b${bevel}s${scale}`;
             if (!W || !H || key === size) return;
             size = key;
@@ -169,9 +171,11 @@
             html.classList.remove(ready);
         };
 
-        // also a fallback for size changes the observer missed (e.g. while hidden)
-        const sync = () => {
-            if (!enabled()) { if (el || html.classList.contains(ready)) detach(); return; }
+        // finds the element; sizes come from the ResizeObserver, so a mounted
+        // pane is rebuilt only when asked (settings changed, window shown)
+        const sync = (rebuild) => {
+            if (!on) { if (el || html.classList.contains(ready)) detach(); return; }
+            if (!rebuild && el && el.isConnected) return;
             const found = document.querySelector(selector);
             if (found && found === el) { build(); return; }
             if (!found) return;
@@ -202,10 +206,14 @@
                    reach: 0.24 })),   // 12px at 50%
     ];
 
-    // the library mounts and unmounts the list; the menu panel appears on first use;
-    // the settings can change any time
-    const syncAll = () => panes.forEach(p => p.sync());
-    syncAll();
-    setInterval(syncAll, 1000);
-    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncAll(); });
+    // the library mounts and unmounts the list; the menu panel appears on
+    // first use; the sliders change variables without reloading stylesheets
+    const syncAll = (force) => {
+        const rebuild = readSettings() || force;
+        panes.forEach(p => p.sync(rebuild));
+    };
+    syncAll(true);
+    setInterval(() => syncAll(false), 1000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncAll(true); });
+    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") syncAll(true); }, true);
 })();

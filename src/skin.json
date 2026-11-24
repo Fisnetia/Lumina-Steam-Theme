@@ -63,11 +63,11 @@
   "Conditions": {
     "Backdrop": {
       "tab": "Backdrop",
-      "description": "What shows behind the glass. Acrylic needs the dwmx plugin.",
+      "description": "What shows behind the glass. Acrylic requires the Lumina Extended plugin.",
       "default": "Wallpaper",
       "values": {
-        "Aurora": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-aurora.css" } },
         "Wallpaper": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-wallpaper.css" } },
+        "Aurora": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-aurora.css" } },
         "Acrylic": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-acrylic.css" } }
       }
     },
@@ -77,30 +77,60 @@
       "default": 4,
       "slider": { "cssVariable": "--lm-wall-blur", "min": 0, "max": 64, "step": 2, "unit": "px" }
     },
+    "Wallpaper mouse": {
+      "tab": "Backdrop",
+      "description": "Scene wallpapers follow the mouse in the main window (parallax, cursor effects).",
+      "default": "On",
+      "values": {
+        "On": { "TargetCss": { "affects": [".*"], "src": "css/conditions/wall-mouse-on.css" } },
+        "Off": { "TargetCss": { "affects": [".*"], "src": "css/conditions/wall-mouse-off.css" } }
+      }
+    },
+    "Desktop blur": {
+      "tab": "Backdrop",
+      "description": "Windows backdrop blur strength: Soft keeps desktop details clearer; Strong uses heavier frosted acrylic.",
+      "default": "Soft",
+      "values": {
+        "Soft": { "TargetCss": { "affects": [".*"], "src": "css/conditions/acrylic-soft.css" } },
+        "Strong": { "TargetCss": { "affects": [".*"], "src": "css/conditions/acrylic-strong.css" } }
+      }
+    },
+    "Game list": {
+      "tab": "Interface",
+      "description": "Liquid glass bends the backdrop along panel edges; Acrylic uses frosted blur with fine grain (no plugin needed).",
+      "default": "Liquid glass",
+      "values": {
+        "Liquid glass": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-liquid.css" } },
+        "Acrylic": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-acrylic.css" } }
+      }
+    },
+    "Liquid opacity": {
+      "tab": "Interface",
+      "description": "Tint of floating liquid glass panels, menus and capsules.",
+      "default": 30,
+      "slider": { "cssVariable": "--lm-liquid-alpha", "min": 0, "max": 60, "step": 2, "unit": "%" }
+    },
+    "Refraction": {
+      "tab": "Interface",
+      "description": "How far in from the edges the backdrop bends.",
+      "default": 50,
+      "slider": { "cssVariable": "--lm-refraction", "min": 0, "max": 100, "step": 5, "unit": "%" }
+    },
     "Opacity": {
-      "tab": "Glass",
+      "tab": "Interface",
       "description": "Panel tint: lower is clearer, higher is easier to read.",
       "default": 38,
       "slider": { "cssVariable": "--lm-alpha", "min": 10, "max": 80, "step": 2, "unit": "%" }
     },
     "Corner radius": {
-      "tab": "Glass",
+      "tab": "Interface",
       "description": "Rounding of panels, buttons and menus.",
       "default": 10,
       "slider": { "cssVariable": "--lm-radius", "min": 0, "max": 20, "step": 1, "unit": "px" }
     },
-    "Game list": {
-      "tab": "Glass",
-      "description": "Classic panel, or a floating liquid glass panel whose edges refract the backdrop; the bottom bar floats too.",
-      "default": "Liquid glass",
-      "values": {
-        "Classic": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-classic.css" } },
-        "Liquid glass": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-liquid.css" } }
-      }
-    },
     "Nav position": {
-      "tab": "Glass",
-      "description": "Where the Store, Library and Community capsule sits in the title bar; it moves to a second row when it doesn't fit.",
+      "tab": "Interface",
+      "description": "Center: in the title bar (moves to a second row when it doesn't fit). Left / Right: on a second row, shared with the URL bar on web pages.",
       "default": "Center",
       "values": {
         "Center": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-center.css" } },
@@ -108,17 +138,14 @@
         "Right": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-right.css" } }
       }
     },
-    "Liquid opacity": {
-      "tab": "Glass",
-      "description": "Liquid glass only: tint of the game list, the menus and the bottom bar.",
-      "default": 30,
-      "slider": { "cssVariable": "--lm-liquid-alpha", "min": 0, "max": 60, "step": 2, "unit": "%" }
-    },
-    "Refraction": {
-      "tab": "Glass",
-      "description": "Liquid glass only: how far in from the edges the backdrop bends.",
-      "default": 50,
-      "slider": { "cssVariable": "--lm-refraction", "min": 0, "max": 100, "step": 5, "unit": "%" }
+    "URL bar": {
+      "tab": "Interface",
+      "description": "Always: the URL bar stays over library and other Steam pages too, showing their path, so the layout doesn't shift between pages. Web pages: only on Store and Community pages.",
+      "default": "Always",
+      "values": {
+        "Always": { "TargetCss": { "affects": [".*"], "src": "css/conditions/url-always.css" } },
+        "Web pages": { "TargetCss": { "affects": [".*"], "src": "css/conditions/url-web.css" } }
+      }
     },
     "Menu animation": {
       "tab": "Motion",
@@ -144,18 +171,9 @@
       "description": "Mouse-wheel smoothing in the library game list.",
       "default": "Soft",
       "values": {
-        "Standard": { "TargetCss": { "affects": [".*"], "src": "css/conditions/scroll-standard.css" } },
         "Soft": { "TargetCss": { "affects": [".*"], "src": "css/conditions/scroll-soft.css" } },
+        "Standard": { "TargetCss": { "affects": [".*"], "src": "css/conditions/scroll-standard.css" } },
         "Off": { "TargetCss": { "affects": [".*"], "src": "css/conditions/scroll-off.css" } }
-      }
-    },
-    "Wallpaper mouse": {
-      "tab": "Motion",
-      "description": "Scene wallpapers follow the mouse in the main window (parallax, cursor effects).",
-      "default": "On",
-      "values": {
-        "On": { "TargetCss": { "affects": [".*"], "src": "css/conditions/wall-mouse-on.css" } },
-        "Off": { "TargetCss": { "affects": [".*"], "src": "css/conditions/wall-mouse-off.css" } }
       }
     }
   }
