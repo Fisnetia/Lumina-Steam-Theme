@@ -19,12 +19,19 @@
     const LINE = 40;          // px per line, for deltaMode 1
     const MIN_SPEED = 0.15;   // px per ms: the glide's slowest pace near the end
 
-    const tauOf = () => {
+    // the Smooth scrolling setting, kept current outside the wheel handler
+    let tau = 0, tauRaw = "";
+    const readTau = () => {
         const raw = getComputedStyle(document.documentElement).getPropertyValue("--lm-smooth-scroll").trim();
+        if (!raw && tauRaw) return;   // stylesheets reloading: keep the last value
+        tauRaw = raw;
         const n = parseFloat(raw);
-        if (!n || n < 0) return 0;
-        return raw.endsWith("ms") ? n : n * 1000;
+        tau = !n || n < 0 ? 0 : raw.endsWith("ms") ? n : n * 1000;
     };
+    const tauOf = () => tau;
+    readTau();
+    setInterval(readTau, 1000);
+    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") readTau(); }, true);
 
     // { el, pos, target, set (last written scrollTop), last, tau, raf }
     let glide = null;
