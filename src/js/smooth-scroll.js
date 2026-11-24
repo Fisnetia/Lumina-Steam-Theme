@@ -6,6 +6,10 @@
  * of 120), Ctrl/Shift+wheel, horizontal wheels and scrolling past the ends are
  * left native. Any other scroll stops the glide. scrollTop is written in whole
  * pixels since each change re-renders the virtualized list.
+ *
+ * The blocking wheel listener sits on the list itself, so wheels elsewhere in
+ * the window scroll without waiting for the main thread. Lists are found by
+ * passive listeners as the pointer reaches them.
  */
 (() => {
     if (window.__lmSmoothScroll) return;
@@ -50,12 +54,11 @@
         g.raf = requestAnimationFrame(step);
     };
 
-    document.addEventListener("wheel", (e) => {
+    const onWheel = (e) => {
         if (e.ctrlKey || e.shiftKey || e.defaultPrevented) return;
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || !e.deltaY) return;
         if (e.wheelDeltaY === undefined || e.wheelDeltaY % 120 !== 0) return;   // touchpad etc.
-        const el = e.target.closest && e.target.closest(LIST);
-        if (!el) return;
+        const el = e.currentTarget;
         const tau = glide && glide.el === el ? glide.tau : tauOf();
         if (!tau) return;
 
@@ -78,5 +81,16 @@
         } else {
             glide.target = target;
         }
-    }, { capture: true, passive: false });
+    };
+
+    // the list is re-created as the library re-renders
+    const bound = new WeakSet();
+    const bind = (e) => {
+        const el = e.target.closest && e.target.closest(LIST);
+        if (!el || bound.has(el)) return;
+        bound.add(el);
+        el.addEventListener("wheel", onWheel, { capture: true, passive: false });
+    };
+    document.addEventListener("mouseover", bind, { passive: true });
+    document.addEventListener("wheel", bind, { passive: true });
 })();

@@ -1,0 +1,4 @@
+/* Desktop acrylic: lighter Windows DWM blur (ACCENT_ENABLE_BLURBEHIND). */
+:root {
+    --lm-acrylic-mode: blur;
+}

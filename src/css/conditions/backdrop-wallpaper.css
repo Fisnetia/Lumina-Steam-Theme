@@ -61,3 +61,7 @@ html.lm-web body::before {
     height: 100% !important;
     display: block;
 }
+
+[data-condition="Desktop blur"]:not([data-lm-hidden="0"]) {
+    display: none !important;
+}

@@ -1,5 +1,5 @@
 /*
- * Bottom bar on web pages (Liquid glass, css/conditions/list-liquid.css).
+ * Bottom bar on web pages (css/library.css).
  *
  * Store and Community are native views the main window can't paint over, so
  * pages can't run behind the capsules there. While one is shown, the three
@@ -22,13 +22,6 @@
     const FRAME = "{{ForceOpaqueBackground.ContentFrame}}";
     const WEB = `${FRAME} > {{ForceOpaqueBackground.BrowserWrapper}}`;
     const DURATION = 420, EASING = "cubic-bezier(0.25, 0.7, 0.25, 1)";
-
-    // read off the stylesheets now and then, not on every mutation
-    let liquid = false;
-    const readLiquid = () => {   // empty while stylesheets reload: keep the last value
-        const v = getComputedStyle(html).getPropertyValue("--lm-liquid").trim();
-        if (v) liquid = v === "1";
-    };
 
     // the web view stays mounted, hidden by an inline display: none
     const webShown = () => {
@@ -53,7 +46,7 @@
     };
 
     const sync = () => {
-        const want = liquid && webShown();
+        const want = webShown();
         if (want !== html.classList.contains("lm-web-bar")) set(want);
     };
 
@@ -78,7 +71,7 @@
         }
     };
 
-    const refresh = () => { watch(); readLiquid(); sync(); };
+    const refresh = () => { watch(); sync(); };
     setInterval(refresh, 1000);
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") refresh(); }, true);
     refresh();

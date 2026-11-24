@@ -172,8 +172,10 @@
         els.forEach(e => { e.style.animationName = ""; });
     };
 
-    // Embedded web view (Store, Community) under the panel area?
-    const overWebView = (rect) => [...document.querySelectorAll("{{ForceOpaqueBackground.BrowserWrapper}}, {{ForceOpaqueBackground.Browser}}")].some(el => {
+    // Embedded web view (Store, Community) under the panel area? Only the view
+    // itself counts: its wrapper also holds the URL bar, which stays shown
+    // over library pages with the Always URL bar setting.
+    const overWebView = (rect) => [...document.querySelectorAll("{{ForceOpaqueBackground.Browser}}")].some(el => {
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0 && r.top < rect.top + rect.height && r.bottom > rect.top
             && r.left < rect.left + rect.width && r.right > rect.left;

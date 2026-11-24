@@ -13,7 +13,7 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    background: #07090f !important;
+    background: var(--lm-base-bg, #07090f) !important;
 }
 
 {{ForceOpaqueBackground.OuterFrame}}::before {
@@ -71,11 +71,16 @@
 :root {
     --lm-titlebar-h: 40px;
     --lm-capsule-h: 32px;
+    --lm-float-gap: 8px;
+    --lm-pill-h: 36px;
+    --lm-bar-space: calc(var(--lm-pill-h) + 2 * var(--lm-float-gap));   /* capsule and its gaps */
+    --lm-web-bar-h: 36px;
 }
 
-/* js/nav-fit.js places the capsule by the Nav position setting
-   (--lm-nav-x), or on a second row (html.lm-nav-wrap) when it would touch
-   the menus or buttons; the breakpoint applies only without the script */
+/* js/nav-fit.js places the capsule by the Nav position setting: Center in
+   the title bar (--lm-nav-x), or on a second row (html.lm-nav-wrap) when it
+   would touch the menus or buttons; Left / Right on the second row
+   (html.lm-nav-row). The breakpoint applies only without the script. */
 html.lm-nav-placed {{ForceOpaqueBackground.SuperNavBar}} {
     left: var(--lm-nav-x);
     translate: none;
@@ -84,8 +89,32 @@ html.lm-nav-placed {{ForceOpaqueBackground.SuperNavBar}} {
 html.lm-nav-wrap {{ForceOpaqueBackground.SuperNavBar}} {
     position: static;
     translate: none;
-    align-self: var(--lm-nav-align, flex-start);
-    margin: 0 10px 6px;
+    align-self: flex-start;
+    margin: 0 var(--lm-float-gap) 4px;
+}
+
+/* Left / Right: the second row is the URL bar's row on web pages, or the
+   library's spacer above its pages, raised to the capsule's height; the
+   capsule sits over its far end. The URL bar keeps to the other end
+   (css/conditions/navpos-left.css, navpos-right.css). */
+html.lm-nav-row {{ForceOpaqueBackground.SuperNavBar}} {
+    top: var(--lm-titlebar-h);
+    left: var(--lm-nav-row-left, auto);
+    right: var(--lm-nav-row-right, auto);
+    z-index: 2;
+}
+
+html.lm-nav-row {{ForceOpaqueBackground.LocalContentContainer}} {{ForceOpaqueBackground.URLBarReplacement}} {
+    height: calc(var(--lm-capsule-h) + 4px) !important;
+    padding: 0 var(--lm-float-gap) 4px;
+}
+
+html.lm-nav-row {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    margin: 0 var(--lm-float-gap) 4px;
+}
+
+html.lm-nav-row {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    max-width: calc(100% - var(--lm-nav-w, 0px) - 3 * var(--lm-float-gap));
 }
 
 @media (max-width: 1240px) {
@@ -111,7 +140,7 @@ html.lm-nav-wrap {{ForceOpaqueBackground.SuperNavBar}} {
     box-sizing: border-box;
     width: fit-content;
     max-width: calc(100% - 32px);
-    min-height: 28px;
+    height: var(--lm-capsule-h);
     margin: 2px 0 6px;
     padding: 0 6px !important;
     background: var(--lm-panel-strong) !important;
@@ -135,6 +164,52 @@ html.lm-nav-wrap {{ForceOpaqueBackground.SuperNavBar}} {
     flex-grow: 0 !important;
     font-size: 12px !important;
     color: var(--lm-text-dim) !important;
+}
+
+/* pencil button and the address input (js/url-bar.js) */
+.lm-url-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    color: var(--lm-text-dim);
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.lm-url-edit:hover,
+.lm-url-editing .lm-url-edit {
+    background: var(--lm-hover);
+    color: var(--lm-text);
+}
+
+.lm-url-edit svg {
+    width: 13px;
+    height: 13px;
+}
+
+{{ForceOpaqueBackground.URLBar}}.lm-url-editing > {{ForceOpaqueBackground.URLBarText}},
+{{ForceOpaqueBackground.URLBar}}.lm-url-editing > {{ForceOpaqueBackground.ReloadButton}} {
+    display: none !important;
+}
+
+.lm-url-input {
+    flex: 0 1 auto !important;
+    width: 520px;
+    min-width: 0;
+    height: 24px;
+    margin-right: 2px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 999px;
+    outline: none;
+    background: rgba(0, 0, 0, 0.28);
+    color: var(--lm-text);
+    font: inherit;
+    font-size: 12px;
 }
 
 {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBarText}}:hover,
@@ -444,14 +519,43 @@ html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHold
 /* ---- Library layout ---- */
 
 {{LeftListSizableContainer.Container}},
-{{LeftListSizableContainer.MainPanel}},
-{{LeftListSizableContainer.AppDetailsTransitionGroup}} {
-    /* AppDetailsTransitionGroup paints #22242a behind the right side */
+{{LeftListSizableContainer.MainPanel}} {
     background: transparent !important;
 }
 
+/* Right library pane (home, collections, game pages): floating rounded card
+   matching the game list's height, corner radius and 8px spacing; material
+   fill and rim live in the list-* condition stylesheets. */
+{{LeftListSizableContainer.AppDetailsTransitionGroup}} {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: auto !important;
+    height: auto !important;
+    margin: var(--lm-float-gap) var(--lm-float-gap) var(--lm-float-gap) 3px;
+    overflow: hidden !important;
+    border-radius: calc(var(--lm-r) * 1.4) !important;
+    background: var(--lm-panel) !important;
+}
+
+{{LeftListSizableContainer.AppDetailsTransitionGroup}}::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 20;
+}
+
+{{LeftListSizableContainer.AppDetailsMain}} {
+    border-top: none !important;
+}
+
+/* both panes float, so the column divider only shows on hover */
 {{LeftListSizableContainer.LibraryWindowDivider}} {
-    background-color: var(--lm-border) !important;
+    height: calc(100% - 2 * var(--lm-float-gap));
+    margin: var(--lm-float-gap) 0;
+    border-radius: 999px;
+    background-color: transparent !important;
 }
 
 {{LeftListSizableContainer.LibraryWindowDivider}}:hover {
@@ -465,11 +569,18 @@ html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHold
     border-radius: var(--lm-r) !important;
 }
 
-/* Left column */
+/* Left column: floating rounded card (3px + 2px divider + 3px = 8px center gap) */
 {{GameListHomeAndSearch.Container}} {
+    box-sizing: border-box;
+    height: calc(100% - 2 * var(--lm-float-gap)) !important;
+    margin: var(--lm-float-gap) 3px var(--lm-float-gap) var(--lm-float-gap);
+    /* keeps the Home box 8px from the rounded corner, so its corner is concentric */
+    padding: 4px 2px 2px;
+    overflow: hidden;
+    border: none !important;
+    border-radius: calc(var(--lm-r) * 1.4) !important;
     background: var(--lm-panel) !important;
     background-image: none !important;
-    border-right: 1px solid var(--lm-border);
 }
 
 {{GameListHomeAndSearch.GameListHomeAndSearch}} {
@@ -630,17 +741,95 @@ html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHold
     border-radius: 4px;
 }
 
-/* bottom bar */
+/* Bottom bar: three floating capsules over the content, merging into a
+   full-width bar on web pages (js/bottom-bar.js, html.lm-web-bar). Surface
+   materials come from the list-* condition stylesheets. */
+{{BottomBarContainer.BottomBarContainer}} {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+{{BottomBarContainer.BottomBarContainer}} > :not({{BottomBarContainer.BottomBar}}) {
+    pointer-events: auto;
+}
+
 {{BottomBarContainer.BottomBar}} {
-    background: var(--lm-panel-strong) !important;
-    border-top: 1px solid var(--lm-border) !important;
-    box-shadow: var(--lm-sheen) !important;
+    position: relative;
+    height: auto !important;
+    min-height: 0 !important;
+    align-items: center;
+    padding: 0 var(--lm-float-gap) var(--lm-float-gap) !important;
+    background: transparent !important;
+    border-top: none !important;
+    box-shadow: none !important;
+    -webkit-app-region: no-drag;
+    app-region: no-drag;
+}
+
+{{BottomBarContainer.BottomBar}}::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--lm-web-bar-h);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--lm-panel-strong);
+    box-shadow: inset 0 1px 0 var(--lm-border-strong);
+    opacity: 0;
+    translate: 0 100%;
+    transition: opacity 0.3s ease, translate 0.42s cubic-bezier(0.25, 0.7, 0.25, 1);
+}
+
+html.lm-web-bar {{BottomBarContainer.BottomBar}}::before {
+    opacity: 1;
+    translate: none;
+}
+
+/* Steam sizes the bar by flex-basis (50px), not height */
+html.lm-web-bar {{BottomBarContainer.BottomBar}} {
+    flex: 0 0 var(--lm-web-bar-h) !important;
+    height: var(--lm-web-bar-h) !important;
+    padding: 0 6px !important;
+}
+
+html.lm-web-bar {{ForceOpaqueBackground.ContentFrame}} {
+    margin-bottom: var(--lm-web-bar-h) !important;
 }
 
 {{BottomBarContainer.AddGameButton}},
 {{BottomBarContainer.FriendsButton}},
 {{BottomBarContainer.DownloadStatus}} {
-    border-radius: var(--lm-r-sm) !important;
+    box-sizing: border-box;
+    height: var(--lm-pill-h);
+    padding: 0 16px;
+    align-items: center;
+    pointer-events: auto;
+    border-radius: calc(var(--lm-pill-h) / 2) !important;
+    background: var(--lm-panel-strong) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Steam's grey text fades over bright covers */
+{{BottomBarContainer.AddGameButton}},
+{{BottomBarContainer.DownloadStatus}},
+{{BottomBarContainer.FriendsButton}},
+{{BottomBarContainer.AddGameButton}} *,
+{{BottomBarContainer.DownloadStatus}} *,
+{{BottomBarContainer.FriendsButton}} * {
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+{{BottomBarContainer.DownloadStatus}} {
+    flex: 0 1 560px;
+    margin: 0 auto;
+    justify-content: center;
 }
 
 {{BottomBarContainer.AddGameButton}}:hover,
@@ -649,8 +838,52 @@ html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHold
     background: var(--lm-hover) !important;
 }
 
+/* plain buttons in the merged web bar */
+html.lm-web-bar {{BottomBarContainer.AddGameButton}},
+html.lm-web-bar {{BottomBarContainer.DownloadStatus}},
+html.lm-web-bar {{BottomBarContainer.FriendsButton}} {
+    height: 28px;
+    padding: 0 12px;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+html.lm-web-bar {{BottomBarContainer.AddGameButton}}:hover,
+html.lm-web-bar {{BottomBarContainer.DownloadStatus}}:hover,
+html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
+    background: var(--lm-hover) !important;
+}
+
 {{BottomBarContainer.ProgressBar}} {
     background: var(--lm-a) !important;
+}
+
+/* pages scroll behind the capsules but can still scroll clear of them */
+{{LibraryHome.InnerContainer}},
+{{AppDetailsOverviewPanel.ScrollContainer}},
+{{DownloadsPage.ItemLists}} {
+    padding-bottom: var(--lm-bar-space) !important;
+}
+
+/* the console's input sits at the bottom of the page */
+{{ConsoleInput.Console}} {
+    box-sizing: border-box;
+    padding-bottom: var(--lm-bar-space) !important;
+}
+
+{{ScrollToTopButton.ScrollToTopButton}} {
+    translate: 0 calc(-1 * var(--lm-bar-space));
+}
+
+/* the game list runs behind the left capsule like the pages on the right */
+{{GameListHomeAndSearch.Container}} .ReactVirtualized__Grid__innerScrollContainer {
+    margin-bottom: var(--lm-bar-space);
+}
+
+/* the web view stays mounted, hidden by an inline display: none */
+{{ForceOpaqueBackground.ContentFrame}}:has(> {{ForceOpaqueBackground.BrowserWrapper}}:not([style*="none"])) {
+    margin-bottom: var(--lm-bar-space);
 }
 
 /* ---- Downloads ---- */

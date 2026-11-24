@@ -4,7 +4,7 @@
 
 html.friendsui-container,
 html.friendsui-container body {
-    background: #07090f !important;
+    background: var(--lm-base-bg, #07090f) !important;
 }
 
 html.friendsui-container body {

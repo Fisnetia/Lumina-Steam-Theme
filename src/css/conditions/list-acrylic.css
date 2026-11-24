@@ -1,0 +1,93 @@
+/* Acrylic material: heavy blur, a faint noise grain and hairline edges, on
+   the floating layout of css/library.css. No SVG filters. */
+:root {
+    --lm-liquid: 0;
+    --lm-acrylic-pane: blur(24px) saturate(1.6) brightness(1.02);
+    --lm-acrylic-pill: blur(20px) saturate(1.55) brightness(0.96);
+    --lm-acrylic-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* the liquid glass sliders only apply to Liquid glass */
+[data-condition="Liquid opacity"]:not([data-lm-hidden="0"]),
+[data-condition="Refraction"]:not([data-lm-hidden="0"]) {
+    display: none !important;
+}
+
+html {{GameListHomeAndSearch.Container}} {
+    background-color: color-mix(in srgb, var(--lm-t) var(--lm-alpha, 38%), transparent) !important;
+    background-image: var(--lm-acrylic-noise) !important;
+    backdrop-filter: var(--lm-acrylic-pane);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+        0 10px 28px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Right library pane: same frosted tint, grain and hairline border without
+   full-viewport backdrop-filter overhead. */
+html {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
+    background-color: color-mix(in srgb, var(--lm-t) var(--lm-alpha, 38%), transparent) !important;
+    background-image: var(--lm-acrylic-noise) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3) !important;
+}
+
+html {{LeftListSizableContainer.AppDetailsTransitionGroup}}::after {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+
+/* Morphing menus (js/morph-nav.js) */
+html .lm-morph {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+        var(--lm-shadow);
+}
+
+html .lm-morph.lm-morph-inpage {
+    background-color: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 16%), 100%), transparent);
+    background-image: var(--lm-acrylic-noise);
+    backdrop-filter: var(--lm-acrylic-pane);
+}
+
+/* Floating bottom bar capsules and merged web bottom bar */
+html {{BottomBarContainer.AddGameButton}},
+html {{BottomBarContainer.DownloadStatus}},
+html {{BottomBarContainer.FriendsButton}} {
+    background-color: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 10%), 100%), transparent) !important;
+    background-image: var(--lm-acrylic-noise) !important;
+    backdrop-filter: var(--lm-acrylic-pill);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+        0 6px 18px rgba(0, 0, 0, 0.28) !important;
+}
+
+html {{BottomBarContainer.AddGameButton}}:hover,
+html {{BottomBarContainer.DownloadStatus}}:hover,
+html {{BottomBarContainer.FriendsButton}}:hover {
+    background-color: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 20%), 100%), transparent) !important;
+}
+
+html {{BottomBarContainer.BottomBar}}::before {
+    background-color: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 16%), 100%), transparent);
+    background-image: var(--lm-acrylic-noise);
+    backdrop-filter: var(--lm-acrylic-pill);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* Title bar capsules and URL bar */
+html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}},
+html {{ForceOpaqueBackground.SuperNavBar}},
+html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}},
+html .title-bar-actions,
+html {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
+    background-color: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 8%), 100%), transparent) !important;
+    background-image: var(--lm-acrylic-noise) !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    backdrop-filter: var(--lm-acrylic-pill);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 6px 18px rgba(0, 0, 0, 0.26) !important;
+}

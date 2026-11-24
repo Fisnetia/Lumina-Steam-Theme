@@ -1,0 +1,4 @@
+/* Desktop acrylic: heavier frosted Windows DWM acrylic (ACCENT_ENABLE_ACRYLICBLURBEHIND). */
+:root {
+    --lm-acrylic-mode: acrylic;
+}

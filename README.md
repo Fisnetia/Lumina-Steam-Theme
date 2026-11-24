@@ -20,17 +20,21 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 
 **Backdrop**
 
-- **Backdrop**: what shows behind the glass. *Wallpaper* (default) takes a picture, a video or a Wallpaper Engine scene; *Aurora* is an animated gradient in the accent color; *Acrylic* is the Windows blur and needs the dwmx plugin.
+- **Backdrop**: what shows behind the glass. *Wallpaper* (default) takes a picture, a video or a Wallpaper Engine scene; *Aurora* is an animated gradient in the accent color; *Acrylic* is Windows desktop blur and requires the Lumina Extended plugin.
 - **Wallpaper**: a picture or video file, or an item from the Wallpaper Engine library. Scenes run live in Steam; other windows show a still of them.
 - **Blur**: how much the backdrop is blurred (default 4 px).
+- **Wallpaper mouse**: Wallpaper Engine scenes follow the mouse (parallax and cursor effects).
+- **Desktop blur** (Acrylic backdrop only): *Soft* (default) uses lighter Windows DWM blur that keeps desktop shapes clearer; *Strong* uses heavier frosted acrylic.
 
-**Glass**
+**Interface**
 
+- **Game list**: *Liquid glass* bends the backdrop along the edges; *Acrylic* uses frosted blur with fine grain (no plugin needed). Both share the same floating cards, capsules and bottom bar.
+- **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes, and how far in from the edges the backdrop bends.
 - **Opacity**: how dark the panels are; lower is clearer.
 - **Corner radius**: rounding of panels, buttons and menus.
-- **Game list**: *Classic* is a full-height panel; *Liquid glass* floats the list with edges that bend the backdrop, and turns the menus and the bottom bar into liquid glass as well.
-- **Nav position**: the Store / Library / Community capsule sits centered in the title bar, or next to the menus on the left or the buttons on the right; it moves to a second row when it doesn't fit.
-- **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes, and how far in from the edges the backdrop bends.
+- **Nav position**: where the Store / Library / Community capsule sits. *Center* puts it in the title bar (on a second row when the window is too narrow); *Left* and *Right* put it on a second row, which on web pages it shares with the URL bar at the other end.
+- **URL bar**: *Always* (default) keeps Steam's URL bar on library and other Steam pages too, showing the page's path (such as `steam://library/home`; clicking copies it), so the layout doesn't shift between pages; *Web pages* shows it on Store and Community pages only.
+  A pencil button at the end of the URL bar turns the address into an input: type a web address or a `steam://` link and press Enter to go there.
 - **Accent** and **Glass tint**: the selection color and the base color of the panels.
 
 **Motion**
@@ -38,9 +42,8 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 - **Menu animation**: *Cascade* unrolls menus item by item and unfolds collections row by row; *Fade* fades them in; *Off* disables the animations.
 - **Nav menu**: *Morph* uses one panel that slides between Store, Library, Community and profile, shared with the title bar and account menus; *Native* keeps Steam's popups.
 - **Smooth scrolling**: mouse-wheel smoothing in the game list.
-- **Wallpaper mouse**: Wallpaper Engine scenes follow the mouse (parallax and cursor effects).
 
-The Lumina Extended plugin reads the Wallpaper Engine library in place (no copying, web wallpapers included) and shows the current wallpaper behind the Store and Community pages. Enable it under Plugins in Millennium's settings. If *Wallpaper Engine…* still opens a folder picker, the wallpaper card says why; `Steam\millennium\logs\lumina-extended_log.log` lists the library folders it found.
+The Lumina Extended plugin reads the Wallpaper Engine library in place (no copying, web wallpapers included), shows the current wallpaper behind the Store and Community pages, and enables Windows desktop acrylic (no separate dwmx plugin needed). Enable it under Plugins in Millennium's settings. If *Wallpaper Engine…* still opens a folder picker, the wallpaper card says why; `Steam\millennium\logs\lumina-extended_log.log` lists the library folders it found.
 
 ---
 
