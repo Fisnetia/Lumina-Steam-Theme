@@ -576,11 +576,18 @@ html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHold
     margin: var(--lm-float-gap) 3px var(--lm-float-gap) var(--lm-float-gap);
     /* keeps the Home box 8px from the rounded corner, so its corner is concentric */
     padding: 4px 2px 2px;
-    overflow: hidden;
     border: none !important;
     border-radius: calc(var(--lm-r) * 1.4) !important;
+    /* not clipped, and above the right pane: the advanced filter pane opens
+       from here across it */
+    z-index: 2;
     background: var(--lm-panel) !important;
     background-image: none !important;
+}
+
+/* the list clips its rows to the card's rounded bottom corners */
+{{GameListHomeAndSearch.Container}} .ReactVirtualized__Grid {
+    border-radius: 0 0 calc(var(--lm-r) * 1.4 - 2px) calc(var(--lm-r) * 1.4 - 2px);
 }
 
 {{GameListHomeAndSearch.GameListHomeAndSearch}} {
@@ -950,11 +957,97 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     border-radius: var(--lm-r-sm) !important;
 }
 
+/* ---- Advanced filter pane (opens from the game list's filter button) ---- */
+
+/* Nearly opaque: it opens inside the game list, so a backdrop blur can't
+   reach the right pane it covers. While it is open the button becomes a tab
+   joined to its top-left corner. */
+:root {
+    --lm-filter-bg: color-mix(in srgb, var(--lm-t) 97%, transparent);
+}
+
+{{AdvancedSearchPane}} {
+    left: 100% !important;
+    background: var(--lm-filter-bg) !important;
+    border: none !important;
+    border-radius: 0 calc(var(--lm-r) * 1.4) calc(var(--lm-r) * 1.4) calc(var(--lm-r) * 1.4) !important;
+    box-shadow: var(--lm-shadow), inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+}
+
+{{AdvancedSearchContainer.AdvancedSearchContainer}}{{AdvancedSearchContainer.Extended}} {
+    background: var(--lm-filter-bg) !important;
+    border-radius: var(--lm-r-sm) 0 0 var(--lm-r-sm) !important;
+    box-shadow:
+        inset 1px 0 0 var(--lm-border-strong),
+        inset 0 1px 0 var(--lm-border-strong),
+        inset 0 -1px 0 var(--lm-border-strong) !important;
+}
+
+/* Steam's grey piece between the button and the pane */
+{{AdvancedSearchPaneContainer}}::before {
+    display: none !important;
+}
+
+/* covers the pane's edge where the tab meets it */
+{{AdvancedSearchContainer.AdvancedSearchContainer}}{{AdvancedSearchContainer.Extended}}::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    right: -2px;
+    width: 3px;
+    z-index: 21;
+    background: var(--lm-filter-bg);
+    pointer-events: none;
+}
+
+{{AdvancedSearchPane}} {{FilterBucketLabel}} {
+    color: var(--lm-a) !important;
+}
+
+{{AdvancedSearchPane}} .DialogCheckbox {
+    background: var(--lm-panel-soft) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong);
+    transition: background-color 0.12s ease;
+}
+
+{{AdvancedSearchPane}} .DialogCheckbox_Container:hover .DialogCheckbox {
+    background: var(--lm-hover) !important;
+}
+
+{{AdvancedSearchPane}} .DialogCheckbox svg path {
+    stroke: var(--lm-a) !important;
+}
+
+{{AdvancedSearchPane}} .DialogDropDown,
+{{AdvancedSearchPane}} .DialogInput {
+    background: var(--lm-panel-soft) !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border) !important;
+    color: var(--lm-text) !important;
+}
+
+{{AdvancedSearchPane}} .DialogDropDown:hover {
+    background: var(--lm-hover) !important;
+}
+
+/* collections page: Steam's dark gradient over the pane */
+{{BigPlus.ScrollContainer}} {
+    background: transparent !important;
+    background-image: none !important;
+}
+
 /* ---- Game page ---- */
 
-/* hidden while a game or collection switch renders (js/library-anim.js) */
+/* hidden while a game, a collection, the collections overview or the library home renders (js/library-anim.js) */
 {{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{AppDetailsOverviewPanel.Container}},
-{{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{ContainerScroll.OuterContainer}} {
+{{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{ContainerScroll.OuterContainer}},
+{{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{LibraryHome.Container}},
+{{LeftListSizableContainer.AppDetailsMain}}.lm-page-wait > {{BigPlus.Container}} {
     opacity: 0 !important;
 }
 

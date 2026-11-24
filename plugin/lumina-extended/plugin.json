@@ -3,6 +3,6 @@
   "name": "lumina-extended",
   "common_name": "Lumina Extended",
   "description": "Optional companion to the Lumina theme: browse your Wallpaper Engine library without copying files, share the backdrop to web pages, and enable Windows desktop acrylic.",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "backendType": "lua"
 }

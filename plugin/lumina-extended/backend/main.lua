@@ -98,6 +98,7 @@ local ACCENT_DISABLED = 0
 local ACCENT_ENABLE_BLURBEHIND = 3
 local ACCENT_ENABLE_ACRYLICBLURBEHIND = 4
 local ACCENT_FLAG_GRADIENT = 0x02   -- acrylic: use nColor as the tint
+local DWMWA_TRANSITIONS_FORCEDISABLED = 3
 local DWMWA_USE_IMMERSIVE_DARK_MODE = 20
 local DWMWA_WINDOW_CORNER_PREFERENCE = 33
 local DWMWA_SYSTEMBACKDROP_TYPE = 38
@@ -314,6 +315,7 @@ comp_data.pData = ffi.cast("void*", accent_policy)
 comp_data.ulDataSize = ffi.sizeof(accent_policy)
 local corner_pref = ffi.new("int32_t[1]", DWMWCP_ROUND)
 local dark_mode = ffi.new("int32_t[1]", 1)
+local transitions_off = ffi.new("int32_t[1]", 1)
 local backdrop_type = ffi.new("int32_t[1]", DWMSBT_NONE)
 local margins_zero = ffi.new("LMWE_MARGINS", 0, 0, 0, 0)
 
@@ -382,6 +384,8 @@ local function patch_hwnd(hwnd, enabled, mode, color, flags)
         if has_dwma then
             backdrop_type[0] = DWMSBT_NONE
             dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, backdrop_type, 4)
+            transitions_off[0] = 0
+            dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, transitions_off, 4)
         end
         if has_dwm_ext then dwmapi.DwmExtendFrameIntoClientArea(hwnd, margins_zero) end
         if has_swca then
@@ -407,6 +411,10 @@ local function patch_hwnd(hwnd, enabled, mode, color, flags)
         dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, corner_pref, 4)
         backdrop_type[0] = DWMSBT_NONE
         dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, backdrop_type, 4)
+        -- DWM animates minimize and restore from a snapshot without the blur,
+        -- so the transparent window would show the desktop unblurred
+        transitions_off[0] = 1
+        dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, transitions_off, 4)
     end
     if has_dwm_ext then
         dwmapi.DwmExtendFrameIntoClientArea(hwnd, margins_zero)

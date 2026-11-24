@@ -2,8 +2,9 @@
    the floating layout of css/library.css. No SVG filters. */
 :root {
     --lm-liquid: 0;
-    --lm-acrylic-pane: blur(24px) saturate(1.6) brightness(1.02);
-    --lm-acrylic-pill: blur(20px) saturate(1.55) brightness(0.96);
+    /* Acrylic blur slider; capsules take 5/6 of it */
+    --lm-acrylic-pane: blur(var(--lm-acrylic-blur, 24px)) saturate(1.6) brightness(1.02);
+    --lm-acrylic-pill: blur(calc(var(--lm-acrylic-blur, 24px) * 5 / 6)) saturate(1.55) brightness(0.96);
     --lm-acrylic-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
@@ -23,11 +24,11 @@ html {{GameListHomeAndSearch.Container}} {
         0 10px 28px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Right library pane: same frosted tint, grain and hairline border without
-   full-viewport backdrop-filter overhead. */
+/* Right library pane: the same acrylic as the game list */
 html {{LeftListSizableContainer.AppDetailsTransitionGroup}} {
     background-color: color-mix(in srgb, var(--lm-t) var(--lm-alpha, 38%), transparent) !important;
     background-image: var(--lm-acrylic-noise) !important;
+    backdrop-filter: var(--lm-acrylic-pane);
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3) !important;
 }
 

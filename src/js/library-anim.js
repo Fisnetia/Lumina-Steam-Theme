@@ -7,7 +7,9 @@
  * Collapse: the toggle is held while games fade (.lm-row-out), then replayed;
  * rows below then slide up from --lm-shift (.lm-row-up).
  * Durations come from the menu-* condition CSS; "Off" passes clicks through.
- * Also replays the game page's enter animation when switching games.
+ * Also replays the game page's enter animation when switching games, and
+ * brings in a collection, the collections overview and the library home row
+ * by row.
  */
 (() => {
     if (window.__lmLibAnim) return;
@@ -80,7 +82,8 @@
         if (pending && pending.header === header) { clearTimeout(pending.timer); pending = null; }
         const grid = header.closest(".ReactVirtualized__Grid");
         if (!panel || !grid) return;
-        const m = header.textContent.match(/\((\d+)\)\s*$/);
+        // "(11)", or "(10/11)" (shown / total) while the list is filtered
+        const m = header.textContent.match(/\((\d+)(?:\/\d+)?\)\s*$/);
         const count = m ? parseInt(m[1], 10) : 0;
         if (!count) return;
         // rows start from where they were, at most from the list's bottom edge
@@ -268,6 +271,57 @@
         items.forEach(([el]) => el.classList.add("lm-cap-in"));
     };
 
+    /* ---- library home: the same, by position ----
+     * The block above the shelves (What's New), each shelf's header and each
+     * visible row of capsules, numbered from the top. */
+
+    const HOME = "{{LibraryHome.LibraryHome}}";
+    const playHome = () => {
+        const main = document.querySelector(MAIN);
+        const home = main && main.querySelector(HOME);
+        if (!home) return;
+        const view = main.getBoundingClientRect();
+        const shown = (el) => {
+            const r = el.getBoundingClientRect();
+            return r.height > 0 && r.bottom > view.top && r.top < view.bottom ? r : null;
+        };
+        const els = [...[...home.parentElement.children].filter(c => c !== home),
+                     ...home.querySelectorAll("{{ShowcaseHeader}}"),
+                     ...[...home.querySelectorAll("{{FeaturedCapsule.LibraryItemBox}}")].map(b => b.parentElement)];
+        const items = els.map(el => [el, shown(el)]).filter(([, r]) => r);
+        const tops = [...new Set(items.map(([, r]) => Math.round(r.top)))].sort((a, b) => a - b);
+        items.forEach(([el, r]) => { el.classList.remove("lm-cap-in"); el.style.setProperty("--lm-i", String(tops.indexOf(Math.round(r.top)))); });
+        void home.offsetWidth;   // restart items that are still animating
+        items.forEach(([el]) => el.classList.add("lm-cap-in"));
+    };
+
+    // collections overview: its header, then each row of collection tiles
+    const playCollections = () => {
+        const main = document.querySelector(MAIN);
+        const page = main && main.querySelector("{{BigPlus.ScrollContainer}}");
+        if (!page) return;
+        const view = main.getBoundingClientRect();
+        const els = [...page.querySelectorAll("{{BigPlus.Header}}, {{BigPlus.Collection}}")];
+        const items = els.map(el => [el, el.getBoundingClientRect()])
+            .filter(([, r]) => r.height > 0 && r.bottom > view.top && r.top < view.bottom);
+        const tops = [...new Set(items.map(([, r]) => Math.round(r.top)))].sort((a, b) => a - b);
+        items.forEach(([el, r]) => { el.classList.remove("lm-cap-in"); el.style.setProperty("--lm-i", String(tops.indexOf(Math.round(r.top)))); });
+        void page.offsetWidth;
+        items.forEach(([el]) => el.classList.add("lm-cap-in"));
+    };
+
+    const onHome = () => {
+        const main = document.querySelector(MAIN);
+        if (!main || !getComputedStyle(document.documentElement).getPropertyValue("--lm-cap-step").trim()) return;
+        playWhenSettled(main, playHome);
+    };
+
+    const onCollections = () => {
+        const main = document.querySelector(MAIN);
+        if (!main || !getComputedStyle(document.documentElement).getPropertyValue("--lm-cap-step").trim()) return;
+        playWhenSettled(main, playCollections);
+    };
+
     const onCollection = () => {
         const main = document.querySelector(MAIN);
         // --lm-cap-step comes with the Cascade and Fade conditions; Off has none
@@ -287,6 +341,8 @@
 
     const appOf = (path) => { const m = /^\/library\/app\/(\d+)/.exec(path || ""); return m ? m[1] : null; };
     const isCollection = (path) => /^\/library\/collection\//.test(path || "");
+    const isHome = (path) => /^\/library\/home\/?$/.test(path || "");
+    const isCollections = (path) => /^\/library\/collections\/?$/.test(path || "");
 
     let tries = 0;
     const hookHistory = () => {
@@ -298,6 +354,8 @@
             const next = appOf(now);
             if (next && app && next !== app) onAppChange();
             else if (isCollection(now) && now !== path) onCollection();
+            else if (isHome(now) && now !== path) onHome();
+            else if (isCollections(now) && now !== path) onCollections();
             app = next;
             path = now;
         });

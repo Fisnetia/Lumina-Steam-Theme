@@ -8,6 +8,11 @@
     --lm-pill-tone: blur(2px) saturate(1.35) brightness(0.94);
 }
 
+/* the Acrylic blur slider only applies to Acrylic */
+[data-condition="Acrylic blur"]:not([data-lm-hidden="0"]) {
+    display: none !important;
+}
+
 html {{GameListHomeAndSearch.Container}} {
     background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
     backdrop-filter: var(--lm-liquid-tone);
