@@ -33,7 +33,7 @@ NOTES = """Lumina {version}（Steam 主题，需要 Millennium）
 
 设置
   在 Millennium 的主题设置里，分为背景 / 界面 / 动效三个标签页。
-  默认背景是内置壁纸，玻璃材质为液态玻璃；背景也可以换成动态极光、自定义壁纸或桌面亚克力。
+  默认背景是动态极光，玻璃材质为液态玻璃；背景可以换成壁纸（图片、视频或 WE 壁纸）。
 
 说明
   与 Valve、Steam、Wallpaper Engine 无关联；Steam 或 Millennium 更新后可能失效。
