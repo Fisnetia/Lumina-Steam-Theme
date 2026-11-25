@@ -3,9 +3,9 @@
    floating geometry lives in css/library.css. */
 :root {
     --lm-liquid: 1;
-    --lm-liquid-tone: blur(var(--lm-liquid-blur, 0px)) saturate(1.35) brightness(1.04);
+    --lm-liquid-tone: blur(var(--lm-liquid-blur, 2px)) saturate(1.35) brightness(1.04);
     /* a little darker for pills: covers behind the capsules are sharp and bright */
-    --lm-pill-tone: blur(var(--lm-liquid-blur, 0px)) saturate(1.35) brightness(0.94);
+    --lm-pill-tone: blur(var(--lm-liquid-blur, 2px)) saturate(1.35) brightness(0.94);
 }
 
 /* the Acrylic blur slider only applies to Acrylic */

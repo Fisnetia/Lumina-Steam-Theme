@@ -2,7 +2,7 @@
   "name": "Lumina",
   "author": "Fina",
   "description": "Translucent glass over a living backdrop: aurora, pictures, videos, or Wallpaper Engine scenes and web wallpapers. 流光：玻璃界面与流动的壁纸。",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "tags": ["Dark", "Transparent", "Blur", "Rounded"],
   "RootColors": "css/root-colors.css",
   "UseDefaultPatches": true,
@@ -72,7 +72,7 @@
     "Backdrop": {
       "tab": "Backdrop",
       "description": "What shows behind the glass. Acrylic needs the Lumina Extended plugin.",
-      "default": "Aurora",
+      "default": "Wallpaper",
       "values": {
         "Wallpaper": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-wallpaper.css" } },
         "Aurora": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-aurora.css" } },
@@ -115,19 +115,19 @@
     "Liquid opacity": {
       "tab": "Interface",
       "description": "Tint of the liquid glass.",
-      "default": 30,
+      "default": 20,
       "slider": { "cssVariable": "--lm-liquid-alpha", "min": 0, "max": 60, "step": 2, "unit": "%" }
     },
     "Refraction": {
       "tab": "Interface",
       "description": "How far in the edges refract.",
-      "default": 55,
+      "default": 40,
       "slider": { "cssVariable": "--lm-refraction", "min": 0, "max": 100, "step": 5, "unit": "%" }
     },
     "Liquid blur": {
       "tab": "Interface",
       "description": "Frosted blur inside liquid glass.",
-      "default": 0,
+      "default": 2,
       "slider": { "cssVariable": "--lm-liquid-blur", "min": 0, "max": 24, "step": 1, "unit": "px" }
     },
     "Acrylic blur": {
@@ -139,7 +139,7 @@
     "Opacity": {
       "tab": "Interface",
       "description": "Panel tint: lower is clearer.",
-      "default": 20,
+      "default": 26,
       "slider": { "cssVariable": "--lm-alpha", "min": 10, "max": 80, "step": 2, "unit": "%" }
     },
     "Corner radius": {
@@ -156,6 +156,16 @@
         "Center": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-center.css" } },
         "Left": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-left.css" } },
         "Right": { "TargetCss": { "affects": [".*"], "src": "css/conditions/navpos-right.css" } }
+      }
+    },
+    "Play bar": {
+      "tab": "Interface",
+      "description": "Alignment of the Play button and stats bar on game pages.",
+      "default": "Center",
+      "values": {
+        "Center": { "TargetCss": { "affects": [".*"], "src": "css/conditions/playbar-center.css" } },
+        "Left": { "TargetCss": { "affects": [".*"], "src": "css/conditions/playbar-left.css" } },
+        "Right": { "TargetCss": { "affects": [".*"], "src": "css/conditions/playbar-right.css" } }
       }
     },
     "URL bar": {

@@ -1,0 +1,21 @@
+/* Play bar alignment: right (CTA on the right edge, stats beside it). */
+:root {
+    --lm-playbar-pos: right;
+}
+
+html {{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}} > {{PlayBarGameName.Row}}:first-child {
+    flex-direction: row-reverse !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 10px 18px !important;
+}
+
+html {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusNameContainer}},
+html {{PlayBarGameName.InPage}} {{PlayBarGameName.GameStatsSection}} {
+    justify-content: flex-end !important;
+}
+
+html {{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}} {
+    margin: 8px 0 0 auto !important;
+}

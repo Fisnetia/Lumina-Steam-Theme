@@ -1171,12 +1171,15 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {
     position: relative;
     z-index: 3;
+    flex: 0 1 auto !important;
     width: auto !important;
     max-width: 100%;
     height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     margin: 0 !important;
-    padding: 6px 22px !important;
-    border-radius: 999px;
+    padding: 4px 20px !important;
+    border-radius: 26px;
     background: var(--lm-panel);
     border: 1px solid var(--lm-border-strong);
     box-shadow: var(--lm-sheen), 0 4px 14px rgba(0, 0, 0, 0.2);
@@ -1188,6 +1191,8 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 }
 
 {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusNameContainer}} {
+    height: auto !important;
+    min-height: 36px;
     justify-content: center !important;
     align-items: center !important;
     gap: 0 !important;
@@ -1199,9 +1204,26 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     justify-content: center !important;
     align-items: center !important;
     flex-wrap: wrap;
-    gap: 6px 22px;
+    gap: 4px 18px;
     margin: 0 !important;
     padding: 0 !important;
+}
+
+/* Steam's cloud status container stacks 4 hidden width-reservation rows below
+   the visible status with height: 0, but they still inherit GameStat's 6px
+   vertical padding (48px total), pushing sibling stats down and out of the pill. */
+{{PlayBarGameName.InPage}} {{PlayBarGameName.PlayBarCloudStatusContainer}} {{PlayBarGameName.SuperimposedGridItems}}:not({{PlayBarGameName.Visible}}) {
+    height: 0 !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    overflow: hidden !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.GameStat}} {
+    align-items: center;
 }
 
 /* Family Library row: compact centered glass pill under the stats bar */
