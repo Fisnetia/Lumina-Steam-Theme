@@ -57,15 +57,25 @@
         const path = m ? m[1] : route();
         return "steam:/" + (path || "/");
     };
+    // Dismiss any open Steam tooltip on URL-bar status/reload icons before
+    // CSS hides or disables pointer events on them (hiding skips mouseleave).
+    const dismissTooltips = (bar) => {
+        for (const el of bar.querySelectorAll("{{ForceOpaqueBackground.StatusIcon}}")) {
+            el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false }));
+            el.dispatchEvent(new PointerEvent("pointerleave", { bubbles: false }));
+        }
+    };
     const rewrite = (bar) => {
         const url = bar.querySelector("{{ForceOpaqueBackground.URL}}");
         if (!url) return;
         const path = steamPath(url.textContent);
         if (path) {
+            const entered = !bar.dataset.lmSteamPath;
             for (const node of url.childNodes) if (node.nodeType === 3) node.nodeValue = "";
             if (url.firstChild && url.firstChild.nodeType === 3) url.firstChild.nodeValue = path;
             else url.prepend(path);
             bar.dataset.lmSteamPath = path;
+            if (entered) dismissTooltips(bar);
         } else if (!url.textContent.startsWith("steam://")) {
             delete bar.dataset.lmSteamPath;
         }
@@ -127,6 +137,7 @@
             input.className = "lm-url-input";
             input.spellcheck = false;
             input.value = url ? url.textContent : "";
+            dismissTooltips(bar);
             bar.classList.add("lm-url-editing");
             btn.before(input);
             input.focus();
