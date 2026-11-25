@@ -31,6 +31,8 @@
     const LOGIN = "{{LoginStaticBackground}}";
     const LEFT_PANE = "{{GameListHomeAndSearch.Container}}";
     const RIGHT_PANE = "{{LeftListSizableContainer.AppDetailsTransitionGroup}}";
+    const INGAME_SEL = "{{TitleBarControls.AccountMenu}}.ingame, {{TitleBarControls.AccountMenu}} .avatarHolder.ingame";
+    const shouldPause = () => document.hidden || (isMain && !document.hasFocus() && !!document.querySelector(INGAME_SEL));
     // the login window is told apart by its content, which renders late
     const host = () => isMain ? document.querySelector(FRAME)
         : document.querySelector(LOGIN) || (inBody ? document.body : null);
@@ -605,12 +607,12 @@ void main() {
 
     const scheduleComposite = () => {
         panesDirty = true;
-        if (compRaf || !canvas || document.hidden) return;
+        if (compRaf || !canvas || shouldPause()) return;
         const auroraPanes = useAuroraPanes(), wallGl = isWallGlMode();
         if (!auroraPanes && !wallGl) return;
         compRaf = requestAnimationFrame(() => {
             compRaf = 0;
-            if (!canvas || document.hidden) return;
+            if (!canvas || shouldPause()) return;
             if (useAuroraPanes()) {
                 if (hasAuroraFrame) renderComposite(fboA.tex, UNIT_COVER, 0, 0, 0);
                 else drawAurora();
@@ -679,7 +681,7 @@ void main() {
     };
 
     const onVideoReady = () => {
-        if (!wallVideo || !isWallGlMode() || document.hidden) return;
+        if (!wallVideo || !isWallGlMode() || shouldPause()) return;
         if (wallVideo.readyState >= 2 && wallVideo.videoWidth > 0) {
             if (uploadWall(wallVideo, wallVideo.videoWidth, wallVideo.videoHeight)) drawWallComposite();
             else setWallActive(false);
@@ -689,7 +691,7 @@ void main() {
 
     const onVideoFrame = (_now, meta) => {
         rvfcId = 0;
-        if (!wallVideo || !isWallGlMode() || document.hidden) return;
+        if (!wallVideo || !isWallGlMode() || shouldPause()) return;
         const frames = meta && typeof meta.presentedFrames === "number" ? meta.presentedFrames : -1;
         if (frames !== -1 && frames === lastVideoFrame) {
             scheduleVideoFrame();
@@ -708,7 +710,7 @@ void main() {
     };
 
     const scheduleVideoFrame = () => {
-        if (!wallVideo || document.hidden || !isWallGlMode()) return;
+        if (!wallVideo || shouldPause() || !isWallGlMode()) return;
         if (typeof wallVideo.requestVideoFrameCallback === "function") {
             if (!rvfcId) rvfcId = wallVideo.requestVideoFrameCallback(onVideoFrame);
         } else {
@@ -779,7 +781,7 @@ void main() {
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const loop = (now) => {
         raf = 0;
-        if (!canvas || document.hidden) return;
+        if (!canvas || shouldPause()) return;
         if (mode === "aurora") {
             if (now - last >= 1000 / FPS - 2) { last = now; drawAurora(); }
             if (!still.matches) raf = requestAnimationFrame(loop);
@@ -799,7 +801,7 @@ void main() {
             }
         }
     };
-    const start = () => { if (canvas && !raf && !document.hidden) raf = requestAnimationFrame(loop); };
+    const start = () => { if (canvas && !raf && !shouldPause()) raf = requestAnimationFrame(loop); };
 
     const mount = () => {
         const parent = host();
@@ -884,27 +886,25 @@ void main() {
         else setFlags(false, false);
     };
 
-    sync();
-    setInterval(() => { if (!document.hidden) sync(); }, 1000);   // the host is re-rendered by React
-    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") sync(); }, true);
-    if (isMain) {
-        window.addEventListener("lm-wall-change", sync);
-        window.addEventListener("resize", scheduleComposite, { passive: true });
-        if (typeof MutationObserver !== "undefined") {
-            const settingsObs = new MutationObserver(sync);
-            if (document.head) settingsObs.observe(document.head, { childList: true });
-            settingsObs.observe(html, { attributes: true, attributeFilter: ["style"] });
+    const pauseLoops = () => {
+        cancelAnimationFrame(raf); raf = 0;
+        cancelAnimationFrame(compRaf); compRaf = 0;
+        if (wallVideo && rvfcId && typeof wallVideo.cancelVideoFrameCallback === "function") {
+            try { wallVideo.cancelVideoFrameCallback(rvfcId); } catch {}
+            rvfcId = 0;
         }
-    }
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            cancelAnimationFrame(raf); raf = 0;
-            if (wallVideo && rvfcId && typeof wallVideo.cancelVideoFrameCallback === "function") {
-                try { wallVideo.cancelVideoFrameCallback(rvfcId); } catch {}
-                rvfcId = 0;
-            }
+    };
+
+    let wasPaused = false;
+    const syncActivity = () => {
+        const paused = shouldPause();
+        if (paused) {
+            wasPaused = true;
+            pauseLoops();
             return;
         }
+        if (!wasPaused) return;
+        wasPaused = false;
         panesDirty = true;
         sync();
         if (mode === "aurora") start();
@@ -913,5 +913,25 @@ void main() {
             else if (wallSceneEl) start();
             if (wallUploaded) scheduleComposite();
         }
-    });
+    };
+
+    sync();
+    setInterval(() => {
+        if (document.hidden) return;
+        syncActivity();
+        if (!shouldPause()) sync();
+    }, 1000);   // the host is re-rendered by React
+    document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") sync(); }, true);
+    if (isMain) {
+        window.addEventListener("lm-wall-change", sync);
+        window.addEventListener("resize", scheduleComposite, { passive: true });
+        window.addEventListener("blur", syncActivity);
+        window.addEventListener("focus", syncActivity);
+        if (typeof MutationObserver !== "undefined") {
+            const settingsObs = new MutationObserver(sync);
+            if (document.head) settingsObs.observe(document.head, { childList: true });
+            settingsObs.observe(html, { attributes: true, attributeFilter: ["style"] });
+        }
+    }
+    document.addEventListener("visibilitychange", syncActivity);
 })();

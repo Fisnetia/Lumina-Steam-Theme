@@ -28,8 +28,10 @@
     const CONDITION = "Backdrop";
     const PLUGIN = "lumina-extended";
     const FRAME = "{{ForceOpaqueBackground.OuterFrame}}";
+    const INGAME_SEL = "{{TitleBarControls.AccountMenu}}.ingame, {{TitleBarControls.AccountMenu}} .avatarHolder.ingame";
     const isMain = html.classList.contains("MillenniumWindow_MainSteamWindow");
     const isFriends = html.classList.contains("friendsui-container");
+    const shouldPause = () => document.hidden || (isMain && !document.hasFocus() && !!document.querySelector(INGAME_SEL));
     const channel = "BroadcastChannel" in window ? new BroadcastChannel("lumina") : null;
 
     const themeFile = (document.currentScript && document.currentScript.src) ||
@@ -203,7 +205,7 @@
         const where = layer && wallpaperMode() ? host() : null;
         if (layer && where && layer.parentNode !== where) where.prepend(layer);
         if (layer && layer.tagName === "VIDEO" && layer.isConnected && layer.paused &&
-            document.visibilityState === "visible") layer.play().catch(() => {});
+            !shouldPause()) layer.play().catch(() => {});
     };
 
     // Plugin videos come from another origin; CORS keeps them readable for frame capture.
@@ -211,11 +213,11 @@
         layer = document.createElement("video");
         layer.className = "lm-video-layer";
         if (/^https?:/.test(src)) layer.crossOrigin = "anonymous";
-        Object.assign(layer, { muted: true, loop: true, autoplay: true, playsInline: true, preload: "auto", src });
+        Object.assign(layer, { muted: true, loop: true, autoplay: !shouldPause(), playsInline: true, preload: "auto", src });
         layer.setAttribute("aria-hidden", "true");
         layer.disablePictureInPicture = true;
         placeLayer();
-        if (document.visibilityState === "visible") layer.play().catch(() => {});
+        if (!shouldPause()) layer.play().catch(() => {});
     };
 
     const showScene = async (makeSource, fps = SCENE_FPS) => {
@@ -228,13 +230,13 @@
         if (layer !== el) return null;
         const inst = await W.mount(el, {
             source: makeSource(W), fit: "cover", fps, renderDpr: sceneDpr(),
-            volume: 0, autoplay: document.visibilityState === "visible",
+            volume: 0, autoplay: !shouldPause(),
         });
         if (layer !== el) { inst.destroy({ releasePkgCache: true }); return null; }
         scene = inst;
         inst.on("error", (err) => fail(err));
         // the window may have been shown while mounting, before scene was set
-        if (document.visibilityState === "visible" && inst.paused) inst.resume();
+        if (!shouldPause() && inst.paused) inst.resume();
         return inst;
     };
 
@@ -311,11 +313,24 @@
         refreshCard();
     }
 
-    document.addEventListener("visibilitychange", () => {
-        const on = document.visibilityState === "visible";
-        if (layer && layer.tagName === "VIDEO") on ? layer.play().catch(() => {}) : layer.pause();
-        if (scene) on ? scene.resume() : scene.pause();
-    });
+    const syncPlayback = () => {
+        const on = !shouldPause();
+        if (layer && layer.tagName === "VIDEO") {
+            if (on) { if (layer.isConnected && layer.paused) layer.play().catch(() => {}); }
+            else if (!layer.paused) layer.pause();
+        }
+        if (scene) {
+            if (on) { if (scene.paused) scene.resume(); }
+            else if (!scene.paused) scene.pause();
+        }
+    };
+
+    document.addEventListener("visibilitychange", syncPlayback);
+    if (isMain) {
+        window.addEventListener("blur", syncPlayback);
+        window.addEventListener("focus", syncPlayback);
+        setInterval(() => { if (!document.hidden) syncPlayback(); }, 1000);
+    }
 
     /* ---- mouse ----
      * Steam's UI covers the scene, so its canvas never sees the pointer. Moves
@@ -914,6 +929,7 @@
     };
     const syncLayer = () => {
         syncAcrylic();
+        syncPlayback();
         if (wallpaperMode()) {
             clearTimeout(leaving); leaving = 0;
             if (!layer && liveKind && !state.error) { liveKind = false; apply(); }

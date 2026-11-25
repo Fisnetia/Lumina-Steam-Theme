@@ -95,5 +95,5 @@
     };
     refresh();
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") refresh(); }, true);
-    setInterval(refresh, 2000);   // the container is re-created when the UI re-mounts
+    setInterval(() => { if (!document.hidden) refresh(); }, 2000);   // the container is re-created when the UI re-mounts
 })();

@@ -80,7 +80,7 @@
     };
     html.classList.add("lm-nav-fit");   // the CSS breakpoint steps aside
     watch();
-    setInterval(watch, 1000);
+    setInterval(() => { if (!document.hidden) watch(); }, 1000);
     // the setting changes by stylesheet; links change in head
     const refit = () => { lastLayout = ""; fit(); };
     new MutationObserver(() => requestAnimationFrame(refit)).observe(document.head, { childList: true, subtree: true });
