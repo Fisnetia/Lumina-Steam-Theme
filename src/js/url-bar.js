@@ -59,10 +59,12 @@
     };
     // Dismiss any open Steam tooltip on URL-bar status/reload icons before
     // CSS hides or disables pointer events on them (hiding skips mouseleave).
+    // React delegates onMouseLeave via bubbling mouseout/pointerout, not
+    // non-bubbling mouseleave.
     const dismissTooltips = (bar) => {
         for (const el of bar.querySelectorAll("{{ForceOpaqueBackground.StatusIcon}}")) {
-            el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false }));
-            el.dispatchEvent(new PointerEvent("pointerleave", { bubbles: false }));
+            el.dispatchEvent(new MouseEvent("mouseout", { bubbles: true, relatedTarget: document.body }));
+            el.dispatchEvent(new PointerEvent("pointerout", { bubbles: true, relatedTarget: document.body }));
         }
     };
     const rewrite = (bar) => {
@@ -83,7 +85,14 @@
     const watchAddress = (bar) => {
         // created before the width animation's observer, so it runs first
         new MutationObserver(() => rewrite(bar)).observe(bar, { subtree: true, childList: true, characterData: true });
+        if (bar.parentElement) {
+            new MutationObserver(() => dismissTooltips(bar)).observe(bar.parentElement, {
+                attributes: true,
+                attributeFilter: ["style"],
+            });
+        }
         rewrite(bar);
+        dismissTooltips(bar);
         bar.addEventListener("click", (e) => {
             const path = bar.dataset.lmSteamPath;
             if (path && e.target.closest("{{ForceOpaqueBackground.URLBarText}}")) {
@@ -177,5 +186,8 @@
         hook(bar);
     });
     scan();
+    document.addEventListener("mouseleave", () => {
+        document.querySelectorAll("{{ForceOpaqueBackground.URLBar}}").forEach(dismissTooltips);
+    });
     setInterval(() => { if (!document.hidden) scan(); }, 1000);
 })();

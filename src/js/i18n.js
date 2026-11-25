@@ -19,7 +19,7 @@
         "Blur": "模糊", "Opacity": "不透明度", "Corner radius": "圆角",
         "Menu animation": "菜单动画", "Smooth scrolling": "平滑滚动", "Nav menu": "导航菜单",
         "Wallpaper mouse": "壁纸鼠标响应", "Desktop blur": "桌面模糊", "Game list": "玻璃材质",
-        "Liquid opacity": "液态玻璃不透明度", "Refraction": "折射强度", "Acrylic blur": "模糊",
+        "Liquid opacity": "液态玻璃不透明度", "Refraction": "折射强度", "Liquid blur": "模糊", "Acrylic blur": "模糊",
         "Nav position": "导航位置", "URL bar": "URL 栏",
     };
     // color pickers (root-colors.css)
@@ -37,6 +37,7 @@
         "Game list": "液态玻璃：边缘折射；亚克力：磨砂模糊",
         "Liquid opacity": "液态玻璃的着色深浅",
         "Refraction": "边缘折射的范围",
+        "Liquid blur": "液态玻璃的磨砂模糊程度",
         "Acrylic blur": "亚克力的模糊程度",
         "Opacity": "面板着色深浅，越低越通透",
         "Corner radius": "面板、按钮和菜单的圆角",

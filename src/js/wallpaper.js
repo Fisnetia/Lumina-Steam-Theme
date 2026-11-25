@@ -900,6 +900,7 @@
             if (isAcrylic || isLiquid) {
                 setHidden(document.querySelector('[data-condition="Liquid opacity"]'), isAcrylic);
                 setHidden(document.querySelector('[data-condition="Refraction"]'), isAcrylic);
+                setHidden(document.querySelector('[data-condition="Liquid blur"]'), isAcrylic);
                 setHidden(document.querySelector('[data-condition="Acrylic blur"]'), isLiquid);
             }
         }

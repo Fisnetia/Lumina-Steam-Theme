@@ -110,6 +110,8 @@ html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
 
 {{MenuWrapper.MenuItem}},
 {{contextMenu.contextMenuItem}} {
+    border-top: none !important;
+    border-bottom: none !important;
     border-radius: var(--lm-r-sm) !important;
     color: var(--lm-text) !important;
     transition: background-color 0.12s ease !important;
@@ -122,26 +124,124 @@ html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
     color: #fff !important;
 }
 
-{{MenuWrapper.Separator}},
 {{contextMenu.ContextMenuSeparator}},
-{{contextMenu.ContextMenuHRSeparator}} {
-    border-color: var(--lm-border) !important;
-    background: var(--lm-border) !important;
+{{contextMenu.ContextMenuHRSeparator}},
+{{DialogDropDownMenu_Item.DialogDropDownMenu_Separator}},
+{{MenuWrapper.MenuItem}}{{MenuWrapper.Separator}} {
+    width: auto !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    padding: 0 !important;
+    margin: 4px 10px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: var(--lm-border-strong) !important;
+    pointer-events: none;
 }
 
-/* dialog dropdowns (settings, properties) */
-{{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+/* dialog dropdowns (sorting, shelves, settings, properties).
+   Let DialogMenuPosition's overflow stay visible so the dropdown's outer
+   box-shadow isn't clipped to a faint square box around the rounded corners;
+   the inner DialogDropDownMenu inherits max-height and scrolls instead. */
+html .DialogMenuPosition {
+    overflow: visible !important;
+}
+
+html .DialogMenuPosition > {{DialogDropDownMenu_Item.DialogDropDownMenu}}._DialogInputContainer,
+html {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+    max-height: inherit;
+    padding: 4px !important;
     background: var(--lm-menu-bg) !important;
+    border: none !important;
     border-radius: var(--lm-r) !important;
-    box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen), 0 6px 20px rgba(0, 0, 0, 0.32) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
 
-{{DialogDropDownMenu_Item.DialogDropDownMenu_Item}} {
+html.MillenniumWindow_MainSteamWindow .DialogMenuPosition > {{DialogDropDownMenu_Item.DialogDropDownMenu}}._DialogInputContainer,
+html.MillenniumWindow_MainSteamWindow {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 24%), 100%), transparent) !important;
+    backdrop-filter: blur(22px) saturate(1.4) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-shadow), var(--lm-sheen) !important;
+}
+
+html .DialogMenuPosition {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}},
+html {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}} {
+    border-top: none !important;
+    border-bottom: none !important;
     border-radius: var(--lm-r-sm) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.12s ease, color 0.12s ease !important;
 }
 
-{{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:hover {
+/* Shelf collection dropdown puts OptionsRule directly on the item below a group break */
+{{CollectionDropDown.OptionsRule}} {
+    position: relative;
+    margin-top: 9px !important;
+    padding-top: 6px !important;
+    overflow: visible !important;
+}
+
+{{CollectionDropDown.OptionsRule}}::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: -5px;
+    height: 1px;
+    background: var(--lm-border-strong);
+    pointer-events: none;
+}
+
+html .DialogMenuPosition {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:hover,
+html .DialogMenuPosition {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:focus,
+html {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:hover,
+html {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:focus {
     background: var(--lm-selected) !important;
+    color: #fff !important;
+}
+
+/* ---- Tooltips ---- */
+
+{{TextToolTip.TextToolTip}},
+{{TextToolTip.ToolTipCustom}},
+{{ListItemTooltipBase.ListItemTooltipBase}},
+{{DateToolTip}},
+{{RoutingToolTip.RoutingToolTip}},
+{{RoutingToolTip.PingOrQualityToolTip}},
+{{RoutingToolTip.CloseReasonToolTip}} {
+    background: var(--lm-menu-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: var(--lm-shadow), var(--lm-sheen) !important;
+    color: var(--lm-text) !important;
+    text-shadow: none !important;
+}
+
+html.MillenniumWindow_MainSteamWindow {{TextToolTip.TextToolTip}},
+html.MillenniumWindow_MainSteamWindow {{TextToolTip.ToolTipCustom}},
+html.MillenniumWindow_MainSteamWindow {{ListItemTooltipBase.ListItemTooltipBase}},
+html.MillenniumWindow_MainSteamWindow {{DateToolTip}},
+html.MillenniumWindow_MainSteamWindow {{RoutingToolTip.RoutingToolTip}},
+html.MillenniumWindow_MainSteamWindow {{RoutingToolTip.PingOrQualityToolTip}},
+html.MillenniumWindow_MainSteamWindow {{RoutingToolTip.CloseReasonToolTip}} {
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 26%), 100%), transparent) !important;
+    backdrop-filter: blur(20px) saturate(1.4) !important;
+}
+
+{{TextToolTip.TextToolTip}} {
+    padding: 6px 10px !important;
+}
+
+{{TextToolTip.ToolTipCustom}} {{TextToolTip.ToolTipTitle}} {
+    color: #fff !important;
+}
+
+{{TextToolTip.ToolTipCustom}} {{TextToolTip.ToolTipInsetContent}} {
+    color: var(--lm-text-dim) !important;
 }
 
 /* ---- Steam Settings window ----
@@ -176,60 +276,80 @@ html.ModalDialogPopup body::before {
     filter: blur(var(--lm-blur-px)) saturate(1.15);
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListColumn {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog_PageListColumn {
     background: var(--lm-panel-strong) !important;
     border-right: 1px solid var(--lm-border);
     box-shadow: var(--lm-sheen);
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem {
-    border-radius: var(--lm-r-sm);
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) {{GamepadDialogContent.FieldDescription}},
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .DialogBodyText,
+html.MillenniumWindow_GameProperties {{AppProperties.AppProperties}} .DialogBody,
+html.MillenniumWindow_GameProperties {{AppProperties.DefaultOptionText}},
+html.MillenniumWindow_GameProperties {{AppProperties.SecondaryText}},
+html.MillenniumWindow_GameProperties {{AppProperties.DescText}},
+html.MillenniumWindow_GameProperties {{AppProperties.Detail}},
+html.MillenniumWindow_GameProperties {{AppProperties.LoadOrderDesc}},
+html.MillenniumWindow_GameProperties {{AppProperties.PrivacyDLCDescription}},
+html.MillenniumWindow_GameProperties {{AppProperties.SubscriptionTime}} {
+    color: rgba(235, 240, 248, 0.84) !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem:hover {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog_PageListItem {
+    border-radius: var(--lm-r-sm);
+    transition: background-color 0.12s ease;
+}
+
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog_PageListItem:hover {
     background: var(--lm-hover) !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageListItem.Active {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog_PageListItem.Active {
     background: var(--lm-selected) !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingDialog_ContentColumn,
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageContent {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingDialog_ContentColumn,
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog_PageContent {
     background: var(--lm-panel) !important;
     background-image: none !important;
 }
 
-html.MillenniumWindow_Settings .PagedSettingsDialog_PageContent {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .PagedSettingsDialog_PageContent {
     background: transparent !important;
 }
 
 /* setting rows and the big buttons on the Account page */
-html.MillenniumWindow_Settings .Field.Background,
-html.MillenniumWindow_Settings .SettingsDialogFatButton {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .Field.Background,
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .SettingsDialogFatButton {
     background: var(--lm-panel-soft) !important;
-    border-radius: var(--lm-r-sm);
+    border-radius: var(--lm-r-sm) !important;
 }
 
-html.MillenniumWindow_Settings .SettingsDialogFatButton:hover {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .SettingsDialogFatButton:hover {
     background: var(--lm-hover) !important;
 }
 
 /* a row Steam builds without Field (Downloads: game update timing) */
-html.MillenniumWindow_Settings {{FakeContainer}} {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) {{FakeContainer}} {
     background: var(--lm-panel-soft) !important;
     border-radius: var(--lm-r-sm);
 }
 
-/* segmented choices (Library: UI element size) */
-html.MillenniumWindow_Settings .Shared_Radio_Group {
+/* segmented choices (Library: UI element size; Game Properties toggles) */
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .Shared_Radio_Group,
+html.MillenniumWindow_GameProperties .DialogToggleField_Control {
     gap: 2px;
     padding: 3px;
     background: var(--lm-panel-soft) !important;
-    border-radius: var(--lm-r-sm);
+    border-radius: var(--lm-r-sm) !important;
 }
 
-html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .Shared_Radio_Group .RadioButton,
+html.MillenniumWindow_GameProperties .DialogToggleField_Option {
     background: transparent !important;
     background-image: none !important;
     border-radius: calc(var(--lm-r-sm) - 2px) !important;
@@ -238,14 +358,78 @@ html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton {
     transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton:hover {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .Shared_Radio_Group .RadioButton:hover,
+html.MillenniumWindow_GameProperties .DialogToggleField_Option:hover:not(.Active) {
     background: var(--lm-hover) !important;
     color: var(--lm-text) !important;
 }
 
-html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton.Active {
+:is(html.MillenniumWindow_Settings, html.MillenniumWindow_GameProperties) .Shared_Radio_Group .RadioButton.Active,
+html.MillenniumWindow_GameProperties .DialogToggleField_Option.Active {
     background: var(--lm-selected) !important;
     color: #fff !important;
+}
+
+/* Game Properties dropdowns, checkboxes, dividers, and tab tables (DLC, Betas, Controller, Workshop) */
+html.MillenniumWindow_GameProperties .DialogDropDown,
+html.MillenniumWindow_GameProperties {{AppProperties.Checkbox}} {
+    background: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border) !important;
+    transition: background-color 0.12s ease !important;
+}
+
+html.MillenniumWindow_GameProperties .DialogDropDown:hover,
+html.MillenniumWindow_GameProperties {{AppProperties.Checkbox}}:hover {
+    background: var(--lm-hover) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong) !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.SectionTopLine}} {
+    border-top-color: var(--lm-border) !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.SteamInputStatusGrid}},
+html.MillenniumWindow_GameProperties {{AppProperties.DlcGrid}},
+html.MillenniumWindow_GameProperties {{AppProperties.WorkshopItemRowsScroll}} {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: none !important;
+    overflow-x: hidden;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.DlcHeader}},
+html.MillenniumWindow_GameProperties {{AppProperties.WorkshopHeader}} {
+    background: var(--lm-panel-strong) !important;
+    border-bottom: 1px solid var(--lm-border) !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.BetaHeaderRow}} {
+    background: var(--lm-panel-strong) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-bottom: none !important;
+    border-radius: var(--lm-r-sm) var(--lm-r-sm) 0 0 !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.BetasTable}} {
+    background: transparent !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: 0 0 var(--lm-r-sm) var(--lm-r-sm) !important;
+    box-shadow: none !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.BetaRow}}{{AppProperties.OddRow}},
+html.MillenniumWindow_GameProperties {{AppProperties.WorkshopItemRow}} {
+    background: var(--lm-panel-soft) !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.BetaRow}}{{AppProperties.EvenRow}} {
+    background: transparent !important;
+}
+
+html.MillenniumWindow_GameProperties {{AppProperties.WorkshopItemAuthorSnapshot}} {
+    background: var(--lm-panel-strong) !important;
 }
 
 /* ---- Title bar buttons ---- */
@@ -271,7 +455,7 @@ html.MillenniumWindow_Settings .Shared_Radio_Group .RadioButton.Active {
    Steam's dialog layout: a glass panel over the window's backdrop in dialog
    windows, and over the library, blurring it, for modals in the main window
    (account switcher). Buttons, inputs and lists inside follow the theme. */
-html.ModalDialogPopup:not(.MillenniumWindow_Settings) .DialogContent._DialogLayout {
+html.ModalDialogPopup:not(.MillenniumWindow_Settings):not(.MillenniumWindow_GameProperties) .DialogContent._DialogLayout {
     background: var(--lm-panel) !important;
     background-image: none !important;
 }
@@ -344,6 +528,34 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
 {{AddNonSteamGameDialog.GameList}} {
     background: var(--lm-panel-soft) !important;
     border-radius: var(--lm-r-sm);
+}
+
+/* Install game dialog: drive selector rows and game icon */
+{{FolderSelector.FolderOption}} {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: var(--lm-sheen) !important;
+    transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+{{FolderSelector.FolderOption}}:hover {
+    background: var(--lm-hover) !important;
+    border-color: var(--lm-border-strong) !important;
+}
+
+{{FolderSelector.FolderOption}}.Active {
+    background: var(--lm-selected) !important;
+    border-color: color-mix(in srgb, var(--lm-a) 55%, transparent) !important;
+    color: #fff !important;
+}
+
+{{FolderSelector.FolderOption}}.Active:hover {
+    background: var(--lm-selected-hover) !important;
+}
+
+{{FolderSelector.AppLogo}} {
+    border-radius: 6px !important;
 }
 
 {{AddNonSteamGameDialog.Header}} {

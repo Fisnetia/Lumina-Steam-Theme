@@ -156,12 +156,13 @@ precision highp float;
 precision mediump float;
 #endif
 uniform sampler2D uTex;
+uniform sampler2D uPaneTex;
+uniform float uHasPaneTex;
 uniform vec2 uRes;      // physical canvas size
 uniform vec2 uCss;      // CSS px size of canvas
 uniform vec4 uCover;    // cover UV scale.xy, offset.zw
 uniform float uGrade;   // 0 already graded, 1 video/scene, 2 picture
 uniform float uFlipY;   // 1 for uploaded DOM media, 0 for FBOs
-uniform float uPaneBlur; // 0..1 glass softness when backdrop blur < 2 px
 uniform vec4 uRect0;    // left, top, width, height in CSS px
 uniform vec4 uMeta0;    // radius, bevel, scale, opacity
 uniform vec4 uRect1;
@@ -189,18 +190,6 @@ vec3 sampleRaw(vec2 uv) {
     return texture2D(uTex, suv).rgb;
 }
 
-// Lightweight 4-tap ~2 px softness matching --lm-liquid-tone's blur(2px)
-// when the wallpaper itself is sharp (--lm-blur-px < 2).
-vec3 sampleInterior(vec2 uv) {
-    if (uPaneBlur <= 0.01) return grade(sampleRaw(uv));
-    vec2 d = (1.15 * uPaneBlur) / uCss;
-    vec3 c = (sampleRaw(uv + vec2( d.x,  d.y))
-            + sampleRaw(uv + vec2(-d.x,  d.y))
-            + sampleRaw(uv + vec2( d.x, -d.y))
-            + sampleRaw(uv + vec2(-d.x, -d.y))) * 0.25;
-    return grade(c);
-}
-
 vec3 applyPane(vec3 base, vec2 pos, vec2 uv, vec4 rect, vec4 meta) {
     if (rect.z <= 1.0 || rect.w <= 1.0 || meta.w <= 0.001) return base;
     vec2 halfSize = rect.zw * 0.5;
@@ -224,12 +213,19 @@ vec3 applyPane(vec3 base, vec2 pos, vec2 uv, vec4 rect, vec4 meta) {
     if (disp > 0.001) {
         // uv.y grows upward while pos.y grows downward; invert n.x and keep n.y to sample inward
         vec2 dirUv = vec2(-n.x, n.y) / uCss;
-        float rCh = sampleRaw(uv + dirUv * disp).r;
-        float gCh = sampleRaw(uv + dirUv * (disp * 0.86)).g;
-        float bCh = sampleRaw(uv + dirUv * (disp * 0.72)).b;
-        body = grade(vec3(rCh, gCh, bCh));
+        if (uHasPaneTex > 0.5) {
+            float rCh = texture2D(uPaneTex, clamp(uv + dirUv * disp, 0.001, 0.999)).r;
+            float gCh = texture2D(uPaneTex, clamp(uv + dirUv * (disp * 0.86), 0.001, 0.999)).g;
+            float bCh = texture2D(uPaneTex, clamp(uv + dirUv * (disp * 0.72), 0.001, 0.999)).b;
+            body = vec3(rCh, gCh, bCh);
+        } else {
+            float rCh = sampleRaw(uv + dirUv * disp).r;
+            float gCh = sampleRaw(uv + dirUv * (disp * 0.86)).g;
+            float bCh = sampleRaw(uv + dirUv * (disp * 0.72)).b;
+            body = grade(vec3(rCh, gCh, bCh));
+        }
     } else {
-        body = sampleInterior(uv);
+        body = uHasPaneTex > 0.5 ? texture2D(uPaneTex, clamp(uv, 0.001, 0.999)).rgb : base;
     }
 
     // 4 px coloured rim band
@@ -270,9 +266,10 @@ void main() {
     let wallTex = null, hasAuroraFrame = false;
     const fboA = { fbo: null, tex: null, w: 0, h: 0, ok: false };
     const fboB = { fbo: null, tex: null, w: 0, h: 0, ok: false };
+    const fboC = { fbo: null, tex: null, w: 0, h: 0, ok: false };
     let raf = 0, compRaf = 0, last = 0, colors = [0.49, 0.77, 1];
-    let mode = "", liquid = false, strength = 50, blurPx = 0, radiusStr = "";
-    let failed = false;
+    let mode = "", liquid = false, strength = 50, blurPx = 0, liquidBlur = 0, radiusStr = "";
+    let failed = false, lostCount = 0, retryTimer = 0;
     const uni = {}, pUni = {}, bUni = {};
 
     // Active wallpaper media state (main window only)
@@ -342,12 +339,23 @@ void main() {
     };
 
     const build = () => {
-        canvas = document.createElement("canvas");
-        canvas.className = "lm-aurora-layer";
-        gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false });
-        if (!gl) { canvas = null; return false; }
-        // the windows share one renderer and its WebGL context limit
-        canvas.addEventListener("webglcontextlost", () => { failed = true; unmount(); });
+        const c = document.createElement("canvas");
+        c.className = "lm-aurora-layer";
+        gl = c.getContext("webgl", { alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false });
+        if (!gl) return false;
+        canvas = c;
+        // the windows share one renderer and its WebGL context limit; ignore
+        // context-lost events fired by our own unmount() and retry real losses
+        c.addEventListener("webglcontextlost", (e) => {
+            if (c !== canvas) return;
+            e.preventDefault();
+            unmount();
+            failed = true;
+            if (++lostCount <= 5) {
+                clearTimeout(retryTimer);
+                retryTimer = setTimeout(() => { retryTimer = 0; failed = false; sync(); }, 2000);
+            }
+        });
         prog = link(VERT, FRAG);
         if (!prog) { canvas = gl = null; return false; }
         vbo = gl.createBuffer();
@@ -359,7 +367,7 @@ void main() {
         if (isMain) {
             paneProg = link(VERT, PANE_FRAG);
             if (paneProg) {
-                for (const n of ["uTex", "uRes", "uCss", "uCover", "uGrade", "uFlipY", "uPaneBlur", "uRect0", "uMeta0", "uRect1", "uMeta1"]) {
+                for (const n of ["uTex", "uPaneTex", "uHasPaneTex", "uRes", "uCss", "uCover", "uGrade", "uFlipY", "uRect0", "uMeta0", "uRect1", "uMeta1"]) {
                     pUni[n] = gl.getUniformLocation(paneProg, n);
                 }
                 pUni.p = gl.getAttribLocation(paneProg, "p");
@@ -401,12 +409,21 @@ void main() {
     let panesDirty = true, cachedCw = 0, cachedCh = 0;
     let cachedR0 = zeroRect, cachedM0 = zeroMeta, cachedR1 = zeroRect, cachedM1 = zeroMeta;
 
+    const findPane = (sel) => {
+        const all = document.querySelectorAll(sel);
+        for (const el of all) {
+            if (el.offsetWidth > 1 && el.offsetHeight > 1) return el;
+        }
+        return all[0] || null;
+    };
+
     const ensurePanes = () => {
         let changed = false;
         for (let i = 0; i < 2; i++) {
-            if (!paneEls[i] || !paneEls[i].isConnected) {
-                const el = document.querySelector(PANE_SEL[i]);
-                if (el !== paneEls[i]) { paneEls[i] = el; changed = true; }
+            const cur = paneEls[i];
+            if (!cur || !cur.isConnected || !(cur.offsetWidth > 1 && cur.offsetHeight > 1)) {
+                const el = findPane(PANE_SEL[i]);
+                if (el !== cur) { paneEls[i] = el; changed = true; }
                 if (el && paneObs && !watched.has(el)) { watched.add(el); paneObs.observe(el); }
             }
         }
@@ -471,9 +488,8 @@ void main() {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
 
-    const blurWall = (cw, ch) => {
-        if (!blurProg || !wallUploaded) return false;
-        const r = blurPx;
+    const blurToFbo = (srcTex, cov, flipY, gradeMode, cw, ch, r, outSlot) => {
+        if (!blurProg || !srcTex || !(r > 0.01)) return false;
         let scale = 1, passes = 1;
         if (r > 24) { scale = 0.125; passes = 3; }
         else if (r > 10) { scale = 0.25; passes = 2; }
@@ -481,10 +497,9 @@ void main() {
         else if (r > 3) { scale = 0.5; passes = 1; }
         const bw = Math.max(2, Math.round(cw * scale));
         const bh = Math.max(2, Math.round(ch * scale));
-        if (!ensureFbo(fboA, bw, bh) || !ensureFbo(fboB, bw, bh)) return false;
+        if (!ensureFbo(outSlot, bw, bh) || !ensureFbo(fboB, bw, bh)) return false;
 
         const sigma = (r * scale) / Math.sqrt(passes);
-        const cov = coverUv(cw, ch, wallMediaW, wallMediaH);
 
         gl.useProgram(blurProg);
         bindQuad(bUni.p);
@@ -498,29 +513,26 @@ void main() {
             const first = i === 0, lastPass = i === passes - 1;
             // Horizontal pass -> fboB
             gl.bindFramebuffer(gl.FRAMEBUFFER, fboB.fbo);
-            gl.bindTexture(gl.TEXTURE_2D, first ? wallTex : fboA.tex);
+            gl.bindTexture(gl.TEXTURE_2D, first ? srcTex : outSlot.tex);
             gl.uniform4fv(bUni.uCover, first ? cov : UNIT_COVER);
             gl.uniform2f(bUni.uDir, 1 / bw, 0);
             gl.uniform1f(bUni.uGrade, 0);
-            gl.uniform1f(bUni.uFlipY, first ? 1 : 0);
+            gl.uniform1f(bUni.uFlipY, first ? flipY : 0);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-            // Vertical pass -> fboA
-            gl.bindFramebuffer(gl.FRAMEBUFFER, fboA.fbo);
+            // Vertical pass -> outSlot
+            gl.bindFramebuffer(gl.FRAMEBUFFER, outSlot.fbo);
             gl.bindTexture(gl.TEXTURE_2D, fboB.tex);
             gl.uniform4fv(bUni.uCover, UNIT_COVER);
             gl.uniform2f(bUni.uDir, 0, 1 / bh);
-            gl.uniform1f(bUni.uGrade, lastPass ? wallGrade : 0);
+            gl.uniform1f(bUni.uGrade, lastPass ? gradeMode : 0);
             gl.uniform1f(bUni.uFlipY, 0);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
-
-        wallBlurred = true;
-        lastBlurKey = `${cw}x${ch}x${r}x${wallGrade}`;
         return true;
     };
 
-    const renderComposite = (tex, cov, gradeMode, flipY, paneBlur) => {
+    const renderComposite = (tex, cov, gradeMode, flipY, paneTex) => {
         if (!canvas || !gl || !paneProg || !tex) return false;
         if (!refreshLayout()) return false;
         const cw = cachedCw, ch = cachedCh;
@@ -535,17 +547,26 @@ void main() {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.uniform1i(pUni.uTex, 0);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, paneTex || tex);
+        gl.uniform1i(pUni.uPaneTex, 1);
+        gl.uniform1f(pUni.uHasPaneTex, paneTex ? 1 : 0);
+        gl.activeTexture(gl.TEXTURE0);
         gl.uniform2f(pUni.uRes, pw, ph);
         gl.uniform2f(pUni.uCss, cw, ch);
         gl.uniform4fv(pUni.uCover, cov);
         gl.uniform1f(pUni.uGrade, gradeMode);
         gl.uniform1f(pUni.uFlipY, flipY);
-        gl.uniform1f(pUni.uPaneBlur, paneBlur);
         gl.uniform4fv(pUni.uRect0, cachedR0);
         gl.uniform4fv(pUni.uMeta0, cachedM0);
         gl.uniform4fv(pUni.uRect1, cachedR1);
         gl.uniform4fv(pUni.uMeta1, cachedM1);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        // Unbind TEXTURE1 so fboC.tex is never bound as an input while rendered to as an FBO
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.activeTexture(gl.TEXTURE0);
+        lostCount = 0;
         return true;
     };
 
@@ -591,16 +612,31 @@ void main() {
         if (!canvas || !gl || !wallUploaded || !isWallGlMode()) return false;
         if (!refreshLayout()) return false;
         const cw = cachedCw, ch = cachedCh;
-        if (blurPx > 0.01) {
-            const key = `${cw}x${ch}x${blurPx}x${wallGrade}`;
+        const cov = coverUv(cw, ch, wallMediaW, wallMediaH);
+        const needBgBlur = blurPx > 0.01;
+        const needPaneBlur = liquidBlur > 0.01;
+        if (needBgBlur || needPaneBlur) {
+            const key = `${cw}x${ch}x${blurPx}x${liquidBlur}x${wallGrade}`;
             if (!wallBlurred || lastBlurKey !== key) {
-                if (!blurWall(cw, ch)) { setWallActive(false); return false; }
+                if (needBgBlur && !blurToFbo(wallTex, cov, 1, wallGrade, cw, ch, blurPx, fboA)) {
+                    setWallActive(false); return false;
+                }
+                if (needPaneBlur) {
+                    const paneR = needBgBlur ? Math.hypot(blurPx, liquidBlur) : liquidBlur;
+                    if (!blurToFbo(wallTex, cov, 1, wallGrade, cw, ch, paneR, fboC)) {
+                        setWallActive(false); return false;
+                    }
+                }
+                wallBlurred = true;
+                lastBlurKey = key;
             }
-            if (!renderComposite(fboA.tex, UNIT_COVER, 0, 0, Math.max(0, 1 - blurPx / 2))) return false;
-        } else {
-            const cov = coverUv(cw, ch, wallMediaW, wallMediaH);
-            if (!renderComposite(wallTex, cov, wallGrade, 1, 1)) return false;
         }
+        const bgTex = needBgBlur ? fboA.tex : wallTex;
+        const bgCov = needBgBlur ? UNIT_COVER : cov;
+        const bgGrade = needBgBlur ? 0 : wallGrade;
+        const bgFlipY = needBgBlur ? 0 : 1;
+        const paneTex = needPaneBlur ? fboC.tex : null;
+        if (!renderComposite(bgTex, bgCov, bgGrade, bgFlipY, paneTex)) return false;
         setWallActive(true);
         return true;
     };
@@ -614,8 +650,11 @@ void main() {
             compRaf = 0;
             if (!canvas || shouldPause()) return;
             if (useAuroraPanes()) {
-                if (hasAuroraFrame) renderComposite(fboA.tex, UNIT_COVER, 0, 0, 0);
-                else drawAurora();
+                if (hasAuroraFrame && refreshLayout()) {
+                    const paneTex = liquidBlur > 0.01 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, cachedCw, cachedCh, liquidBlur, fboC)
+                        ? fboC.tex : null;
+                    renderComposite(fboA.tex, UNIT_COVER, 0, 0, paneTex);
+                } else drawAurora();
             } else if (isWallGlMode() && wallUploaded) {
                 drawWallComposite();
             }
@@ -661,7 +700,9 @@ void main() {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, fboA.fbo);
                 renderAurora(aw, ah);
                 hasAuroraFrame = true;
-                renderComposite(fboA.tex, UNIT_COVER, 0, 0, 0);
+                const paneTex = liquidBlur > 0.01 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, cachedCw, cachedCh, liquidBlur, fboC)
+                    ? fboC.tex : null;
+                renderComposite(fboA.tex, UNIT_COVER, 0, 0, paneTex);
                 return;
             }
         }
@@ -822,17 +863,20 @@ void main() {
         watchedFrame = watchedLocal = watchedWeb = null;
         watched = new WeakSet();
         paneEls[0] = paneEls[1] = null;
-        if (canvas) {
-            canvas.remove();
-            const lose = gl && !gl.isContextLost() && gl.getExtension("WEBGL_lose_context");
+        const oldCanvas = canvas;
+        const oldGl = gl;
+        canvas = gl = prog = paneProg = blurProg = vbo = wallTex = null;
+        if (oldCanvas) {
+            oldCanvas.remove();
+            const lose = oldGl && !oldGl.isContextLost() && oldGl.getExtension("WEBGL_lose_context");
             if (lose) lose.loseContext();
         }
-        canvas = gl = prog = paneProg = blurProg = vbo = wallTex = null;
         wallTexW = wallTexH = 0;
         panesDirty = true;
         cachedCw = cachedCh = 0;
         resetFboSlot(fboA);
         resetFboSlot(fboB);
+        resetFboSlot(fboC);
         hasAuroraFrame = false;
     };
 
@@ -848,10 +892,12 @@ void main() {
         if (!Number.isNaN(rf)) strength = Math.min(Math.max(rf, 0), 100);
         const bp = parseFloat(cs.getPropertyValue("--lm-blur-px"));
         if (!Number.isNaN(bp)) blurPx = Math.min(Math.max(bp, 0), 64);
+        const lb = parseFloat(cs.getPropertyValue("--lm-liquid-blur"));
+        if (!Number.isNaN(lb)) liquidBlur = Math.min(Math.max(lb, 0), 24);
         const rs = cs.getPropertyValue("--lm-radius").trim();
         if (rs) radiusStr = rs;
 
-        const settingsKey = `${mode}|${liquid}|${strength}|${blurPx}|${radiusStr}`;
+        const settingsKey = `${mode}|${liquid}|${strength}|${blurPx}|${liquidBlur}|${radiusStr}`;
         const changed = settingsKey !== prevSettings;
         const modeChanged = mode !== prevMode;
         prevSettings = settingsKey;
@@ -865,8 +911,9 @@ void main() {
             canvas.style.visibility = "";
             const ap = useAuroraPanes();
             setFlags(ap, false);
+            if (ap && ((paneEls[0] && cachedR0[2] < 2) || (paneEls[1] && cachedR1[2] < 2))) panesDirty = true;
             start();
-            if (modeChanged || ap !== prevAuroraPanes || (ap && changed)) {
+            if (modeChanged || ap !== prevAuroraPanes || (ap && (changed || panesDirty))) {
                 prevAuroraPanes = ap;
                 drawAurora();
             }
@@ -878,7 +925,8 @@ void main() {
             if (modeChanged) { cancelAnimationFrame(raf); raf = 0; }
             if (!mount()) return;
             bindWallSource();
-            if (wallUploaded && changed) scheduleComposite();
+            if ((paneEls[0] && cachedR0[2] < 2) || (paneEls[1] && cachedR1[2] < 2)) panesDirty = true;
+            if (wallUploaded && (changed || panesDirty)) scheduleComposite();
             return;
         }
 

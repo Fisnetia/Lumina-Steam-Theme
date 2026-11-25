@@ -18,7 +18,8 @@
     to   { opacity: 1; transform: none; }
 }
 
-{{contextMenu.contextMenu}}.ready {
+{{contextMenu.contextMenu}}.ready,
+.DialogMenuPosition.ready > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
     animation: lm-menu-fade 240ms ease-out backwards;
 }
 
@@ -97,8 +98,15 @@
 
 /* Steam Settings: the page body is replaced on every switch (the header stays).
    It is the scroll container, so its contents move, not its scrollbar. */
-html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > * {
+html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > *,
+html.MillenniumWindow_GameProperties .DialogContent_InnerWidth > .DialogBody > * {
     animation: lm-page-in 200ms ease-out backwards;
+}
+
+/* In-window modal dialogs (Install, Uninstall, Account Switcher, confirmations) */
+.FullModalOverlay .ModalOverlayBackground,
+.FullModalOverlay .ModalPosition_Content {
+    animation: lm-page-in 180ms ease-out backwards;
 }
 
 /* Collection page: rows fade in one after another (js/library-anim.js). */
@@ -121,10 +129,15 @@ html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > * {
     .lm-row-up,
     .lm-row-in,
     {{LeftListSizableContainer.AppDetailsMain}} > {{AppDetailsOverviewPanel.Container}},
+    html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > *,
+    html.MillenniumWindow_GameProperties .DialogContent_InnerWidth > .DialogBody > *,
+    .FullModalOverlay .ModalOverlayBackground,
+    .FullModalOverlay .ModalPosition_Content,
     .lm-morph.open,
     .lm-morph.open .lm-first .lm-morph-item,
     {{contextMenu.contextMenu}}.ready,
-    {{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}} {
+    {{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}},
+    .DialogMenuPosition.ready > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
         animation: none !important;
     }
 }

@@ -21,9 +21,15 @@ html {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] {{ForceOpaqueBackgr
 
 /* On Steam pages the hidden browser's address is a data: URI, so Steam leaves
    the globe icon's tooltip at its default "#Browser_Loading" string; ignore
-   pointer events on the icon so hovering it cannot pop or stick that tooltip. */
+   pointer events on the icon and hide any already-open tooltip popover so
+   switching tabs cannot leave it stuck on screen. */
 html {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] {{ForceOpaqueBackground.StatusIcon}}{{ForceOpaqueBackground.LockIcon}} {
     pointer-events: none !important;
+}
+
+html {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] {{ForceOpaqueBackground.StatusIcon}} {{HoverPosition.HoverPositionOuter}},
+html {{ForceOpaqueBackground.BrowserWrapper}}[style*="none"] {{ForceOpaqueBackground.StatusIcon}} {{HoverPosition.HoverPosition}} {
+    display: none !important;
 }
 
 html {{ForceOpaqueBackground.LocalContentContainer}} {{ForceOpaqueBackground.URLBarReplacement}} {
