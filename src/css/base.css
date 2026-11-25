@@ -621,8 +621,9 @@ html.lm-morph-host .contextMenu {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen);
     overflow: hidden;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 160ms ease;   /* geometry is animated by the script */
+    transition: opacity 160ms ease, visibility 0s linear 160ms;   /* geometry is animated by the script */
 }
 
 /* follows the Opacity slider (62% at its default 38%) */
@@ -635,7 +636,9 @@ html.lm-morph-host .contextMenu {
 
 .lm-morph.open {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition: opacity 160ms ease, visibility 0s linear 0s;
 }
 
 .lm-morph-page {
