@@ -691,6 +691,13 @@ html {{TitleBarControls.AccountMenu}} {{avatarHolder.avatarHolder}} {{avatarHold
     background-color: var(--lm-selected-hover) !important;
 }
 
+/* Steam's stylesheet has a stray space (`Selected.Container :hover`) that paints
+   solid rgb(88, 111, 150) onto hovered descendants inside a selected game row */
+{{GameListEntryContainer.Selected}}{{GameListEntryContainer.Container}} :hover,
+{{GameListEntryContainer.Selected}} {{GameListEntryContainer.Container}} :hover {
+    background-color: transparent !important;
+}
+
 /* row content shifts right on hover and stays shifted while selected;
    translate leaves Steam's drag transform intact */
 {{GameListEntryContainer.Container}} > {{GameListEntryContainer.GameListEntryContainer}} {
@@ -1057,53 +1064,762 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     background-image: none !important;
 }
 
-/* ColumnContainer sits under BackdropGlass; tint only one of them */
+/* Soft bottom fade on ImgContainer (not HeaderBackgroundImage, which is 64px shorter
+   and would clip ImgContainer's overflow) so the full hero art melts smoothly into glass. */
+{{TopCapsule.ImgContainer}} {
+    mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+}
+
+{{TopCapsule.ImgBlur}},
+{{TopCapsule.ImgBlurBackdrop}} {
+    display: none !important;
+}
+
+/* Collection badges in the hero's top-right: floating glass pills */
+{{HeaderFeatures.HeaderFeatures}} {
+    gap: 6px !important;
+}
+
+{{HeaderFeatures.InCollection}} {
+    margin: 0 !important;
+    padding: 3px 12px !important;
+    border-radius: 999px !important;
+    background: var(--lm-panel-strong) !important;
+    backdrop-filter: blur(12px) saturate(1.3);
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-sheen), 0 4px 12px rgba(0, 0, 0, 0.25);
+    color: var(--lm-text) !important;
+}
+
+/* ColumnContainer sits under BackdropGlass; the right pane already carries the
+   theme's glass surface, so drop Steam's extra opaque/blurred backdrop strip.
+   Flatten the non-hero body wrappers (keeping preserve-3d intact on Header) so
+   InPage's RightControls anchors to InnerContainer at the hero's top-left,
+   mirroring HeaderFeatures at the hero's top-right. */
+{{AppDetailsOverviewPanel.AppDetailsOverviewPanel}},
+{{SpotlightLeftColumn.Container}},
+{{SpotlightLeftColumn.Glassy}} {
+    position: static !important;
+    transform-style: flat !important;
+}
+
 {{SpotlightLeftColumn.Container}} {{SpotlightLeftColumn.ColumnContainer}},
 {{SpotlightLeftColumn.Glassy}} {{SpotlightLeftColumn.ColumnContainer}} {
     background: transparent !important;
 }
 
-/* Steam's glass layer under the hero: 450px tall, fades out downward so it
-   leaves no edge; the mask fades its blur as well */
 {{SpotlightLeftColumn.Glassy}} {{SpotlightLeftColumn.BackdropGlass}} {
-    background: var(--lm-panel) !important;
-    mask-image: linear-gradient(to bottom, #000 82px, transparent);
+    display: none !important;
 }
 
-/* the page scrolls under the play bar, so it gets a real blur */
-{{PlayBarGameName.PlayBar}} {
-    background: linear-gradient(to top, var(--lm-panel-strong) 30%, transparent) !important;
+/* In-page PlayBar: sits cleanly below the hero art with a centered Play CTA on
+   Row 1, a centered glass stats pill on Row 2, and the action icon capsule
+   docked in the hero's top-left corner mirroring the top-right collection pills. */
+{{PlayBarGameName.InPage}} {
+    position: static !important;
+    margin-top: 12px !important;
 }
 
+{{PlayBarGameName.InPage}} {{PlayBarGameName.PlayBar}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.Row}} {
+    position: static !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.PlayBar}} {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StickyHeaderShadow}} {
+    display: none !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}} {
+    padding: 4px 20px 6px !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}} > {{PlayBarGameName.Row}}:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.ActionSection}} {
+    position: relative;
+    z-index: 3;
+    margin: 0 !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.RightControls}} {
+    position: absolute !important;
+    top: 16px !important;
+    left: 16px !important;
+    z-index: 32 !important;
+    margin: 0 !important;
+    align-items: flex-start !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.RightControls}} {{PlayBarGameName.AppButtonsContainer}} {
+    background: var(--lm-panel-strong) !important;
+    backdrop-filter: blur(12px) saturate(1.3);
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-sheen), 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {
+    position: relative;
+    z-index: 3;
+    width: auto !important;
+    max-width: 100%;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 6px 22px !important;
+    border-radius: 999px;
+    background: var(--lm-panel);
+    border: 1px solid var(--lm-border-strong);
+    box-shadow: var(--lm-sheen), 0 4px 14px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}}:has({{PlayBarGameName.GameStatsSection}}:empty):not(:has({{PlayBarGameName.DetailsProgressBar}})) {
+    display: none !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusNameContainer}} {
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.GameStatsSection}} {
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Family Library row: compact centered glass pill under the stats bar */
+{{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}} {
+    position: relative;
+    z-index: 3;
+    width: fit-content !important;
+    max-width: 100%;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px;
+    margin: 8px auto 0 !important;
+    padding: 5px 16px !important;
+    border-radius: 999px;
+    background: var(--lm-panel);
+    border: 1px solid var(--lm-border);
+    box-shadow: var(--lm-sheen);
+    font-size: 12px;
+    color: rgba(235, 240, 248, 0.84);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Scrolled sticky PlayBar: stays compact single-row and frosted over content */
+{{PlayBarGameName.StickyHeader}} {{PlayBarGameName.PlayBar}},
 {{PlayBarGameName.StickyHeader}} {{PlayBarGameName.Glassy}} {
     background: var(--lm-panel-strong) !important;
-    backdrop-filter: blur(18px) saturate(1.2) !important;
+    backdrop-filter: blur(18px) saturate(1.25) !important;
     border-bottom: 1px solid var(--lm-border) !important;
 }
 
-{{AppGameInfoContainer}},
-{{PlayBarGameName.GameInfoButton}} {
-    background-color: var(--lm-panel-soft) !important;
+{{PlayBarGameName.StickyHeader}} {{PlayBarGameName.SharedLibrary}} {
+    display: none !important;
 }
 
-{{PlayBarGameName.AppButtonsContainer}} > *,
-{{PlayBarGameName.MenuButton}},
-{{PlayBarGameName.GameInfoButton}} {
-    border-radius: var(--lm-r-sm) !important;
+/* Play / Install / Update / Stop crystal-glass pill with macaron-tinted fill */
+{{PlayButtonContainer.PlayButtonContainer}} {
+    --lm-cta-glow: rgba(142, 212, 255, 0.18);
+    --lm-cta-rim-tint: rgba(186, 230, 255, 0.34);
+    position: relative !important;
+    isolation: isolate !important;
+    box-sizing: border-box !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(14px) saturate(1.35);
+    border: none !important;
+    box-shadow:
+        inset 0 2px 6px rgba(255, 255, 255, 0.28),
+        inset 0 -3px 8px rgba(255, 255, 255, 0.16),
+        inset 5px 0 10px -3px rgba(255, 255, 255, 0.16),
+        inset -5px 0 10px -3px rgba(255, 255, 255, 0.16),
+        inset 0 0 16px var(--lm-cta-glow),
+        0 10px 24px -4px rgba(0, 0, 0, 0.38),
+        0 3px 8px rgba(0, 0, 0, 0.22) !important;
+    transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.16s ease, box-shadow 0.16s ease !important;
 }
 
-{{PlayButtonContainer.PlayButtonContainer}},
+{{PlayButtonContainer.PlayButtonContainer}}::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    padding: 1px !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(255, 255, 255, 0.38) 0deg,
+        var(--lm-cta-rim-tint) 65deg,
+        rgba(255, 255, 255, 0.24) 105deg,
+        rgba(255, 255, 255, 0.14) 155deg,
+        rgba(255, 255, 255, 0.08) 215deg,
+        rgba(255, 255, 255, 0.22) 275deg,
+        rgba(255, 255, 255, 0.42) 320deg,
+        rgba(255, 255, 255, 0.38) 360deg
+    ) !important;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+    -webkit-mask-composite: xor !important;
+    mask-composite: exclude !important;
+}
+
+{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})):hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})):active {
+    transform: translateY(0.5px) scale(0.985);
+    filter: brightness(0.98);
+}
+
+/* Play: macaron mint green */
+{{PlayButtonContainer.PlayButtonContainer}}{{PlayButtonContainer.Green}} {
+    --lm-cta-glow: rgba(138, 240, 184, 0.20);
+    --lm-cta-rim-tint: rgba(182, 248, 212, 0.36);
+    background: linear-gradient(
+        180deg,
+        rgba(116, 232, 168, 0.34) 0%,
+        rgba(84, 206, 144, 0.42) 100%
+    ) !important;
+}
+
+/* Stop / Shutdown: macaron coral pink */
+{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.ShutdownAppButton}}, {{PlayButtonContainer.ForceShutdownButton}}, :has({{PlayButtonContainer.ShutdownAppButton}}), :has({{PlayButtonContainer.ForceShutdownButton}})) {
+    --lm-cta-glow: rgba(255, 160, 174, 0.20);
+    --lm-cta-rim-tint: rgba(255, 198, 208, 0.36);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 136, 152, 0.36) 0%,
+        rgba(234, 98, 120, 0.44) 100%
+    ) !important;
+}
+
+/* Disabled / NoAction: neutral frosted crystal */
+{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.Disabled}}, {{PlayButtonContainer.NoAction}}, :has({{PlayButtonContainer.Disabled}}), :has({{PlayButtonContainer.NoAction}})) {
+    --lm-cta-glow: rgba(255, 255, 255, 0.06);
+    --lm-cta-rim-tint: rgba(255, 255, 255, 0.22);
+    background: linear-gradient(
+        180deg,
+        rgba(210, 224, 240, 0.16) 0%,
+        rgba(168, 186, 208, 0.22) 100%
+    ) !important;
+}
+
+/* Install / Update / Buy: macaron sky blue */
+{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Green}}):not({{PlayButtonContainer.ShutdownAppButton}}):not({{PlayButtonContainer.ForceShutdownButton}}):not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.ShutdownAppButton}})):not(:has({{PlayButtonContainer.ForceShutdownButton}})):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})) {
+    background: linear-gradient(
+        180deg,
+        rgba(118, 200, 255, 0.34) 0%,
+        rgba(90, 172, 244, 0.42) 100%
+    ) !important;
+}
+
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.PlayButton}},
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.StreamingSelector}} {
+    position: relative !important;
+    z-index: 1 !important;
+    background: transparent !important;
+    color: #fff !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.40);
+}
+
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.PlayButton}} svg,
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.StreamingSelector}} svg {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+
+{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})) {{PlayButtonContainer.PlayButton}}:hover,
+{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})) {{PlayButtonContainer.StreamingSelector}}:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
 {{PlayButtonContainer.PlayButton}} {
-    border-radius: var(--lm-r-sm) !important;
+    min-width: 196px !important;
+    height: 46px !important;
+    padding: 0 28px !important;
+    border-radius: 999px !important;
 }
 
-/* activity, achievements, friends cards */
-{{AppDetailsSectionContainer.AppDetailsSectionContainer}}{{AppDetailsSectionContainer.RightColumnSection}},
-{{AppDetailsSectionContainer.RightColumnSection}}{{AppDetailsSectionContainer.AppDetailsSectionContainer}} {
-    background: var(--lm-panel-soft) !important;
+{{PlayButtonContainer.ShowingStreaming}} {{PlayButtonContainer.PlayButton}} {
+    min-width: 168px !important;
+    padding: 0 22px 0 26px !important;
+    border-radius: 999px 0 0 999px !important;
+}
+
+{{PlayButtonContainer.StreamingSelector}} {
+    box-sizing: border-box !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    margin: 0 !important;
+    padding: 0 3px 0 0 !important;
+    height: 46px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 999px 999px 0 !important;
+    border-left: none !important;
+}
+
+{{PlayButtonContainer.StreamingSelector}}::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 22% !important;
+    bottom: 22% !important;
+    width: 1px !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.28) 30%, rgba(255, 255, 255, 0.28) 70%, transparent) !important;
+}
+
+{{PlayButtonContainer.StreamingSelector}} svg {
+    width: 12px !important;
+    height: 12px !important;
+    flex-shrink: 0 !important;
+    margin: 0 0 2px 0 !important;
+    padding: 0 !important;
+    opacity: 0.92;
+}
+
+{{PlayBarGameName.StickyHeader}} {{PlayButtonContainer.PlayButton}} {
+    min-width: 148px !important;
+    height: 36px !important;
+    padding: 0 18px !important;
+}
+
+{{PlayBarGameName.StickyHeader}} {{PlayButtonContainer.ShowingStreaming}} {{PlayButtonContainer.PlayButton}} {
+    min-width: 122px !important;
+    padding: 0 14px 0 18px !important;
+}
+
+{{PlayBarGameName.StickyHeader}} {{PlayButtonContainer.StreamingSelector}} {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 36px !important;
+    padding: 0 2px 0 0 !important;
+}
+
+{{PlayBarGameName.StickyHeader}} {{PlayButtonContainer.StreamingSelector}} svg {
+    width: 10px !important;
+    height: 10px !important;
+}
+
+/* Action icon buttons grouped inside a floating glass capsule */
+{{PlayBarGameName.AppButtonsContainer}} {
+    padding: 4px !important;
+    gap: 2px !important;
+    align-items: center !important;
+    border-radius: 999px !important;
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-sheen), 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+{{PlayBarGameName.AppButtonsContainer}} > * {
+    margin: 0 !important;
+}
+
+{{PlayBarGameName.AppButtonsContainer}} {{PlayBarGameName.MenuButton}},
+{{PlayBarGameName.AppButtonsContainer}} {{PlayBarGameName.GameInfoButton}},
+{{PlayBarGameName.AppButtonsContainer}} > * > * {
+    margin: 0 !important;
+    border-radius: 999px !important;
+    background-color: transparent !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+{{PlayBarGameName.AppButtonsContainer}} {{PlayBarGameName.MenuButton}}:hover,
+{{PlayBarGameName.AppButtonsContainer}} {{PlayBarGameName.GameInfoButton}}:hover {
+    background-color: var(--lm-hover) !important;
+}
+
+/* Expandable game info drawer */
+{{AppGameInfoContainer}} {
+    background-color: transparent !important;
+}
+
+{{AppGameInfoContainer}} > div:first-child {
+    margin: 6px 20px !important;
+    border-radius: var(--lm-r) !important;
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+    overflow: hidden;
+}
+
+/* Centered glass links bar (Store / DLC / Community / Discussions / Guides / Support).
+   Keep the outer section container full-width so Steam's link-overflow measurement
+   sees the full row width and never collapses links into "...". */
+{{LinksSection.LinksSection}} > {{AppDetailsSectionContainer.AppDetailsSectionContainer}},
+{{LinksSection.LinksSection}} > {{AppDetailsSectionContainer.AppDetailsSectionContainer}}{{AppDetailsSectionContainer.RightColumnSection}} {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 4px 20px 10px !important;
+    padding: 0 !important;
+}
+
+{{LinksSection.LinksSectionBody}} {
+    padding: 0 !important;
+}
+
+{{LinksSection.Links}} {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: auto !important;
+    min-height: 36px !important;
+    padding: 3px 10px !important;
+    border-radius: 999px !important;
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-sheen), 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+}
+
+{{LinksSection.LinkInner}} {
+    position: static !important;
+    display: inline-flex !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+{{LinksSection.Anchor}},
+{{LinksSection.Link}} {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+{{LinksSection.Link}} {
+    padding: 5px 16px !important;
+    border-radius: 999px !important;
+    color: var(--lm-text) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+{{LinksSection.Link}}:hover {
+    background: var(--lm-hover) !important;
+    color: #fff !important;
+}
+
+/* Review prompt banner: translucent glass card instead of opaque grey bar */
+{{SpotlightSimpleTextBox.ReviewContainer}},
+{{SpotlightSimpleTextBox.RatingContainer}} {
+    background: var(--lm-panel) !important;
+    background-image: none !important;
     border: 1px solid var(--lm-border) !important;
     border-radius: var(--lm-r) !important;
     box-shadow: var(--lm-sheen) !important;
+}
+
+{{WriteReviewContainer.RatingContainer}} {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+{{WriteReviewContainer.OptionButton}},
+{{WriteReviewContainer.ReviewThumbButton}} {
+    border-radius: var(--lm-r-sm) !important;
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+{{WriteReviewContainer.OptionButton}}:hover,
+{{WriteReviewContainer.ReviewThumbButton}}:hover {
+    background: var(--lm-hover) !important;
+    border-color: var(--lm-border-strong) !important;
+}
+
+/* Post-game summary carousel */
+{{GamePlaySummaryContainer.SummaryCarouselContainer}} {
+    border-radius: var(--lm-r) !important;
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+    border: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+}
+
+/* Activity feed cards, partner news updates, major updates, post composer and load-more button */
+.EventBody,
+{{PartnerEvent.PartnerEvent}},
+{{PartnerEvent.PartnerEventTextOnly}},
+{{PartnerEvent.PartnerEventMediumImage}},
+{{PartnerEvent.PartnerEventFeatured}},
+{{PartnerEvent.PartnerEventUpdate}},
+{{PartnerEvent.PartnerEventLargeUpdate}},
+{{MajorEventContainer.MajorEventContainer}},
+{{SpotlightSimpleTextBox.SpotlightDLC}},
+{{Rollup.Rollup}} {{Rollup.Contents}},
+{{FramerateReportingBanner.FramerateReportingBanner}} {
+    box-sizing: border-box !important;
+    border-radius: var(--lm-r) !important;
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+    border: 1px solid var(--lm-border) !important;
+    border-image: none !important;
+    box-shadow: var(--lm-sheen) !important;
+    transition: background-color 0.16s ease, border-color 0.16s ease !important;
+}
+
+/* Clip banner/image partner cards to rounded corners, but leave .EventBody overflow
+   visible so hovered trading cards and tooltips can pop out unclipped. */
+{{PartnerEvent.PartnerEvent}},
+{{PartnerEvent.PartnerEventTextOnly}},
+{{PartnerEvent.PartnerEventMediumImage}},
+{{PartnerEvent.PartnerEventFeatured}},
+{{PartnerEvent.PartnerEventUpdate}},
+{{PartnerEvent.PartnerEventLargeUpdate}},
+{{MajorEventContainer.MajorEventContainer}},
+{{SpotlightSimpleTextBox.SpotlightDLC}},
+{{Rollup.Rollup}} {{Rollup.Contents}},
+{{FramerateReportingBanner.FramerateReportingBanner}} {
+    overflow: hidden !important;
+}
+
+{{PartnerEvent.TradingCardSection}} {
+    padding: 10px 10px 12px !important;
+    gap: 8px;
+}
+
+{{PartnerEvent.TradingCardSection}} {{BadgeSection.Owned}}:not({{BadgeSection.LoadFailed}}) {{BadgeSection.CardImage}} {
+    opacity: 1 !important;
+}
+
+{{PartnerEvent.PartnerEvent}}:hover,
+{{PartnerEvent.PartnerEventTextOnly}}:hover,
+{{PartnerEvent.PartnerEventMediumImage}}:hover,
+{{PartnerEvent.PartnerEventFeatured}}:hover,
+{{PartnerEvent.PartnerEventUpdate}}:hover,
+{{PartnerEvent.PartnerEventLargeUpdate}}:hover,
+{{MajorEventContainer.MajorEventContainer}}:hover {
+    background: color-mix(in srgb, var(--lm-panel) 90%, #fff 10%) !important;
+    background-image: none !important;
+    border-color: var(--lm-border-strong) !important;
+}
+
+{{PartnerEvent.PartnerEventFeatured}},
+{{PartnerEvent.PartnerEventLargeUpdate}},
+{{MajorEventContainer.MajorEventContainer}} {
+    border-color: rgba(71, 191, 255, 0.42) !important;
+    box-shadow: var(--lm-sheen), 0 0 18px rgba(56, 189, 248, 0.14) !important;
+}
+
+{{SpotlightSimpleTextBox.SpotlightDLC}},
+{{Rollup.Rollup}} {{Rollup.Contents}} {
+    border-color: rgba(186, 120, 245, 0.42) !important;
+}
+
+{{PartnerEvent.LeftSideMajorUpdateBar}} {
+    display: none !important;
+}
+
+{{PartnerEvent.PartnerEventMediumImage_Container}},
+{{PartnerEvent.PartnerEventLargeImage_Container}},
+{{PartnerEvent.PartnerEventTextOnly_Container}},
+{{PartnerEvent.PartnerEventSmallImageAndTextOnly_Container}} {
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-image: none !important;
+    box-shadow: none !important;
+}
+
+{{PartnerEvent.PartnerEventMediumImage_Image}},
+{{PartnerEvent.PartnerEventLargeImage_Image}},
+{{PartnerEvent.PartnerEventSmallImage_Image}},
+{{PartnerEvent.ActiveScreenshot}},
+{{DLCSection.DLCArt}} {
+    border-radius: var(--lm-r-sm) !important;
+    overflow: hidden !important;
+}
+
+{{DLCSection.DLCSection}} {{DLCSection.InnerContainer}} {
+    background: transparent !important;
+    border: none !important;
+    border-image: none !important;
+    border-radius: var(--lm-r) !important;
+}
+
+{{ActivityFeedContainer.StatusInputBox}},
+{{ActivityFeedContainer.StatusInputTextArea}},
+{{PostTextEntry.PostTextEntryArea}} {
+    border-radius: var(--lm-r-sm) !important;
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+{{PostTextEntry.PostTextEntryArea}}:focus {
+    background: var(--lm-panel-strong) !important;
+    border-color: var(--lm-border-strong) !important;
+}
+
+{{PostTextEntry.PostButton}},
+{{CommunityContentContainer.LoadContentButton}},
+{{ActivityFeedContainer.FetchMoreContainer}} {
+    border-radius: 999px !important;
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+{{PostTextEntry.PostButton}}:hover,
+{{CommunityContentContainer.LoadContentButton}}:hover,
+{{ActivityFeedContainer.FetchMoreContainer}}:hover {
+    background: var(--lm-hover) !important;
+    border-color: var(--lm-border-strong) !important;
+}
+
+/* Activity reply / comment thread card */
+{{ActivityCommentThread.ActivityCommentThread}} {
+    margin-top: 6px !important;
+    padding: 8px 14px 10px 18px !important;
+    border-radius: var(--lm-r) !important;
+    background: var(--lm-panel) !important;
+    background-image: none !important;
+    border: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+}
+
+{{ActivityCommentThread.MakeCommentsVisible}},
+{{ActivityCommentThread.LikeButton}},
+{{ActivityCommentThread.CommentButton}},
+{{ActivityCommentThread.Reactions}} {
+    border-radius: 6px !important;
+}
+
+{{ActivityCommentThread.MakeCommentsVisible}} {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+}
+
+{{ActivityCommentThread.MakeCommentsVisible}}:hover,
+{{ActivityCommentThread.RatingBar}} {{ActivityCommentThread.LikeButton}}:hover,
+{{ActivityCommentThread.RatingBar}} {{ActivityCommentThread.CommentButton}}:hover,
+{{ActivityCommentThread.RatingBar}} {{ActivityCommentThread.Reactions}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+/* Scroll-to-top floating pill (inner button only; outer bar stays transparent) */
+{{ScrollToTopButton.ScrollToTopButton}} {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+}
+
+{{ScrollToTopButton.ScrollToTopButton}} button,
+{{ScrollToTopButton.ScrollToTopButton}} > div {
+    border-radius: 999px !important;
+    background: var(--lm-panel-strong) !important;
+    background-image: none !important;
+    backdrop-filter: blur(12px) saturate(1.3);
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.32) !important;
+    color: var(--lm-text) !important;
+}
+
+{{ScrollToTopButton.ScrollToTopButton}} button:hover,
+{{ScrollToTopButton.ScrollToTopButton}} > div:hover {
+    background: var(--lm-hover) !important;
+    color: #fff !important;
+}
+
+/* Right-column cards: achievements, trading cards, workshop, review, friends, DLC */
+{{AppDetailsSectionContainer.AppDetailsSectionContainer}}{{AppDetailsSectionContainer.RightColumnSection}},
+{{AppDetailsSectionContainer.RightColumnSection}}{{AppDetailsSectionContainer.AppDetailsSectionContainer}} {
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: var(--lm-sheen) !important;
+}
+
+/* Shared top highlight strip in right-column cards (achievements, trading cards, workshop, review) */
+{{AppDetailsSectionContainer.Highlight}} {
+    border-radius: max(0px, calc(var(--lm-r) - 1px)) max(0px, calc(var(--lm-r) - 1px)) 0 0 !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+    background-image: none !important;
+    border: none !important;
+    border-bottom: 1px solid var(--lm-border) !important;
+    box-shadow: none !important;
+}
+
+/* Workshop footer: drop Steam's opaque blueprint grid so it blends with the glass card */
+{{WorkshopContainer.WorkshopContainer}} {
+    background: transparent !important;
+    background-image: none !important;
+    border-radius: 0 0 max(0px, calc(var(--lm-r) - 1px)) max(0px, calc(var(--lm-r) - 1px)) !important;
+}
+
+{{WorkshopContainer.FeaturedItemImage}},
+{{ReviewMetadata.ReviewIcon}},
+{{ClickableScreenshot.ClickableScreenshot}} {
+    border-radius: var(--lm-r-sm) !important;
+    overflow: hidden !important;
+}
+
+{{BadgeSection.CardContainer}},
+{{AchievementIconWrapper.AchievementIconWrapper}} {{AchievementIconWrapper.Icon}},
+{{RightAchievementSection.Remainder}} {
+    border-radius: 6px !important;
+}
+
+{{RightAchievementSection.GroupsSection}} {{RightAchievementSection.DLC}} {
+    border-radius: var(--lm-r-sm) !important;
+    border: 1px solid rgba(186, 120, 245, 0.28) !important;
+}
+
+{{AppDetailsButton.AppDetailsButton}} {
+    border-radius: var(--lm-r-sm) !important;
+}
+
+/* Softly round friend & activity avatars without clipping Steam avatar frames */
+{{AppDetailsOverviewPanel.AppDetailsOverviewPanel}} .avatarHolder img.avatar {
+    border-radius: 6px !important;
+}
+
+{{AppDetailsOverviewPanel.AppDetailsOverviewPanel}} .avatarHolder .avatarStatus.bottom {
+    left: 4px !important;
+    right: 4px !important;
+    width: auto !important;
+    border-radius: 999px !important;
+}
+
+{{AppDetailsOverviewPanel.AppDetailsOverviewPanel}} .avatarHolder .avatarStatus.right {
+    top: 4px !important;
+    bottom: 4px !important;
+    height: auto !important;
+    border-radius: 999px !important;
 }
 
 /* progress bars */

@@ -10,7 +10,8 @@
 
 /* the liquid glass sliders only apply to Liquid glass */
 [data-condition="Liquid opacity"]:not([data-lm-hidden="0"]),
-[data-condition="Refraction"]:not([data-lm-hidden="0"]) {
+[data-condition="Refraction"]:not([data-lm-hidden="0"]),
+[data-condition="Liquid blur"]:not([data-lm-hidden="0"]) {
     display: none !important;
 }
 
@@ -82,7 +83,7 @@ html {{BottomBarContainer.BottomBar}}::before {
 html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}},
 html {{ForceOpaqueBackground.SuperNavBar}},
 html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}},
-html .title-bar-actions,
+html.MillenniumWindow_MainSteamWindow .title-bar-actions,
 html {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
     background-color: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 8%), 100%), transparent) !important;
     background-image: var(--lm-acrylic-noise) !important;

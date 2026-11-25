@@ -32,7 +32,8 @@
     to   { opacity: 1; transform: none; }
 }
 
-{{contextMenu.contextMenu}}.ready {
+{{contextMenu.contextMenu}}.ready,
+.DialogMenuPosition.ready > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
     animation: lm-menu-unroll var(--lm-menu-unroll) cubic-bezier(0.25, 0.7, 0.25, 1) backwards;
 }
 
@@ -151,7 +152,13 @@
     animation: lm-page-in 240ms ease-out backwards;
 }
 
-{{AppDetailsOverviewPanel.AppDetailsOverviewPanel}} {
+/* Rise the inner sections rather than AppDetailsOverviewPanel itself so no
+   transient transform becomes a containing block for RightControls pinned to
+   InnerContainer's top-left corner. */
+{{SpotlightLeftColumn.Container}} {{SpotlightLeftColumn.ColumnContainer}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.ActionSection}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}} {
     animation: lm-page-rise 420ms cubic-bezier(0.25, 0.7, 0.25, 1) backwards;
 }
 
@@ -162,8 +169,23 @@
     to   { opacity: 1; transform: none; }
 }
 
-html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > * {
+html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > *,
+html.MillenniumWindow_GameProperties .DialogContent_InnerWidth > .DialogBody > * {
     animation: lm-settings-in 360ms cubic-bezier(0.25, 0.7, 0.25, 1) backwards;
+}
+
+/* In-window modal dialogs (Install, Uninstall, Account Switcher, confirmations) */
+@keyframes lm-modal-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
+    to   { opacity: 1; transform: none; }
+}
+
+.FullModalOverlay .ModalOverlayBackground {
+    animation: lm-page-in 180ms ease-out backwards;
+}
+
+.FullModalOverlay .ModalPosition_Content {
+    animation: lm-modal-in 220ms cubic-bezier(0.2, 0.85, 0.25, 1) backwards;
 }
 
 /* the hero only (not its hidden blur layers); starts when it has loaded */
@@ -193,12 +215,20 @@ html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > * {
     .lm-row-up,
     .lm-row-in,
     {{LeftListSizableContainer.AppDetailsMain}} > {{AppDetailsOverviewPanel.Container}},
-    {{AppDetailsOverviewPanel.AppDetailsOverviewPanel}},
+    {{SpotlightLeftColumn.Container}} {{SpotlightLeftColumn.ColumnContainer}},
+    {{PlayBarGameName.InPage}} {{PlayBarGameName.ActionSection}},
+    {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}},
+    {{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}},
     {{AppDetailsOverviewPanel.HeaderLoaded}} {{TopCapsule.HeaderBackgroundImage}} > {{TopCapsule.ImgContainer}},
+    html.MillenniumWindow_Settings .DialogContent_InnerWidth > .DialogBody > *,
+    html.MillenniumWindow_GameProperties .DialogContent_InnerWidth > .DialogBody > *,
+    .FullModalOverlay .ModalOverlayBackground,
+    .FullModalOverlay .ModalPosition_Content,
     .lm-morph.open,
     .lm-morph.open .lm-first .lm-morph-item,
     {{contextMenu.contextMenu}}.ready,
-    {{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}} {
+    {{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}},
+    .DialogMenuPosition.ready > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
         animation: none !important;
     }
 }

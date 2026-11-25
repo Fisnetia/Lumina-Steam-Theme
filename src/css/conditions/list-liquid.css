@@ -3,9 +3,9 @@
    floating geometry lives in css/library.css. */
 :root {
     --lm-liquid: 1;
-    --lm-liquid-tone: blur(2px) saturate(1.35) brightness(1.04);
+    --lm-liquid-tone: blur(var(--lm-liquid-blur, 0px)) saturate(1.35) brightness(1.04);
     /* a little darker for pills: covers behind the capsules are sharp and bright */
-    --lm-pill-tone: blur(2px) saturate(1.35) brightness(0.94);
+    --lm-pill-tone: blur(var(--lm-liquid-blur, 0px)) saturate(1.35) brightness(0.94);
 }
 
 /* the Acrylic blur slider only applies to Acrylic */
@@ -106,7 +106,7 @@ html {{BottomBarContainer.BottomBar}}::before {
 html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}},
 html {{ForceOpaqueBackground.SuperNavBar}},
 html {{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}},
-html .title-bar-actions,
+html.MillenniumWindow_MainSteamWindow .title-bar-actions,
 html {{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}} {
     background: color-mix(in srgb, var(--lm-t) var(--lm-liquid-alpha, 24%), transparent) !important;
     border-color: transparent !important;

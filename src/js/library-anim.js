@@ -202,7 +202,10 @@
     // the hero needs no replay: its animation starts with HeaderLoaded, re-added on every switch
     const PAGE_PARTS = [
         "{{LeftListSizableContainer.AppDetailsMain}} > {{AppDetailsOverviewPanel.Container}}",
-        "{{AppDetailsOverviewPanel.AppDetailsOverviewPanel}}",
+        "{{SpotlightLeftColumn.Container}} {{SpotlightLeftColumn.ColumnContainer}}",
+        "{{PlayBarGameName.InPage}} {{PlayBarGameName.ActionSection}}",
+        "{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}}",
+        "{{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}}",
     ].join(",");
 
     const hasAnim = (el) => getComputedStyle(el).animationName !== "none";
