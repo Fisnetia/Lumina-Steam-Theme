@@ -106,7 +106,7 @@
     "Game list": {
       "tab": "Interface",
       "description": "Liquid glass refracts at the edges; Acrylic is frosted blur.",
-      "default": "Acrylic",
+      "default": "Liquid glass",
       "values": {
         "Liquid glass": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-liquid.css" } },
         "Acrylic": { "TargetCss": { "affects": [".*"], "src": "css/conditions/list-acrylic.css" } }
@@ -121,13 +121,13 @@
     "Refraction": {
       "tab": "Interface",
       "description": "How far in the edges refract.",
-      "default": 50,
+      "default": 55,
       "slider": { "cssVariable": "--lm-refraction", "min": 0, "max": 100, "step": 5, "unit": "%" }
     },
     "Acrylic blur": {
       "tab": "Interface",
       "description": "Blur of the acrylic.",
-      "default": 4,
+      "default": 2,
       "slider": { "cssVariable": "--lm-acrylic-blur", "min": 0, "max": 48, "step": 1, "unit": "px" }
     },
     "Opacity": {
