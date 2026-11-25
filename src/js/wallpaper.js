@@ -211,7 +211,7 @@
         layer = document.createElement("video");
         layer.className = "lm-video-layer";
         if (/^https?:/.test(src)) layer.crossOrigin = "anonymous";
-        Object.assign(layer, { muted: true, loop: true, autoplay: true, playsInline: true, src });
+        Object.assign(layer, { muted: true, loop: true, autoplay: true, playsInline: true, preload: "auto", src });
         layer.setAttribute("aria-hidden", "true");
         layer.disablePictureInPicture = true;
         placeLayer();
@@ -296,10 +296,18 @@
         } catch (err) { console.warn("[Lumina] scene frame:", err); }
     }, FRAME_DELAY);
 
+    let currentStill = DEFAULT_URL;
+    const publishWallSource = (src) => {
+        if (!isMain) return;
+        window.__lmWallSource = src;
+        window.dispatchEvent(new Event("lm-wall-change"));
+    };
+
     function fail(err) {
         console.warn("[Lumina] wallpaper failed:", err);
         clearLayer();
         state.error = T.failed;
+        publishWallSource({ kind: "picture", url: currentStill });
         refreshCard();
     }
 
@@ -346,9 +354,10 @@
     }
 
     function setStill(url) {
+        currentStill = url || DEFAULT_URL;
         if (url) html.style.setProperty("--lm-wallpaper", `url("${url}")`);
         else html.style.removeProperty("--lm-wallpaper");
-        shareStill(url || DEFAULT_URL);
+        shareStill(currentStill);
     }
 
     /* ---- web pages (Store, Community) ----
@@ -422,7 +431,13 @@
         clearLayer();
         const old = urls; urls = [];
         const blobUrl = (b) => { const u = URL.createObjectURL(b); urls.push(u); return u; };
-        const live = (start) => start().then(inst => { if (inst && !frame) captureFrame(inst, key); }).catch(fail);
+        const live = (start, kind) => start().then(inst => {
+            if (!inst) return;
+            if (kind === "scene" && layer && layer.querySelector("canvas")) {
+                publishWallSource({ kind: "scene", el: layer });
+            }
+            if (!frame) captureFrame(inst, key);
+        }).catch(fail);
 
         let still = null, error = "";
         if (meta && meta.source === "plugin") {
@@ -439,7 +454,7 @@
                 else if ((meta.kind === "scene" || meta.kind === "web") && isMain) {
                     // webwallgl's <60 fps rAF throttle shares one timestamp across all
                     // callbacks, starving web wallpapers with multiple rAF loops
-                    live(() => showScene(W => W.httpSource(base), meta.kind === "web" ? 60 : SCENE_FPS));
+                    live(() => showScene(W => W.httpSource(base), meta.kind === "web" ? 60 : SCENE_FPS), meta.kind);
                 }
             }
         } else if (meta) {
@@ -449,11 +464,18 @@
             liveKind = !!file && (meta.kind === "video" || (meta.kind === "scene" && isMain));
             if (file && wallpaperMode()) {
                 if (meta.kind === "video") showVideo(blobUrl(file));
-                else if (meta.kind === "scene" && isMain) live(() => showScene(W => W.fileSource(file, meta.project)));
+                else if (meta.kind === "scene" && isMain) live(() => showScene(W => W.fileSource(file, meta.project)), "scene");
             }
         } else {
             state = { kind: null, title: "", still: null, error: "" };
             setStill(null);
+        }
+        if (layer && layer.tagName === "VIDEO") {
+            publishWallSource({ kind: "video", el: layer });
+        } else if (liveKind || (gif && meta && meta.kind === "picture")) {
+            publishWallSource({ kind: "none" });
+        } else {
+            publishWallSource({ kind: "picture", url: currentStill });
         }
         old.forEach(u => URL.revokeObjectURL(u));
         refreshCard();
@@ -897,21 +919,31 @@
             if (!layer && liveKind && !state.error) { liveKind = false; apply(); }
             else placeLayer();
         } else if (layer && !leaving) {
-            leaving = setTimeout(() => { leaving = 0; if (!wallpaperMode()) clearLayer(); }, 1000);
+            leaving = setTimeout(() => {
+                leaving = 0;
+                if (!wallpaperMode()) { clearLayer(); publishWallSource({ kind: "none" }); }
+            }, 1000);
         }
     };
 
     // The settings page and the backdrop frame are re-rendered by React;
-    // stylesheet links change in head. syncSettings runs before paint so
-    // switching tabs or dropdown options updates dependent rows immediately.
-    let pending = 0;
+    // stylesheet links change in head. Coalesce settings scans to one per
+    // frame so heavy DOM commits (e.g. switching games) don't re-scan per batch.
+    let pending = 0, settingsRaf = 0;
     const scheduleLayer = () => {
         if (pending) return;
         pending = setTimeout(() => { pending = 0; syncSettings(); syncLayer(); }, 250);
     };
+    const scheduleSettings = () => {
+        if (settingsRaf) return;
+        settingsRaf = requestAnimationFrame(() => {
+            settingsRaf = 0;
+            syncSettings();
+            mo.takeRecords();   // drop our own card / attribute mutations
+        });
+    };
     const mo = new MutationObserver(() => {
-        syncSettings();
-        mo.takeRecords();   // drop our own card / attribute mutations
+        scheduleSettings();
         scheduleLayer();
     });
     mo.observe(html, { childList: true, subtree: true, characterData: true });

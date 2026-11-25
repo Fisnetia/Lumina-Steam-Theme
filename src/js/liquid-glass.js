@@ -103,16 +103,12 @@
             `<feComposite in="rgb" in2="dr" operator="in" result="body"/>`;
     };
 
-    // Coloured rim: within the band in the map's B channel, the dispersed
-    // backdrop is saturated, brightened and tinted slightly blue, so the
-    // fringe shows over a blurred backdrop too.
+    // Coloured rim: within the band in the map's B channel, the refracted
+    // backdrop is saturated (2.2x), brightened (1.25x) and tinted slightly
+    // blue in one combined color matrix.
     const rimLight =
         `<feColorMatrix in="map" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="band"/>` +
-        `<feColorMatrix in="body" type="saturate" values="2.2" result="sat"/>` +
-        `<feComponentTransfer in="sat" result="lit">` +
-        `<feFuncR type="linear" slope="1.25" intercept="0.02"/>` +
-        `<feFuncG type="linear" slope="1.25" intercept="0.03"/>` +
-        `<feFuncB type="linear" slope="1.25" intercept="0.07"/></feComponentTransfer>` +
+        `<feColorMatrix in="body" type="matrix" values="2.4305 -1.0725 -0.108 0 0.02  -0.3195 1.6775 -0.108 0 0.03  -0.3195 -1.0725 2.642 0 0.07  0 0 0 1 0" result="lit"/>` +
         `<feComposite in="lit" in2="band" operator="in" result="edge"/>` +
         `<feComposite in="edge" in2="body" operator="over"/>`;
 
@@ -123,7 +119,7 @@
     // only changes a few attributes; drawing and decoding a map every frame
     // drops frames. The map is redrawn once the size settles.
     const SETTLE = 120;
-    const pane = ({ selector, id, ready, reach }) => {
+    const pane = ({ selector, id, ready, reach, skip }) => {
         let el = null, size = "", observer = null, pending = 0;
 
         const stretch = () => {
@@ -174,7 +170,7 @@
         // finds the element; sizes come from the ResizeObserver, so a mounted
         // pane is rebuilt only when asked (settings changed, window shown)
         const sync = (rebuild) => {
-            if (!on) { if (el || html.classList.contains(ready)) detach(); return; }
+            if (!on || (skip && skip())) { if (el || html.classList.contains(ready)) detach(); return; }
             if (!rebuild && el && el.isConnected) return;
             const found = document.querySelector(selector);
             if (found && found === el) { build(); return; }
@@ -191,7 +187,7 @@
 
     const panes = [
         pane({ selector: "{{GameListHomeAndSearch.Container}}", id: "lm-liquid", ready: "lm-liquid-ready",
-               reach: 0.92 }),   // 46px at 50%
+               reach: 0.92, skip: () => html.classList.contains("lm-gl-panes") }),   // 46px at 50%
         pane({ selector: ".lm-morph.lm-morph-inpage", id: "lm-liquid-menu", ready: "lm-liquid-menu-ready",
                reach: 0.56 }),    // 28px at 50%
         // bottom bar capsules (36px tall) and title bar capsules (32px)
@@ -213,7 +209,7 @@
         panes.forEach(p => p.sync(rebuild));
     };
     syncAll(true);
-    setInterval(() => syncAll(false), 1000);
+    setInterval(() => { if (!document.hidden) syncAll(false); }, 1000);
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncAll(true); });
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") syncAll(true); }, true);
 })();

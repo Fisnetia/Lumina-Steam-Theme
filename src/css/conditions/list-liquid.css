@@ -27,6 +27,12 @@ html.lm-liquid-ready {{GameListHomeAndSearch.Container}} {
     backdrop-filter: url(#lm-liquid) var(--lm-liquid-tone);
 }
 
+/* When WebGL draws the liquid-glass refraction directly in the backdrop behind
+   the library panes (js/aurora.js), skip the slow SVG backdrop-filter here. */
+html.lm-gl-panes {{GameListHomeAndSearch.Container}} {
+    backdrop-filter: none !important;
+}
+
 /* Right library pane: kept free of backdrop-filter for performance; the rim
    lives on ::after so scrolled covers and game heroes stay framed inside it. */
 html {{LeftListSizableContainer.AppDetailsTransitionGroup}} {

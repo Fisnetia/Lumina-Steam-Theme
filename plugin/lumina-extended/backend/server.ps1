@@ -43,7 +43,7 @@ $handler = {
         '.woff' = 'font/woff'; '.woff2' = 'font/woff2'; '.ttf' = 'font/ttf'; '.otf' = 'font/otf'
         '.wasm' = 'application/wasm'; '.txt' = 'text/plain; charset=utf-8'
     }
-    $CHUNK = 8MB
+    $CHUNK = 32MB
     try {
         $res.AddHeader('Access-Control-Allow-Origin', '*')
         $res.AddHeader('Access-Control-Allow-Headers', 'Range')
@@ -65,7 +65,7 @@ $handler = {
         $ext = [IO.Path]::GetExtension($full).ToLowerInvariant()
         $res.ContentType = if ($mime.ContainsKey($ext)) { $mime[$ext] } else { 'application/octet-stream' }
         $res.AddHeader('Accept-Ranges', 'bytes')
-        $res.AddHeader('Cache-Control', 'private, max-age=60')
+        $res.AddHeader('Cache-Control', 'private, max-age=3600')
 
         # Web wallpapers run inside a blob: iframe (different origin from this
         # server), so local images loaded via new Image() without crossOrigin
@@ -113,7 +113,7 @@ $handler = {
             $res.ContentLength64 = $len
             if ($req.HttpMethod -eq 'HEAD') { return }
             [void]$fs.Seek($start, 'Begin')
-            $buf = New-Object byte[] 262144
+            $buf = New-Object byte[] 1048576
             $out = $res.OutputStream
             while ($len -gt 0) {
                 $n = $fs.Read($buf, 0, [int][Math]::Min($buf.Length, $len))
@@ -133,11 +133,14 @@ $pool = [RunspaceFactory]::CreateRunspacePool(1, 6)
 $pool.Open()
 $jobs = New-Object System.Collections.ArrayList
 
+$parentProc = $null
+try { $parentProc = [System.Diagnostics.Process]::GetProcessById($ParentPid) } catch { exit 0 }
+
 try {
     while ($true) {
         $async = $listener.BeginGetContext($null, $null)
         while (-not $async.AsyncWaitHandle.WaitOne(1000)) {
-            if (-not (Get-Process -Id $ParentPid -ErrorAction SilentlyContinue)) { exit 0 }
+            if ($parentProc.HasExited) { exit 0 }
         }
         $ctx = $listener.EndGetContext($async)
         $ps = [PowerShell]::Create()
