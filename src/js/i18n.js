@@ -44,7 +44,7 @@
         "URL bar": "常驻：库等页面也显示 URL 栏和页面路径",
         "Menu animation": "菜单、分类展开收起和切换游戏的动画",
         "Nav menu": "变形：导航菜单共用一个面板，切换时变形",
-        "Smooth scrolling": "游戏列表的滚轮平滑滚动",
+        "Smooth scrolling": "游戏列表和库页面的滚轮平滑滚动",
     };
     // A dropdown menu is translated only when its items match one of these sets.
     const BACKDROP_OPTIONS = { "Wallpaper": "壁纸", "Aurora": "极光", "Acrylic": "桌面亚克力" };

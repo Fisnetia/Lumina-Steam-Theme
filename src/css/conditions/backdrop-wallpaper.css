@@ -64,6 +64,44 @@ html.lm-web body::before {
     display: block;
 }
 
+/* WebGL backdrop + liquid-glass pane compositor (js/aurora.js) */
+.lm-aurora-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Keep video/scene layers underneath the opaque WebGL canvas without CSS blur
+   so decoding and mouse forwarding stay active while WebGL draws the backdrop.
+   Video stays 1x1 in the viewport so Chromium decodes at native resolution
+   without compositing a second full-screen video overlay behind WebGL. */
+html.lm-gl-wall {{ForceOpaqueBackground.OuterFrame}}::before {
+    visibility: hidden !important;
+    filter: none !important;
+}
+
+html.lm-gl-wall {{ForceOpaqueBackground.OuterFrame}} > .lm-video-layer {
+    inset: auto !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0.01 !important;
+    z-index: -2 !important;
+    filter: none !important;
+}
+
+html.lm-gl-wall {{ForceOpaqueBackground.OuterFrame}} > .lm-scene-layer {
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: -2 !important;
+    filter: none !important;
+}
+
 [data-condition="Desktop blur"]:not([data-lm-hidden="0"]) {
     display: none !important;
 }

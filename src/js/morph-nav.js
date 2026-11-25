@@ -155,7 +155,8 @@
             host = { win, doc, panel: makePanel(doc), origin: { left: 0, top: 0 }, rect: null };
             const panel = host.panel;
             doc.addEventListener("mouseover", (e) => {
-                if (panel.contains(e.target)) clearTimeout(closeTimer); else if (hovering()) close(false);
+                if (panel.contains(e.target)) { clearTimeout(closeTimer); cancelSwitch(); }
+                else if (hovering()) close(false);
             }, true);
             // keep cancelling while over the panel: the main window's events may arrive later
             doc.addEventListener("mousemove", (e) => { if (panel.contains(e.target)) clearTimeout(closeTimer); }, true);
@@ -180,11 +181,12 @@
     // Embedded web view (Store, Community) under the panel area? Only the view
     // itself counts: its wrapper also holds the URL bar, which stays shown
     // over library pages with the Always URL bar setting.
-    const overWebView = (rect) => [...document.querySelectorAll("{{ForceOpaqueBackground.Browser}}")].some(el => {
-        const r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0 && r.top < rect.top + rect.height && r.bottom > rect.top
-            && r.left < rect.left + rect.width && r.right > rect.left;
-    });
+    const visibleWebViews = () => [...document.querySelectorAll("{{ForceOpaqueBackground.Browser}}")]
+        .map(el => el.getBoundingClientRect())
+        .filter(r => r.width > 0 && r.height > 0);
+    const overWebView = (views, rect) => views.some(r =>
+        r.top < rect.top + rect.height && r.bottom > rect.top
+        && r.left < rect.left + rect.width && r.right > rect.left);
 
     // Union of every menu's panel position, in main-window px.
     const panelArea = (sizes) => {
@@ -201,6 +203,16 @@
         };
     };
 
+    const clearHostHide = (h) => {
+        if (!h) return;
+        clearTimeout(h.unhost);
+        h.unhost = 0;
+        if (h.onHide) {
+            h.doc.removeEventListener("visibilitychange", h.onHide);
+            h.onHide = null;
+        }
+    };
+
     const showHost = (area) => {
         const W = host.win.SteamClient.Window;
         const same = host.rect && ["left", "top", "width", "height"].every(k => host.rect[k] === area[k]);
@@ -210,7 +222,7 @@
             host.rect = area;
         }
         host.origin = { left: area.left, top: area.top };
-        clearTimeout(host.unhost);
+        clearHostHide(host);
         host.doc.documentElement.classList.add("lm-morph-host");
         if (!host.panel.isConnected) host.doc.body.appendChild(host.panel);
         host.shown = true;
@@ -220,16 +232,16 @@
     // Steam's own menu stays hidden until the window really is (the hide can be delayed).
     const hideHost = () => {
         const h = host;
+        clearHostHide(h);
         const unhost = () => {
-            clearTimeout(h.unhost);
+            clearHostHide(h);
             if (current && surface === h) return;
             h.doc.documentElement.classList.remove("lm-morph-host");
             h.panel.replaceChildren();
             h.rect = null;
         };
-        h.doc.addEventListener("visibilitychange", function once() {
-            if (h.doc.visibilityState === "hidden") { h.doc.removeEventListener("visibilitychange", once); unhost(); }
-        });
+        h.onHide = () => { if (h.doc.visibilityState === "hidden") unhost(); };
+        h.doc.addEventListener("visibilitychange", h.onHide);
         h.unhost = setTimeout(unhost, 600);
         h.shown = false;
         h.win.SteamClient.Window.HideWindow();
@@ -250,6 +262,7 @@
 
     let surface = null;   // inPage or host while open
     let geom = null, tween = 0;
+    let tweenFrom = null, tweenTo = null, tweenT0 = 0;
 
     const applyGeom = (g) => {
         const p = surface.panel.style, o = surface.origin;
@@ -259,19 +272,46 @@
         p.setProperty("--lm-mh", g.h + "px");
     };
 
-    // Retargets from wherever the panel is now.
-    const moveTo = (to, instant) => {
-        cancelAnimationFrame(tween);
-        if (instant || !geom || reduced.matches) { geom = to; applyGeom(to); return; }
-        const from = { ...geom }, t0 = performance.now();
-        const step = (now) => {
-            const k = ease(Math.min(1, (now - t0) / SHIFT));
-            geom = { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k,
-                     w: from.w + (to.w - from.w) * k, h: from.h + (to.h - from.h) * k };
-            applyGeom(geom);
-            if (k < 1) tween = requestAnimationFrame(step);
+    const advanceGeom = (now) => {
+        if (!tweenFrom || !tweenTo) return 1;
+        const p = Math.max(0, Math.min(1, (now - tweenT0) / SHIFT));
+        const k = ease(p);
+        geom = {
+            x: tweenFrom.x + (tweenTo.x - tweenFrom.x) * k,
+            y: tweenFrom.y + (tweenTo.y - tweenFrom.y) * k,
+            w: tweenFrom.w + (tweenTo.w - tweenFrom.w) * k,
+            h: tweenFrom.h + (tweenTo.h - tweenFrom.h) * k,
         };
-        tween = requestAnimationFrame(step);
+        applyGeom(geom);
+        return p;
+    };
+
+    const tickTween = () => {
+        tween = 0;
+        if (!surface || !tweenFrom || !tweenTo) return;
+        if (advanceGeom(performance.now()) < 1) tween = requestAnimationFrame(tickTween);
+        else { tweenFrom = null; tweenTo = null; }
+    };
+
+    const stopTween = () => {
+        cancelAnimationFrame(tween);
+        tween = 0; tweenFrom = null; tweenTo = null;
+    };
+
+    // Retargets from wherever the panel is now without cancelling an active rAF.
+    const moveTo = (to, instant) => {
+        if (instant || !geom || reduced.matches) {
+            stopTween();
+            geom = to;
+            applyGeom(to);
+            return;
+        }
+        const now = performance.now();
+        if (tweenFrom && tweenTo) advanceGeom(now);
+        tweenFrom = { ...geom };
+        tweenTo = to;
+        tweenT0 = now;
+        if (!tween) tween = requestAnimationFrame(tickTween);
     };
 
     const placePanel = (wrapper, title, w, h, instant) => {
@@ -291,7 +331,8 @@
         // are lifted while a click menu is open (css/base.css).
         html.classList.toggle("lm-click-menu", !!current && current.kind !== "nav");
     };
-    let closeTimer = 0, hideTimer = 0;
+    let closeTimer = 0, hideTimer = 0, switchRaf = 0, switchTarget = null;
+    const cancelSwitch = () => { cancelAnimationFrame(switchRaf); switchRaf = 0; switchTarget = null; };
 
     // Items are numbered for the open cascade (--lm-i, --lm-n), as in js/menu-anim.js.
     const buildPage = (doc, title, list) => {
@@ -337,16 +378,34 @@
 
     const open = (wrapper, title) => {
         clearTimeout(closeTimer);
+        cancelSwitch();
         if (current && current.wrapper === wrapper) return true;
         const kind = kindOf(title);
         if (current && current.kind !== kind) close(true);   // morph only within one group
 
         if (!current) {
             clearTimeout(hideTimer);   // the last close's fade-out, if still pending
+            const views = visibleWebViews();
+            if (!views.length) {
+                // No web view is visible (library, downloads, settings): build
+                // and measure only the requested menu instead of the whole group.
+                const list = entries(title);
+                if (!list.some(e => e.item)) { if (host && host.shown) hideHost(); return false; }
+                if (host && host.shown) hideHost();
+                surface = inPage;
+                if (!inPage.panel.isConnected) document.body.appendChild(inPage.panel);
+                const page = buildPage(document, title, list);
+                page.classList.add("lm-first");
+                inPage.panel.replaceChildren(page);
+                placePanel(wrapper, title, page.offsetWidth, page.offsetHeight, true);
+                inPage.panel.classList.add("open");
+                setCurrent({ wrapper, title, kind, page });
+                return true;
+            }
             const group = menus(kind);
             let next = inPage;
             let sizes = measure(inPage, group);
-            if (overWebView(panelArea(sizes))) {
+            if (overWebView(views, panelArea(sizes))) {
                 if (!getHost()) return false;
                 sizes = measure(host, group);
                 next = host;
@@ -375,6 +434,7 @@
         const dir = wrapper.getBoundingClientRect().left > current.wrapper.getBoundingClientRect().left ? 1 : -1;
         surface.panel.querySelectorAll(".lm-morph-page.leave").forEach(p => p.remove());   // one leaving at most
         const old = current.page;
+        old.classList.remove("lm-first");
         old.style.setProperty("--lm-dir", dir);
         old.classList.add("leave");
         setTimeout(() => old.remove(), SHIFT);
@@ -389,11 +449,12 @@
 
     function close(now) {
         clearTimeout(closeTimer);
+        cancelSwitch();
         const done = () => {
             if (!current) return;
             const s = surface;
             s.panel.classList.remove("open");
-            cancelAnimationFrame(tween);
+            stopTween();
             geom = null;
             setCurrent(null);
             hideTimer = setTimeout(() => {
@@ -429,16 +490,35 @@
     // window capture runs before React's own document listeners
     const hovering = () => current && current.kind === "nav";
 
+    // Coalesce multiple hover crossings within the same animation frame into
+    // one DOM/reflow pass with zero extra frame latency.
+    const hoverOpen = (m) => {
+        clearTimeout(closeTimer);
+        if (!current || current.kind !== m.kind) return open(m.wrapper, m.title);
+        if (current.wrapper === m.wrapper) { cancelSwitch(); return true; }
+        if (!readable(m)) return false;
+        switchTarget = m;
+        if (!switchRaf) {
+            switchRaf = requestAnimationFrame(() => {
+                const next = switchTarget;
+                switchRaf = 0; switchTarget = null;
+                if (next && current && current.kind === next.kind && next.wrapper.isConnected) open(next.wrapper, next.title);
+            });
+        }
+        return true;
+    };
+
     window.addEventListener("mouseover", (e) => {
         if (!enabled()) return;
         closeNative(e.target.closest && e.target.closest(SUPERNAV));
         const m = managed(e.target);
         if (m && m.kind === "nav") {
-            if (open(m.wrapper, m.title)) e.stopImmediatePropagation();
+            if (hoverOpen(m)) e.stopImmediatePropagation();
         } else if (m && m.kind === "bar" && current && current.kind === "bar") {
-            if (open(m.wrapper, m.title)) e.stopImmediatePropagation();   // switch along the title bar
+            if (hoverOpen(m)) e.stopImmediatePropagation();   // switch along the title bar
         } else if (inPage.panel.contains(e.target)) {
             clearTimeout(closeTimer);
+            cancelSwitch();
         } else if (hovering()) {
             close(false);   // click menus stay open until a click elsewhere
         }
