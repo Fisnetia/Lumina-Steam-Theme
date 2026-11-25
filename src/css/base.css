@@ -223,7 +223,6 @@ html {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:focus {
 
 html.MillenniumWindow_MainSteamWindow {{TextToolTip.TextToolTip}},
 html.MillenniumWindow_MainSteamWindow {{TextToolTip.ToolTipCustom}},
-html.MillenniumWindow_MainSteamWindow {{ListItemTooltipBase.ListItemTooltipBase}},
 html.MillenniumWindow_MainSteamWindow {{DateToolTip}},
 html.MillenniumWindow_MainSteamWindow {{RoutingToolTip.RoutingToolTip}},
 html.MillenniumWindow_MainSteamWindow {{RoutingToolTip.PingOrQualityToolTip}},

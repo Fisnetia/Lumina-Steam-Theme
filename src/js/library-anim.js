@@ -206,6 +206,7 @@
         "{{PlayBarGameName.InPage}} {{PlayBarGameName.ActionSection}}",
         "{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}}",
         "{{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}}",
+        "{{LinksSection.LinksSection}}",
     ].join(",");
 
     const hasAnim = (el) => getComputedStyle(el).animationName !== "none";
