@@ -494,7 +494,7 @@ void main() {
         if (r > 24) { scale = 0.125; passes = 3; }
         else if (r > 10) { scale = 0.25; passes = 2; }
         else if (r > 6) { scale = 0.5; passes = 2; }
-        else if (r > 3) { scale = 0.5; passes = 1; }
+        else if (r >= 1.5) { scale = 0.5; passes = 1; }
         const bw = Math.max(2, Math.round(cw * scale));
         const bh = Math.max(2, Math.round(ch * scale));
         if (!ensureFbo(outSlot, bw, bh) || !ensureFbo(fboB, bw, bh)) return false;
@@ -651,7 +651,8 @@ void main() {
             if (!canvas || shouldPause()) return;
             if (useAuroraPanes()) {
                 if (hasAuroraFrame && refreshLayout()) {
-                    const paneTex = liquidBlur > 0.01 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, cachedCw, cachedCh, liquidBlur, fboC)
+                    const aw = Math.max(1, Math.round(cachedCw * SCALE)), ah = Math.max(1, Math.round(cachedCh * SCALE));
+                    const paneTex = liquidBlur > 3 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, aw, ah, liquidBlur, fboC)
                         ? fboC.tex : null;
                     renderComposite(fboA.tex, UNIT_COVER, 0, 0, paneTex);
                 } else drawAurora();
@@ -700,7 +701,9 @@ void main() {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, fboA.fbo);
                 renderAurora(aw, ah);
                 hasAuroraFrame = true;
-                const paneTex = liquidBlur > 0.01 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, cachedCw, cachedCh, liquidBlur, fboC)
+                // Aurora is already a low-frequency 1/3-scale gradient; only blur
+                // at higher radii and stay at aw x ah instead of full screen res.
+                const paneTex = liquidBlur > 3 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, aw, ah, liquidBlur, fboC)
                     ? fboC.tex : null;
                 renderComposite(fboA.tex, UNIT_COVER, 0, 0, paneTex);
                 return;
@@ -982,4 +985,5 @@ void main() {
         }
     }
     document.addEventListener("visibilitychange", syncActivity);
+    window.addEventListener("pagehide", unmount);
 })();

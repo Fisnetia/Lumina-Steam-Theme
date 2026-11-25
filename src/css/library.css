@@ -1085,7 +1085,6 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     padding: 3px 12px !important;
     border-radius: 999px !important;
     background: var(--lm-panel-strong) !important;
-    backdrop-filter: blur(12px) saturate(1.3);
     border: 1px solid var(--lm-border-strong) !important;
     box-shadow: var(--lm-sheen), 0 4px 12px rgba(0, 0, 0, 0.25);
     color: var(--lm-text) !important;
@@ -1101,10 +1100,29 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 {{SpotlightLeftColumn.Glassy}} {
     position: static !important;
     transform-style: flat !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    align-content: flex-start !important;
+    column-gap: 12px !important;
+    row-gap: 0 !important;
+    padding: 16px 20px 0 !important;
+}
+
+{{SpotlightLeftColumn.Container}} > :not({{PlayBarGameName.InPage}}):not({{LinksSection.LinksSection}}),
+{{SpotlightLeftColumn.Glassy}} > :not({{PlayBarGameName.InPage}}):not({{LinksSection.LinksSection}}) {
+    box-sizing: border-box !important;
+    flex: 0 0 calc(100% + 40px) !important;
+    width: calc(100% + 40px) !important;
+    margin-inline: -20px !important;
 }
 
 {{SpotlightLeftColumn.Container}} {{SpotlightLeftColumn.ColumnContainer}},
 {{SpotlightLeftColumn.Glassy}} {{SpotlightLeftColumn.ColumnContainer}} {
+    order: 5 !important;
     background: transparent !important;
 }
 
@@ -1112,16 +1130,17 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     display: none !important;
 }
 
-/* In-page PlayBar: sits cleanly below the hero art with a centered Play CTA on
-   Row 1, a centered glass stats pill on Row 2, and the action icon capsule
-   docked in the hero's top-left corner mirroring the top-right collection pills. */
-{{PlayBarGameName.InPage}} {
-    position: static !important;
-    margin-top: 12px !important;
-}
-
+/* In-page PlayBar: flattened with display: contents so Row 1 (Play CTA + stats)
+   stays full-width while SharedLibrary and LinksSection share Row 2 whenever
+   they fit side by side, wrapping cleanly when narrow. */
+{{PlayBarGameName.InPage}},
 {{PlayBarGameName.InPage}} {{PlayBarGameName.PlayBar}},
 {{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}} > :has({{PlayBarGameName.SharedLibrary}}) {
+    display: contents !important;
+    position: static !important;
+}
+
 {{PlayBarGameName.InPage}} {{PlayBarGameName.Row}} {
     position: static !important;
 }
@@ -1135,11 +1154,12 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     display: none !important;
 }
 
-{{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}} {
-    padding: 4px 20px 6px !important;
-}
-
 {{PlayBarGameName.InPage}} {{PlayBarGameName.InnerContainer}} > {{PlayBarGameName.Row}}:first-child {
+    order: 1 !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -1149,6 +1169,7 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 {{PlayBarGameName.InPage}} {{PlayBarGameName.ActionSection}} {
     position: relative;
     z-index: 3;
+    height: auto !important;
     margin: 0 !important;
 }
 
@@ -1163,7 +1184,6 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 
 {{PlayBarGameName.InPage}} {{PlayBarGameName.RightControls}} {{PlayBarGameName.AppButtonsContainer}} {
     background: var(--lm-panel-strong) !important;
-    backdrop-filter: blur(12px) saturate(1.3);
     border: 1px solid var(--lm-border-strong) !important;
     box-shadow: var(--lm-sheen), 0 4px 12px rgba(0, 0, 0, 0.25) !important;
 }
@@ -1171,15 +1191,18 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {
     position: relative;
     z-index: 3;
+    box-sizing: border-box !important;
     flex: 0 1 auto !important;
     width: auto !important;
     max-width: 100%;
     height: auto !important;
+    min-height: 46px;
     max-height: none !important;
+    align-items: center !important;
     overflow: visible !important;
     margin: 0 !important;
-    padding: 4px 20px !important;
-    border-radius: 26px;
+    padding: 5px clamp(14px, 1.6vw, 22px) !important;
+    border-radius: 23px;
     background: var(--lm-panel);
     border: 1px solid var(--lm-border-strong);
     box-shadow: var(--lm-sheen), 0 4px 14px rgba(0, 0, 0, 0.2);
@@ -1192,7 +1215,7 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 
 {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusNameContainer}} {
     height: auto !important;
-    min-height: 36px;
+    min-height: 34px;
     justify-content: center !important;
     align-items: center !important;
     gap: 0 !important;
@@ -1204,40 +1227,73 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     justify-content: center !important;
     align-items: center !important;
     flex-wrap: wrap;
-    gap: 4px 18px;
+    gap: 6px clamp(12px, 1.8vw, 24px) !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* Steam's cloud status container stacks 4 hidden width-reservation rows below
-   the visible status with height: 0, but they still inherit GameStat's 6px
-   vertical padding (48px total), pushing sibling stats down and out of the pill. */
+/* Steam's cloud status container stacks 4 hidden sizer rows below the visible
+   status; hide them so the cloud item sizes to its actual label without extra
+   vertical height or phantom horizontal gap. */
 {{PlayBarGameName.InPage}} {{PlayBarGameName.PlayBarCloudStatusContainer}} {{PlayBarGameName.SuperimposedGridItems}}:not({{PlayBarGameName.Visible}}) {
-    height: 0 !important;
-    min-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    overflow: hidden !important;
+    display: none !important;
 }
 
 {{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.GameStat}} {
-    align-items: center;
+    padding: 2px !important;
+    margin-inline: 0 !important;
+    align-items: center !important;
 }
 
-/* Family Library row: compact centered glass pill under the stats bar */
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.GameStatIcon}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.GameStatIconForced}} {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 3px 0 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.PlaytimeIcon}} svg,
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.PlaytimeIconForced}} svg,
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.CloudIconSVG}},
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.AchievementSVG}} {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.ClickablePlayBarItem}} {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-radius: 999px !important;
+    padding: 1px 8px !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    transition: background-color 0.14s ease !important;
+}
+
+{{PlayBarGameName.InPage}} {{PlayBarGameName.StatusAndStats}} {{PlayBarGameName.ClickablePlayBarItem}}:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #fff !important;
+}
+
+/* Family Library row: compact glass pill sharing Row 2 with LinksSection when room permits */
 {{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}} {
+    order: 2 !important;
     position: relative;
     z-index: 3;
+    box-sizing: border-box !important;
+    flex: 0 1 auto !important;
     width: fit-content !important;
     max-width: 100%;
+    min-height: 36px !important;
+    flex-wrap: wrap;
     justify-content: center !important;
     align-items: center !important;
-    gap: 6px;
-    margin: 8px auto 0 !important;
-    padding: 5px 16px !important;
-    border-radius: 999px;
+    gap: 4px 10px !important;
+    margin: 0 0 8px 0 !important;
+    padding: 5px clamp(12px, 1.4vw, 18px) !important;
+    border-radius: 22px;
     background: var(--lm-panel);
     border: 1px solid var(--lm-border);
     box-shadow: var(--lm-sheen);
@@ -1246,11 +1302,14 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* Scrolled sticky PlayBar: stays compact single-row and frosted over content */
+{{PlayBarGameName.InPage}} {{PlayBarGameName.SharedLibrary}} img {
+    border-radius: 6px !important;
+}
+
+/* Scrolled sticky PlayBar: compact single-row header without extra GPU blur */
 {{PlayBarGameName.StickyHeader}} {{PlayBarGameName.PlayBar}},
 {{PlayBarGameName.StickyHeader}} {{PlayBarGameName.Glassy}} {
-    background: var(--lm-panel-strong) !important;
-    backdrop-filter: blur(18px) saturate(1.25) !important;
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 34%), 100%), transparent) !important;
     border-bottom: 1px solid var(--lm-border) !important;
 }
 
@@ -1265,10 +1324,15 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     position: relative !important;
     isolation: isolate !important;
     box-sizing: border-box !important;
+    height: auto !important;
     border-radius: 999px !important;
     overflow: hidden !important;
-    backdrop-filter: blur(14px) saturate(1.35);
     border: none !important;
+    background: linear-gradient(
+        180deg,
+        rgba(118, 200, 255, 0.34) 0%,
+        rgba(90, 172, 244, 0.42) 100%
+    ) !important;
     box-shadow:
         inset 0 2px 6px rgba(255, 255, 255, 0.28),
         inset 0 -3px 8px rgba(255, 255, 255, 0.16),
@@ -1304,12 +1368,12 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     mask-composite: exclude !important;
 }
 
-{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})):hover {
+{{PlayButtonContainer.PlayButtonContainer}}:hover {
     transform: translateY(-1px);
     filter: brightness(1.08);
 }
 
-{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})):active {
+{{PlayButtonContainer.PlayButtonContainer}}:active {
     transform: translateY(0.5px) scale(0.985);
     filter: brightness(0.98);
 }
@@ -1326,7 +1390,7 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 }
 
 /* Stop / Shutdown: macaron coral pink */
-{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.ShutdownAppButton}}, {{PlayButtonContainer.ForceShutdownButton}}, :has({{PlayButtonContainer.ShutdownAppButton}}), :has({{PlayButtonContainer.ForceShutdownButton}})) {
+{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.ShutdownAppButton}}, {{PlayButtonContainer.ForceShutdownButton}}) {
     --lm-cta-glow: rgba(255, 160, 174, 0.20);
     --lm-cta-rim-tint: rgba(255, 198, 208, 0.36);
     background: linear-gradient(
@@ -1337,7 +1401,8 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 }
 
 /* Disabled / NoAction: neutral frosted crystal */
-{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.Disabled}}, {{PlayButtonContainer.NoAction}}, :has({{PlayButtonContainer.Disabled}}), :has({{PlayButtonContainer.NoAction}})) {
+{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.Disabled}}, {{PlayButtonContainer.NoAction}}),
+{{PlayButtonContainer.PlayButtonContainer}}:has(> {{PlayButtonContainer.Disabled}}, > {{PlayButtonContainer.NoAction}}) {
     --lm-cta-glow: rgba(255, 255, 255, 0.06);
     --lm-cta-rim-tint: rgba(255, 255, 255, 0.22);
     background: linear-gradient(
@@ -1345,15 +1410,8 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
         rgba(210, 224, 240, 0.16) 0%,
         rgba(168, 186, 208, 0.22) 100%
     ) !important;
-}
-
-/* Install / Update / Buy: macaron sky blue */
-{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Green}}):not({{PlayButtonContainer.ShutdownAppButton}}):not({{PlayButtonContainer.ForceShutdownButton}}):not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.ShutdownAppButton}})):not(:has({{PlayButtonContainer.ForceShutdownButton}})):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})) {
-    background: linear-gradient(
-        180deg,
-        rgba(118, 200, 255, 0.34) 0%,
-        rgba(90, 172, 244, 0.42) 100%
-    ) !important;
+    transform: none !important;
+    filter: none !important;
 }
 
 {{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.PlayButton}},
@@ -1370,9 +1428,15 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
 }
 
-{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})) {{PlayButtonContainer.PlayButton}}:hover,
-{{PlayButtonContainer.PlayButtonContainer}}:not({{PlayButtonContainer.Disabled}}):not({{PlayButtonContainer.NoAction}}):not(:has({{PlayButtonContainer.Disabled}})):not(:has({{PlayButtonContainer.NoAction}})) {{PlayButtonContainer.StreamingSelector}}:hover {
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.PlayButton}}:hover,
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.StreamingSelector}}:hover {
     background: rgba(255, 255, 255, 0.12) !important;
+}
+
+{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.Disabled}}, {{PlayButtonContainer.NoAction}}) {{PlayButtonContainer.PlayButton}}:hover,
+{{PlayButtonContainer.PlayButtonContainer}}:is({{PlayButtonContainer.Disabled}}, {{PlayButtonContainer.NoAction}}) {{PlayButtonContainer.StreamingSelector}}:hover,
+{{PlayButtonContainer.PlayButtonContainer}} {{PlayButtonContainer.PlayButton}}:is({{PlayButtonContainer.Disabled}}, {{PlayButtonContainer.NoAction}}):hover {
+    background: transparent !important;
 }
 
 {{PlayButtonContainer.PlayButton}} {
@@ -1476,11 +1540,12 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 
 /* Expandable game info drawer */
 {{AppGameInfoContainer}} {
+    order: 4 !important;
     background-color: transparent !important;
 }
 
 {{AppGameInfoContainer}} > div:first-child {
-    margin: 6px 20px !important;
+    margin: 2px 20px 8px !important;
     border-radius: var(--lm-r) !important;
     background: var(--lm-panel) !important;
     border: 1px solid var(--lm-border) !important;
@@ -1488,15 +1553,23 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     overflow: hidden;
 }
 
-/* Centered glass links bar (Store / DLC / Community / Discussions / Guides / Support).
-   Keep the outer section container full-width so Steam's link-overflow measurement
-   sees the full row width and never collapses links into "...". */
+/* Adaptive glass links pill (Store / DLC / Community / Discussions / Guides / Support):
+   shares Row 2 next to SharedLibrary when both fit, wrapping cleanly when narrow. */
+{{LinksSection.LinksSection}} {
+    order: 3 !important;
+    flex: 0 1 auto !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+}
+
 {{LinksSection.LinksSection}} > {{AppDetailsSectionContainer.AppDetailsSectionContainer}},
 {{LinksSection.LinksSection}} > {{AppDetailsSectionContainer.AppDetailsSectionContainer}}{{AppDetailsSectionContainer.RightColumnSection}} {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    margin: 4px 20px 10px !important;
+    margin: 0 !important;
     padding: 0 !important;
 }
 
@@ -1504,16 +1577,24 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     padding: 0 !important;
 }
 
+{{LinksSection.LinksSectionBody}} {{LinksSection.MenuButton}} {
+    display: none !important;
+}
+
 {{LinksSection.Links}} {
     display: flex !important;
     flex-wrap: wrap;
     justify-content: center !important;
     align-items: center !important;
-    gap: 4px !important;
+    gap: 2px 6px !important;
+    box-sizing: border-box !important;
+    width: fit-content !important;
+    max-width: 100% !important;
     height: auto !important;
     min-height: 36px !important;
+    margin: 0 !important;
     padding: 3px 10px !important;
-    border-radius: 999px !important;
+    border-radius: 20px !important;
     background: var(--lm-panel) !important;
     border: 1px solid var(--lm-border-strong) !important;
     box-shadow: var(--lm-sheen), 0 4px 14px rgba(0, 0, 0, 0.18) !important;
@@ -1524,6 +1605,10 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     display: inline-flex !important;
     width: auto !important;
     flex: 0 0 auto !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: auto !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -1538,7 +1623,7 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 }
 
 {{LinksSection.Link}} {
-    padding: 5px 16px !important;
+    padding: 4px 13px !important;
     border-radius: 999px !important;
     color: var(--lm-text) !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -1765,7 +1850,6 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     border-radius: 999px !important;
     background: var(--lm-panel-strong) !important;
     background-image: none !important;
-    backdrop-filter: blur(12px) saturate(1.3);
     border: 1px solid var(--lm-border-strong) !important;
     box-shadow: var(--lm-sheen), 0 6px 18px rgba(0, 0, 0, 0.32) !important;
     color: var(--lm-text) !important;
