@@ -72,7 +72,7 @@
     "Backdrop": {
       "tab": "Backdrop",
       "description": "What shows behind the glass. Acrylic needs the Lumina Extended plugin.",
-      "default": "Wallpaper",
+      "default": "Aurora",
       "values": {
         "Wallpaper": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-wallpaper.css" } },
         "Aurora": { "TargetCss": { "affects": [".*"], "src": "css/conditions/backdrop-aurora.css" } },
