@@ -28,9 +28,9 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 
 **Interface**
 
-- **Game list**: *Acrylic* (default) uses frosted blur with fine grain; *Liquid glass* bends the backdrop along the edges (heavier on performance). Both share the same floating cards, capsules and bottom bar.
-- **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes, and how far in from the edges the backdrop bends.
-- **Blur** (Acrylic only): how much the panels and menus blur what's behind them (default 4 px); capsules blur a little less.
+- **Game list**: *Liquid glass* (default) refracts the backdrop with colour dispersion along the edges (WebGL-accelerated for library panes); *Acrylic* uses frosted blur with fine grain. Both share the same floating cards, capsules and bottom bar.
+- **Liquid opacity** and **Refraction** (Liquid glass only): the tint of the floating panes (default 30%), and how far in from the edges the backdrop bends (default 55%).
+- **Blur** (Acrylic only): how much the panels and menus blur what's behind them (default 2 px); capsules blur a little less.
 - **Opacity**: how dark the panels are; lower is clearer.
 - **Corner radius**: rounding of panels, buttons and menus.
 - **Nav position**: where the Store / Library / Community capsule sits. *Center* puts it in the title bar (on a second row when the window is too narrow); *Left* and *Right* put it on a second row, which on web pages it shares with the URL bar at the other end.
@@ -42,7 +42,7 @@ Install Millennium, then put `lumina` from a [release](../../releases) in `Steam
 
 - **Menu animation**: *Cascade* unrolls menus item by item and unfolds collections row by row; *Fade* fades them in; *Off* disables the animations.
 - **Nav menu**: *Morph* uses one panel that slides between Store, Library, Community and profile, shared with the title bar and account menus; *Native* keeps Steam's popups.
-- **Smooth scrolling**: mouse-wheel smoothing in the game list.
+- **Smooth scrolling**: mouse-wheel smoothing in the library (game list and right pane).
 
 The Lumina Extended plugin reads the Wallpaper Engine library in place (no copying, web wallpapers included), shows the current wallpaper behind the Store and Community pages, and enables Windows desktop acrylic (no separate dwmx plugin needed). Enable it under Plugins in Millennium's settings. If *Wallpaper Engine…* still opens a folder picker, the wallpaper card says why; `Steam\millennium\logs\lumina-extended_log.log` lists the library folders it found.
 
