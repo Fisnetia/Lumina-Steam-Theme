@@ -119,7 +119,7 @@
     // only changes a few attributes; drawing and decoding a map every frame
     // drops frames. The map is redrawn once the size settles.
     const SETTLE = 120;
-    const pane = ({ selector, id, ready, reach, skip }) => {
+    const pane = ({ selector, id, ready, reach, skip, disperse = true }) => {
         let el = null, size = "", observer = null, pending = 0;
 
         const stretch = () => {
@@ -146,9 +146,10 @@
             if (!f) { f = document.createElementNS(NS, "filter"); f.id = id; filterHost().appendChild(f); }
             for (const [k, v] of Object.entries({ x: 0, y: 0, width: W, height: H, filterUnits: "userSpaceOnUse",
                 primitiveUnits: "userSpaceOnUse", "color-interpolation-filters": "sRGB" })) f.setAttribute(k, v);
+            const refr = disperse ? dispersion(scale) : displace(scale ? scale.toFixed(1) : 0, "body");
             f.innerHTML =
                 `<feImage href="${drawMap(W, H, R, bevel)}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="map"/>` +
-                dispersion(scale) + rimLight;
+                refr + rimLight;
             html.classList.add(ready);
         };
 
@@ -190,16 +191,18 @@
                reach: 0.92, skip: () => html.classList.contains("lm-gl-panes") }),   // 46px at 50%
         pane({ selector: ".lm-morph.lm-morph-inpage", id: "lm-liquid-menu", ready: "lm-liquid-menu-ready",
                reach: 0.56 }),    // 28px at 50%
-        // bottom bar capsules (36px tall) and title bar capsules (32px)
-        ...[["{{BottomBarContainer.AddGameButton}}", "add"], ["{{BottomBarContainer.DownloadStatus}}", "dl"],
-            ["{{BottomBarContainer.FriendsButton}}", "friends"],
-            ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}}", "menus"],
-            ["{{ForceOpaqueBackground.SuperNavBar}}", "nav"],
-            ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}}", "controls"],
-            [".title-bar-actions", "window"],
-            ["{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}}", "url"]].map(([selector, name]) =>
+        // bottom bar capsules (36px tall, 6 primitives over scrolling content)
+        // and title bar capsules (32px, full RGB dispersion)
+        ...[["{{BottomBarContainer.AddGameButton}}", "add", false],
+            ["{{BottomBarContainer.DownloadStatus}}", "dl", false],
+            ["{{BottomBarContainer.FriendsButton}}", "friends", false],
+            ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.RootMenuBar}}", "menus", true],
+            ["{{ForceOpaqueBackground.SuperNavBar}}", "nav", true],
+            ["{{ForceOpaqueBackground.TitleBar}} > {{ForceOpaqueBackground.TitleBarControls}}", "controls", true],
+            [".title-bar-actions", "window", true],
+            ["{{ForceOpaqueBackground.BrowserWrapper}} {{ForceOpaqueBackground.URLBar}}", "url", true]].map(([selector, name, disperse]) =>
             pane({ selector, id: `lm-liquid-${name}`, ready: `lm-liquid-${name}-ready`,
-                   reach: 0.24 })),   // 12px at 50%
+                   reach: 0.24, disperse })),   // 12px at 50%
     ];
 
     // the library mounts and unmounts the list; the menu panel appears on
