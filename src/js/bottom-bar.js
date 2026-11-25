@@ -72,7 +72,7 @@
     };
 
     const refresh = () => { watch(); sync(); };
-    setInterval(refresh, 1000);
+    setInterval(() => { if (!document.hidden) refresh(); }, 1000);
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") refresh(); }, true);
     refresh();
 })();

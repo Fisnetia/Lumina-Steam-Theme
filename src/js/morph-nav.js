@@ -38,7 +38,7 @@
     };
     const enabled = () => morphOn;
     readEnabled();
-    setInterval(readEnabled, 1000);
+    setInterval(() => { if (!document.hidden) readEnabled(); }, 1000);
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") readEnabled(); }, true);
 
     /* ---- Steam's menus ---- */

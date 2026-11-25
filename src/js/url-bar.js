@@ -166,5 +166,5 @@
         hook(bar);
     });
     scan();
-    setInterval(scan, 1000);
+    setInterval(() => { if (!document.hidden) scan(); }, 1000);
 })();
