@@ -1,0 +1,4 @@
+/* Play bar alignment: center (default in css/library.css). */
+:root {
+    --lm-playbar-pos: center;
+}
