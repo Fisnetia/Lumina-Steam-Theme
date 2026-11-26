@@ -22,6 +22,7 @@
         "{{LibraryHome.InnerContainer}}",
         "{{ContainerScroll.OuterContainer}}",
         "{{BigPlus.ScrollContainer}}",
+        "{{OverlayPinned.DesktopPanel}}",
     ].join(",");
     const LINE = 40;          // px per line, for deltaMode 1
     const MIN_SPEED = 0.15;   // px per ms: the glide's slowest pace near the end

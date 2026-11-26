@@ -147,7 +147,12 @@
 
     // Translate synchronously in the MutationObserver microtask (before paint)
     // so settings rows and dropdowns never flash English or jump after render.
+    const isGalleryTarget = (t) => {
+        const el = t && (t.nodeType === 1 ? t : t.parentElement);
+        return !!(el && el.closest(".lm-gallery"));
+    };
     const mo = new MutationObserver((records) => {
+        if (records.every(r => isGalleryTarget(r.target))) return;
         if (records.some(r => r.addedNodes.length)) translateMenus();
         translatePage();
         mo.takeRecords();   // drop mutations from our own text swaps

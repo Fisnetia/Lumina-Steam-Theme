@@ -890,6 +890,13 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
     translate: 0 calc(-1 * var(--lm-bar-space));
 }
 
+/* Library stays mounted behind web pages, so its portaled scroll-to-top pill
+   would otherwise show through while the web view is still loading. */
+html.lm-web-bar {{ScrollToTopButton.ScrollToTopButton}},
+html.lm-web-bar {{ScrollToTopButton.ScrollToTopButtonPosition}} {
+    display: none !important;
+}
+
 /* the game list runs behind the left capsule like the pages on the right */
 {{GameListHomeAndSearch.Container}} .ReactVirtualized__Grid__innerScrollContainer {
     margin-bottom: var(--lm-bar-space);
@@ -1932,4 +1939,234 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}}:hover {
 {{PlayBarGameName.DetailsProgressBar}} {
     background: var(--lm-a) !important;
     border-radius: 3px;
+}
+
+/* ---- Achievements overlay page ---- */
+
+{{LeftListSizableContainer.AchievementsOverlayContainer}} {
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 18%), 100%), transparent) !important;
+    backdrop-filter: blur(22px) saturate(1.35);
+}
+
+/* Full-pane glass layout instead of Steam's inset dark modal box */
+{{LeftListSizableContainer.AchievementsOverlayContainer}} > div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+{{LeftListSizableContainer.AchievementsOverlayContainer}} {{AchievementList.AchievementsPage}} {
+    height: 100% !important;
+    max-height: 100% !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Soft atmospheric hero banner: static blurred wash fading into glass */
+{{AchievementList.AchievementsPage}} {{AchievementList.Background}} {{AchievementList.Blur}} {
+    background: none !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementList.HeaderImage}} {
+    height: 290px !important;
+    opacity: 0.52;
+    filter: blur(12px) saturate(1.3) brightness(0.82);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
+}
+
+/* Floating glass close button docked inside the top-right corner */
+{{LeftListSizableContainer.AchievementsOverlayContainer}} {{LeftListSizableContainer.CloseButton}} {
+    top: 18px !important;
+    right: 22px !important;
+    z-index: 30 !important;
+    box-sizing: border-box !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 9px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    background: var(--lm-panel-strong) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    box-shadow: var(--lm-shadow), var(--lm-sheen) !important;
+    transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.14s ease !important;
+}
+
+{{LeftListSizableContainer.AchievementsOverlayContainer}} {{LeftListSizableContainer.CloseButton}}:hover {
+    background: var(--lm-hover) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+    transform: scale(1.05);
+}
+
+{{LeftListSizableContainer.AchievementsOverlayContainer}} {{LeftListSizableContainer.CloseButton}} svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+{{LeftListSizableContainer.AchievementsOverlayContainer}} {{LeftListSizableContainer.CloseButton}} svg line {
+    stroke: var(--lm-text) !important;
+}
+
+/* Centered editorial scroll column with bottom clearance for floating capsules */
+{{AchievementList.AchievementsPage}} {{OverlayPinned.DesktopPanel}} {
+    padding: 28px clamp(20px, 4vw, 48px) calc(var(--lm-bar-space) + 24px) !important;
+    gap: 16px !important;
+    box-sizing: border-box;
+}
+
+{{AchievementList.AchievementsPage}} {{OverlayPinned.DesktopPanel}} > * {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+}
+
+/* Game icon & title header */
+{{AchievementList.AchievementsPage}} {{SummaryHeading.ArtworkLink}} {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+{{AchievementList.AchievementsPage}} {{OverlayPinned.NoScrollAnchor}} h1 {
+    font-size: 22px !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* Overall progress card */
+{{AchievementList.AchievementsPage}} {{SummaryHeading.SummaryHeading}} {
+    background: var(--lm-panel) !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: var(--lm-sheen) !important;
+    padding: 16px 20px !important;
+}
+
+{{AchievementList.AchievementsPage}} {{SummaryHeading.AllGroupsCompleted}} {{SummaryHeading.SummaryHeading}} {
+    border-color: rgba(255, 196, 86, 0.35) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{CompletedCallout.Unlocked}} {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--lm-a) 78%, #fff), var(--lm-a)) !important;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--lm-a) 55%, transparent) !important;
+    border-radius: 999px !important;
+}
+
+/* Friend comparison strip */
+{{AchievementList.AchievementsPage}} {{FriendCompareBox.FriendCompareBox}} {
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    border-radius: var(--lm-r) !important;
+    padding: 10px 16px !important;
+    box-shadow: var(--lm-sheen);
+}
+
+/* Filter bar controls: dropdowns, search field, and toggle switches */
+{{AchievementList.AchievementsPage}} {{ControlBox.ControlBox}} {
+    background-color: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border) !important;
+    transition: background-color 0.14s ease, box-shadow 0.14s ease !important;
+}
+
+{{AchievementList.AchievementsPage}} {{ControlBox.ControlBox}}{{ControlBox.Hoverable}}:hover {
+    background-color: var(--lm-hover) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{ControlBox.ControlBox}}{{ControlBox.Focusable}}:focus-within {
+    background-color: var(--lm-panel-strong) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lm-a) 70%, transparent) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{Track.Track}} {
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border);
+}
+
+{{AchievementList.AchievementsPage}} {{Track.Track}}::before {
+    background: var(--lm-a) !important;
+}
+
+/* Achievement rows as floating glass cards (preserves virtualizer height & global fill bar) */
+{{AchievementList.AchievementsPage}} {{AchievementsTable.AchievementRow}} {
+    --color-achievements-global-progress-common: color-mix(in srgb, var(--lm-a) 22%, transparent);
+    --color-achievements-global-progress-rare: rgba(255, 196, 86, 0.22);
+    margin: 5px 0 !important;
+    border: none !important;
+    border-radius: var(--lm-r-sm) !important;
+    background-color: var(--lm-panel-soft) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border) !important;
+    transition: background-color 0.14s ease, box-shadow 0.14s ease !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.AchievementRow}}:hover {
+    background-color: var(--lm-hover) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.AchievementRow}}{{AchievementsTable.GlobalProgressBarRare}} {
+    box-shadow: inset 0 0 0 1px rgba(255, 196, 86, 0.28) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.AchievementRow}}{{AchievementsTable.GlobalProgressBarRare}}:hover {
+    box-shadow: inset 0 0 0 1px rgba(255, 196, 86, 0.5), var(--lm-sheen) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.GlobalProgressSection}}{{AchievementsTable.Rare}} {
+    color: #ffd070 !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.HiddenRow}},
+{{AchievementList.AchievementsPage}} {{AchievementsTable.FilteredAchievementsRow}},
+{{AchievementList.AchievementsPage}} {{AchievementsTable.SectionGap}} > {{AchievementsTable.HiddenContent}} {
+    margin: 5px 0 !important;
+    border-radius: var(--lm-r-sm) !important;
+    background-color: var(--lm-panel-soft) !important;
+    box-shadow: none !important;
+    border: 1px dashed var(--lm-border-strong) !important;
+    transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.HiddenRow}}:hover,
+{{AchievementList.AchievementsPage}} {{AchievementsTable.FilteredAchievementsRow}}:hover,
+{{AchievementList.AchievementsPage}} {{AchievementsTable.SectionGap}} > {{AchievementsTable.HiddenContent}}:hover {
+    background-color: var(--lm-hover) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.RevealInstructions}} {
+    background: color-mix(in srgb, var(--lm-t) 82%, transparent) !important;
+    backdrop-filter: blur(14px) saturate(1.3);
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lm-a) 40%, var(--lm-border-strong)), var(--lm-sheen) !important;
+    color: #fff !important;
+}
+
+{{AchievementList.AchievementsPage}} {{RareAchievementIconGlowContainerRoot.HiddenLabel}} {
+    background: var(--lm-panel-strong) !important;
+    background-image: none !important;
+    border-radius: 10px !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong);
+    color: var(--lm-text-dim) !important;
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.AchievementIconWrapper}},
+{{AchievementList.AchievementsPage}} {{RareAchievementIconGlowContainerRoot.AchievementIconWrapper}} {
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+{{AchievementList.AchievementsPage}} {{AchievementsTable.EmptyTableDivider}} {
+    border-color: var(--lm-border) !important;
 }

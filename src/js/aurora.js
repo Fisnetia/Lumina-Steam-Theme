@@ -447,6 +447,10 @@ void main() {
         ];
     };
 
+    const hasVisiblePane = () =>
+        (cachedR0[2] > 1 && cachedR0[3] > 1 && cachedM0[3] > 0.001) ||
+        (cachedR1[2] > 1 && cachedR1[3] > 1 && cachedM1[3] > 0.001);
+
     const refreshLayout = () => {
         if (!canvas) return false;
         if (!panesDirty && cachedCw > 0 && cachedCh > 0 &&
@@ -614,9 +618,9 @@ void main() {
         const cw = cachedCw, ch = cachedCh;
         const cov = coverUv(cw, ch, wallMediaW, wallMediaH);
         const needBgBlur = blurPx > 0.01;
-        const needPaneBlur = liquidBlur > 0.01;
+        const needPaneBlur = liquidBlur > 0.01 && hasVisiblePane();
         if (needBgBlur || needPaneBlur) {
-            const key = `${cw}x${ch}x${blurPx}x${liquidBlur}x${wallGrade}`;
+            const key = `${cw}x${ch}x${blurPx}x${needPaneBlur ? liquidBlur : 0}x${wallGrade}`;
             if (!wallBlurred || lastBlurKey !== key) {
                 if (needBgBlur && !blurToFbo(wallTex, cov, 1, wallGrade, cw, ch, blurPx, fboA)) {
                     setWallActive(false); return false;
@@ -652,7 +656,7 @@ void main() {
             if (useAuroraPanes()) {
                 if (hasAuroraFrame && refreshLayout()) {
                     const aw = Math.max(1, Math.round(cachedCw * SCALE)), ah = Math.max(1, Math.round(cachedCh * SCALE));
-                    const paneTex = liquidBlur > 3 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, aw, ah, liquidBlur, fboC)
+                    const paneTex = liquidBlur > 3 && hasVisiblePane() && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, aw, ah, liquidBlur, fboC)
                         ? fboC.tex : null;
                     renderComposite(fboA.tex, UNIT_COVER, 0, 0, paneTex);
                 } else drawAurora();
@@ -703,7 +707,7 @@ void main() {
                 hasAuroraFrame = true;
                 // Aurora is already a low-frequency 1/3-scale gradient; only blur
                 // at higher radii and stay at aw x ah instead of full screen res.
-                const paneTex = liquidBlur > 3 && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, aw, ah, liquidBlur, fboC)
+                const paneTex = liquidBlur > 3 && hasVisiblePane() && blurToFbo(fboA.tex, UNIT_COVER, 0, 0, aw, ah, liquidBlur, fboC)
                     ? fboC.tex : null;
                 renderComposite(fboA.tex, UNIT_COVER, 0, 0, paneTex);
                 return;
