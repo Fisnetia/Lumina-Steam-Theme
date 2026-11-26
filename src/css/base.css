@@ -203,6 +203,43 @@ html {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}}:focus {
     color: #fff !important;
 }
 
+/* Steam design-system listbox popovers (e.g. Achievements filter & friend compare) */
+{{ListBox.ListBox}} {
+    padding: 6px !important;
+    border: none !important;
+    border-radius: var(--lm-r) !important;
+    background: var(--lm-menu-bg) !important;
+    box-shadow: var(--lm-shadow), inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+    filter: none !important;
+    overflow-x: hidden;
+}
+
+html.MillenniumWindow_MainSteamWindow {{ListBox.ListBox}} {
+    background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 26%), 100%), transparent) !important;
+    backdrop-filter: blur(22px) saturate(1.4) !important;
+}
+
+{{ListBox.ListBox}} {{ListBox.ListBoxOption}} {
+    border-radius: var(--lm-r-sm) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+{{ListBox.ListBox}} {{ListBox.ListBoxOption}}[data-focused="true"] {
+    background: var(--lm-hover) !important;
+    color: #fff !important;
+}
+
+{{ListBox.ListBox}} {{ListBox.ListBoxOption}}[data-selected="true"] {
+    background: var(--lm-selected) !important;
+    color: #fff !important;
+}
+
+{{ListBox.ListBox}} [role="separator"] {
+    margin: 4px 6px !important;
+    background: var(--lm-border-strong) !important;
+}
+
 /* ---- Tooltips ---- */
 
 {{TextToolTip.TextToolTip}},
@@ -454,7 +491,8 @@ html.MillenniumWindow_GameProperties {{AppProperties.WorkshopItemAuthorSnapshot}
    Steam's dialog layout: a glass panel over the window's backdrop in dialog
    windows, and over the library, blurring it, for modals in the main window
    (account switcher). Buttons, inputs and lists inside follow the theme. */
-html.ModalDialogPopup:not(.MillenniumWindow_Settings):not(.MillenniumWindow_GameProperties) .DialogContent._DialogLayout {
+html.ModalDialogPopup:not(.MillenniumWindow_Settings):not(.MillenniumWindow_GameProperties) .DialogContent._DialogLayout,
+html.ModalDialogPopup {{NewUpdates.WhatsNewSettingsContainer}} {
     background: var(--lm-panel) !important;
     background-image: none !important;
 }
@@ -561,6 +599,38 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
     background: var(--lm-panel-strong) !important;
 }
 
+/* What's New settings dialog */
+{{NewUpdates.WhatsNewSettings}} ._DialogInputContainer {
+    background: var(--lm-panel-soft) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border);
+}
+
+{{NewUpdates.WhatsNewSettings}} {{NewUpdates.WhatsNewHeaderText}},
+{{NewUpdates.WhatsNewSettings}} {{NewUpdates.DialogLabelSoft}},
+{{NewUpdates.WhatsNewSettings}} .DialogToggle_Description {
+    color: rgba(235, 240, 248, 0.78) !important;
+}
+
+{{NewUpdates.WhatsNewSettings}} {{NewUpdates.WhatsNewGameListRow}} {
+    border-radius: var(--lm-r-sm);
+}
+
+{{NewUpdates.WhatsNewSettings}} {{NewUpdates.WhatsNewGameListRow}}:hover {
+    background: var(--lm-hover) !important;
+}
+
+{{NewUpdates.WhatsNewSettings}} {{NewUpdates.WhatsNewSettingsUndoButton}} {
+    background: var(--lm-panel-strong) !important;
+    border-radius: var(--lm-r-sm) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+    color: var(--lm-text) !important;
+}
+
+{{NewUpdates.WhatsNewSettings}} {{NewUpdates.WhatsNewSettingsUndoButton}}:hover {
+    background: var(--lm-hover) !important;
+}
+
 /* Login window: not a dialog window; its root and form carry Steam's dark
    gradient. The client's backdrop goes behind them, as in dialog windows. */
 {{LoginStaticBackground}} {
@@ -626,6 +696,9 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
     line-height: 16px;
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
+}
+
+.lm-wp-badge {
     backdrop-filter: blur(6px);
 }
 
@@ -674,8 +747,7 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(5, 7, 12, 0.55);
-    backdrop-filter: blur(6px);
+    background: rgba(5, 7, 12, 0.62);
 }
 
 .lm-gallery-panel {
@@ -740,12 +812,14 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
 
 .lm-gallery-grid {
     flex: 1;
+    min-height: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     align-content: start;
     gap: 12px;
     padding: 16px;
     overflow-y: auto;
+    contain: layout style paint;
 }
 
 /* 16:9 via padding: aspect-ratio with overflow hidden collapses grid rows */
@@ -760,6 +834,7 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
     box-shadow: inset 0 0 0 1px var(--lm-border);
     overflow: hidden;
     cursor: pointer;
+    contain: layout style paint;
 }
 
 .lm-gallery-card img {
@@ -785,6 +860,8 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
 .lm-gallery-badge {
     top: 8px;
     bottom: auto;
+    background: rgba(8, 12, 20, 0.72);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
 .lm-gallery-name {
@@ -800,6 +877,50 @@ html.ModalDialogPopup input:is([type="text"], [type="password"], [type="search"]
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.lm-gallery-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--lm-border);
+}
+
+.lm-gallery-foot button {
+    min-width: 30px;
+    height: 28px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--lm-text-dim);
+    background: var(--lm-hover);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.lm-gallery-foot button:hover:not(:disabled) {
+    color: #fff;
+}
+
+.lm-gallery-foot button.active {
+    color: #fff;
+    background: var(--lm-selected);
+}
+
+.lm-gallery-foot button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.lm-gallery-dots {
+    padding: 0 4px;
+    font-size: 12px;
+    color: var(--lm-text-dim);
+    user-select: none;
 }
 
 /* ---- Morphing nav menu (js/morph-nav.js) ----

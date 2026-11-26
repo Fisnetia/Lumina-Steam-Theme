@@ -31,15 +31,21 @@
     // stylesheets reload, then the last value holds. Read on stylesheet loads
     // and once a second, not in the pointer handlers: reading a style there
     // forces a style pass whenever Steam is re-rendering.
-    let morphOn = false;
+    let morphOn = false, morphKnown = false;
     const readEnabled = () => {
         const v = getComputedStyle(html).getPropertyValue("--lm-morph-nav").trim();
-        if (v) morphOn = v === "1";
+        if (v) { morphOn = v === "1"; morphKnown = true; }
     };
-    const enabled = () => morphOn;
+    const enabled = () => {
+        if (!morphKnown) readEnabled();
+        return morphOn;
+    };
     readEnabled();
     setInterval(() => { if (!document.hidden) readEnabled(); }, 1000);
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") readEnabled(); }, true);
+    if (document.head && typeof MutationObserver !== "undefined") {
+        new MutationObserver(readEnabled).observe(document.head, { childList: true });
+    }
 
     /* ---- Steam's menus ---- */
 
@@ -56,16 +62,20 @@
     const MENU_ITEM = "{{contextMenu.contextMenuItem}}";
     const kindOf = (title) => /Supernav$/.test(title) ? "nav" : /Root Menu$/.test(title) ? "bar" : "click";
 
-    // The popup's title from the wrapper's React props; null if not one of ours.
-    const popupTitle = (wrapper) => {
-        const key = Object.keys(wrapper).find(k => k.startsWith("__reactFiber"));
+    // The popup's title and menuItems from the wrapper's React props; null if not one of ours.
+    const popupProps = (wrapper) => {
+        const key = wrapper && Object.keys(wrapper).find(k => k.startsWith("__reactFiber"));
         for (let f = key && wrapper[key], i = 0; f && i < 6; f = f.return, i++) {
             const p = f.memoizedProps;
             if (!p || typeof p.title !== "string") continue;
-            if (/Supernav$/.test(p.title)) return p.menuItems ? p.title : null;   // nav items without a menu
-            if (/Root Menu$|^Account Menu$/.test(p.title)) return p.title;
+            if (/Supernav$/.test(p.title)) return p.menuItems ? p : null;   // nav items without a menu
+            if (/Root Menu$|^Account Menu$/.test(p.title)) return p;
         }
         return null;
+    };
+    const popupTitle = (wrapper) => {
+        const p = popupProps(wrapper);
+        return p ? p.title : null;
     };
 
     /* Millennium adds its two Steam menu items when the menu renders after its
@@ -105,10 +115,52 @@
         return { item: el };
     };
 
+    // Steam delays creating hidden Supernav popups by 2+ seconds on cold start
+    // (2000ms timer + requestIdleCallback queue). Until a popup mounts, build
+    // entries directly from the wrapper's React menuItems so hovering during
+    // startup opens the morphing panel instead of falling back to a native popup.
+    const entriesFromProps = (wrapper) => {
+        const p = popupProps(wrapper);
+        if (!p || !Array.isArray(p.menuItems)) return [];
+        const o = opener();
+        const lm = o && o.LocalizationManager;
+        const out = [];
+        for (const it of p.menuItems) {
+            if (!it || it.visible === false) continue;
+            const actionable = it.route || it.steamURL || it.dialog || typeof it.onClick === "function";
+            if (!actionable && !it.disabled) {
+                out.push({ separator: true });
+                continue;
+            }
+            let text = "";
+            if (typeof it.children === "string") text = it.children;
+            else if (typeof it.name === "string") {
+                text = it.name[0] === "#" && lm && typeof lm.LocalizeString === "function"
+                    ? lm.LocalizeString(it.name) : it.name;
+            }
+            if (!text || text[0] === "#") continue;
+            const el = document.createElement("div");
+            el.textContent = text;
+            el.addEventListener("click", () => {
+                try {
+                    if (it.route && o && o.SteamUIStore) o.SteamUIStore.Navigate(it.route);
+                    else if (it.steamURL && o) {
+                        if (/^steam:\/\//i.test(it.steamURL)) o.SteamClient.URL.ExecuteSteamURL(it.steamURL);
+                        else o.SteamUIStore.WindowStore.MainWindowInstance.m_Navigator.SteamWeb(it.steamURL);
+                    } else if (typeof it.onClick === "function") {
+                        it.onClick();
+                    }
+                } catch {}
+            });
+            out.push({ item: el });
+        }
+        return out;
+    };
+
     // [{ item: Element } | { separator: true }] in menu order
-    const entries = (title) => {
+    const entries = (title, wrapper) => {
         const w = popupWindow(title), box = w && w.document.querySelector("{{contextMenu.contextMenuContents}}");
-        if (!box) return [];
+        if (!box) return wrapper && kindOf(title) === "nav" ? entriesFromProps(wrapper) : [];
         const list = [...box.querySelectorAll(`${MENU_ITEM}, [class*='Separator']`)]
             .filter(el => el.matches(MENU_ITEM) || !el.closest(MENU_ITEM))
             .map(el => el.matches(MENU_ITEM) ? { item: el } : { separator: true });
@@ -355,9 +407,10 @@
             if (e.item.querySelector("svg")) b.classList.add("lm-checked");   // e.g. the current friends status
             b.addEventListener("click", () => {
                 const n = list.slice(0, i).filter(x => x.item).length;
-                const target = entries(title).filter(x => x.item)[n];   // fresh lookup
+                const live = entries(title).filter(x => x.item)[n];   // prefer Steam's live popup item once mounted
+                const target = (live && live.item) || e.item;
                 close(true);
-                if (target) target.item.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+                if (target) target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
             });
             page.appendChild(b);
         });
@@ -366,7 +419,7 @@
 
     // Sizes of every menu's page, measured on a surface.
     const measure = (s, navs) => navs.map(n => {
-        const list = entries(n.title);
+        const list = entries(n.title, n.wrapper);
         const page = buildPage(s.doc, n.title, list);
         page.style.visibility = "hidden";
         if (!s.panel.isConnected) s.doc.body.appendChild(s.panel);
@@ -389,7 +442,7 @@
             if (!views.length) {
                 // No web view is visible (library, downloads, settings): build
                 // and measure only the requested menu instead of the whole group.
-                const list = entries(title);
+                const list = entries(title, wrapper);
                 if (!list.some(e => e.item)) { if (host && host.shown) hideHost(); return false; }
                 if (host && host.shown) hideHost();
                 surface = inPage;
@@ -426,7 +479,7 @@
             return true;
         }
 
-        const items = entries(title);
+        const items = entries(title, wrapper);
         if (!items.some(e => e.item)) return false;
         const page = buildPage(surface.doc, title, items);
         surface.panel.appendChild(page);
@@ -473,7 +526,7 @@
         const title = popupTitle(wrapper);
         return title ? { wrapper, title, kind: kindOf(title) } : null;
     };
-    const readable = (m) => m && entries(m.title).some(x => x.item);
+    const readable = (m) => m && entries(m.title, m.wrapper).some(x => x.item);
 
     // A native nav popup that opened anyway (a hover that reached React) never
     // gets its leave, since the handlers below hold back mouseout; send one.

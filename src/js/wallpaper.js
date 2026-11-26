@@ -31,6 +31,7 @@
     const INGAME_SEL = "{{TitleBarControls.AccountMenu}}.ingame, {{TitleBarControls.AccountMenu}} .avatarHolder.ingame";
     const isMain = html.classList.contains("MillenniumWindow_MainSteamWindow");
     const isFriends = html.classList.contains("friendsui-container");
+    const canVideo = isMain || isFriends;
     const shouldPause = () => document.hidden || (isMain && !document.hasFocus() && !!document.querySelector(INGAME_SEL));
     const channel = "BroadcastChannel" in window ? new BroadcastChannel("lumina") : null;
 
@@ -49,7 +50,7 @@
             label: "Wallpaper",
             desc: "Picture, video, or a Wallpaper Engine scene or video.",
             chooseFile: "Choose file…", engine: "Wallpaper Engine…", engineTip: "Choose from Wallpaper Engine",
-            reset: "Reset to default", close: "Close", all: "All",
+            reset: "Reset to default", close: "Close", all: "All", prev: "Prev", next: "Next",
             libraryTitle: "Wallpaper Engine library", pickOne: "Choose a wallpaper",
             kinds: { scene: "Scene", video: "Video", web: "Web", picture: "Picture", application: "App", "": "Other" },
             default: "Default",
@@ -72,7 +73,7 @@
             label: "壁纸",
             desc: "图片、视频，或 Wallpaper Engine 的 Scene 与视频壁纸",
             chooseFile: "选择文件…", engine: "WE 壁纸库…", engineTip: "从 Wallpaper Engine 选择",
-            reset: "恢复默认", close: "关闭", all: "全部",
+            reset: "恢复默认", close: "关闭", all: "全部", prev: "上一页", next: "下一页",
             libraryTitle: "Wallpaper Engine 壁纸库", pickOne: "选择壁纸",
             kinds: { scene: "Scene", video: "视频", web: "网页", picture: "图片", application: "应用程序", "": "其他" },
             default: "默认",
@@ -196,7 +197,13 @@
 
     const clearLayer = () => {
         if (scene) { try { scene.destroy({ releasePkgCache: true }); } catch {} scene = null; }
-        if (layer) { layer.remove(); layer = null; }
+        if (layer) {
+            if (layer.tagName === "VIDEO") {
+                try { layer.pause(); layer.removeAttribute("src"); layer.load(); } catch {}
+            }
+            layer.remove();
+            layer = null;
+        }
     };
 
     // A video removed from the document is paused, so it is resumed after
@@ -210,6 +217,7 @@
 
     // Plugin videos come from another origin; CORS keeps them readable for frame capture.
     const showVideo = (src) => {
+        if (!canVideo) return;
         layer = document.createElement("video");
         layer.className = "lm-video-layer";
         if (/^https?:/.test(src)) layer.crossOrigin = "anonymous";
@@ -217,7 +225,7 @@
         layer.setAttribute("aria-hidden", "true");
         layer.disablePictureInPicture = true;
         placeLayer();
-        if (!shouldPause()) layer.play().catch(() => {});
+        if (layer.isConnected && !shouldPause()) layer.play().catch(() => {});
     };
 
     const showScene = async (makeSource, fps = SCENE_FPS) => {
@@ -460,9 +468,9 @@
             else still = meta.preview ? base + encodePath(meta.preview) : null;
             state = { kind: meta.kind, title: meta.title || "", still, error };
             setStill(flat ? blobUrl(flat) : still);
-            liveKind = !!base && (meta.kind === "video" || ((meta.kind === "scene" || meta.kind === "web") && isMain));
+            liveKind = !!base && ((meta.kind === "video" && canVideo) || ((meta.kind === "scene" || meta.kind === "web") && isMain));
             if (base && wallpaperMode()) {
-                if (meta.kind === "video") {
+                if (meta.kind === "video" && canVideo) {
                     showVideo(base + encodePath(meta.file));
                     if (isMain && !frame) captureVideoFrame(layer, key);
                 }
@@ -476,9 +484,9 @@
             still = meta.kind === "picture" ? (file && blobUrl(file)) : (poster && blobUrl(poster));
             state = { kind: meta.kind, title: meta.title || "", still, error };
             setStill(flat ? blobUrl(flat) : still);
-            liveKind = !!file && (meta.kind === "video" || (meta.kind === "scene" && isMain));
+            liveKind = !!file && ((meta.kind === "video" && canVideo) || (meta.kind === "scene" && isMain));
             if (file && wallpaperMode()) {
-                if (meta.kind === "video") showVideo(blobUrl(file));
+                if (meta.kind === "video" && canVideo) showVideo(blobUrl(file));
                 else if (meta.kind === "scene" && isMain) live(() => showScene(W => W.fileSource(file, meta.project)), "scene");
             }
         } else {
@@ -630,8 +638,10 @@
     /* ---- gallery ---- */
 
     // items: [{ title, kind, preview (URL or Blob), pick() }]
+    let closeGallery = null;
     const gallery = (items, heading) => {
-        document.querySelector(".lm-gallery")?.remove();
+        if (closeGallery) closeGallery();
+        const PAGE_SIZE = 24;
         const root = document.createElement("div");
         root.className = "lm-gallery";
         const blobUrls = new Map();
@@ -641,13 +651,29 @@
             if (!blobUrls.has(p)) blobUrls.set(p, URL.createObjectURL(p));
             return blobUrls.get(p);
         };
+
+        const releaseImages = () => {
+            grid.querySelectorAll("img").forEach(img => img.removeAttribute("src"));
+        };
+
         const close = () => {
+            if (closeGallery === close) closeGallery = null;
+            releaseImages();
             root.remove();
             blobUrls.forEach(u => URL.revokeObjectURL(u));
             blobUrls.clear();
             document.removeEventListener("keydown", onKey, true);
         };
-        const onKey = (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
+        closeGallery = close;
+
+        let filtered = items, page = 0;
+        const totalPages = () => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+        const onKey = (e) => {
+            if (e.key === "Escape") { e.stopPropagation(); close(); }
+            else if (e.key === "ArrowLeft" && page > 0) { e.preventDefault(); showPage(page - 1); }
+            else if (e.key === "ArrowRight" && page < totalPages() - 1) { e.preventDefault(); showPage(page + 1); }
+        };
         document.addEventListener("keydown", onKey, true);
         root.addEventListener("click", (e) => { if (e.target === root) close(); });
 
@@ -669,13 +695,61 @@
 
         const grid = document.createElement("div");
         grid.className = "lm-gallery-grid";
-        const render = (kind) => {
-            grid.replaceChildren(...items.filter(it => kind === null || it.kind === kind).map(it => {
+        const foot = document.createElement("div");
+        foot.className = "lm-gallery-foot";
+
+        const pageNumbers = (cur, total) => {
+            if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+            const set = new Set([0, total - 1, cur - 1, cur, cur + 1]);
+            const nums = [...set].filter(n => n >= 0 && n < total).sort((a, b) => a - b);
+            const out = [];
+            for (const n of nums) {
+                if (out.length && n - out[out.length - 1] > 1) out.push(-1);
+                out.push(n);
+            }
+            return out;
+        };
+
+        const renderPager = () => {
+            const pages = totalPages();
+            if (pages <= 1) { foot.style.display = "none"; foot.replaceChildren(); return; }
+            foot.style.display = "";
+            const nodes = [];
+            const nav = (label, target, disabled) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.textContent = label;
+                b.disabled = disabled;
+                b.onclick = () => showPage(target);
+                return b;
+            };
+            nodes.push(nav(T.prev, page - 1, page === 0));
+            for (const n of pageNumbers(page, pages)) {
+                if (n === -1) {
+                    const d = document.createElement("span");
+                    d.className = "lm-gallery-dots";
+                    d.textContent = "…";
+                    nodes.push(d);
+                } else {
+                    const b = nav(String(n + 1), n, false);
+                    if (n === page) b.className = "active";
+                    nodes.push(b);
+                }
+            }
+            nodes.push(nav(T.next, page + 1, page >= pages - 1));
+            foot.replaceChildren(...nodes);
+        };
+
+        const showPage = (next) => {
+            const pages = totalPages();
+            page = Math.max(0, Math.min(next, pages - 1));
+            releaseImages();
+            const slice = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+            grid.replaceChildren(...slice.map(it => {
                 const card = document.createElement("button");
                 card.className = "lm-gallery-card";
                 card.title = it.title;
                 const img = document.createElement("img");
-                img.loading = "lazy";
                 img.decoding = "async";
                 const src = previewUrl(it.preview);
                 if (src) img.src = src;
@@ -692,6 +766,13 @@
                 };
                 return card;
             }));
+            grid.scrollTop = 0;
+            renderPager();
+        };
+
+        const render = (kind) => {
+            filtered = kind === null ? items : items.filter(it => it.kind === kind);
+            showPage(0);
         };
         const kinds = [...new Set(items.map(i => i.kind))].sort();
         [[null, `${T.all} ${items.length}`], ...kinds.map(k => [k, `${kindLabel(k)} ${items.filter(i => i.kind === k).length}`])]
@@ -702,10 +783,10 @@
                 b.onclick = () => { filters.querySelectorAll("button").forEach(x => x.className = ""); b.className = "active"; render(k); };
                 filters.appendChild(b);
             });
-        render(null);
-        panel.append(head, grid);
+        panel.append(head, grid, foot);
         root.appendChild(panel);
         document.body.appendChild(root);
+        render(null);
     };
 
     /* ---- actions ---- */
@@ -959,12 +1040,23 @@
             mo.takeRecords();   // drop our own card / attribute mutations
         });
     };
-    const mo = new MutationObserver(() => {
+    const isGalleryTarget = (t) => {
+        const el = t && (t.nodeType === 1 ? t : t.parentElement);
+        return !!(el && el.closest(".lm-gallery"));
+    };
+    const mo = new MutationObserver((records) => {
+        if (records.every(r => isGalleryTarget(r.target))) return;
         scheduleSettings();
         scheduleLayer();
     });
     mo.observe(html, { childList: true, subtree: true, characterData: true });
     document.addEventListener("load", (e) => { if (e.target.tagName === "LINK") scheduleLayer(); }, true);
+    window.addEventListener("pagehide", () => {
+        if (closeGallery) closeGallery();
+        clearLayer();
+        urls.forEach(u => URL.revokeObjectURL(u));
+        urls = [];
+    });
     syncSettings();
     syncAcrylic();
 })();

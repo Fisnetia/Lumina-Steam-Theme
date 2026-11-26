@@ -86,7 +86,11 @@
         // created before the width animation's observer, so it runs first
         new MutationObserver(() => rewrite(bar)).observe(bar, { subtree: true, childList: true, characterData: true });
         if (bar.parentElement) {
-            new MutationObserver(() => dismissTooltips(bar)).observe(bar.parentElement, {
+            const po = new MutationObserver(() => {
+                if (!bar.isConnected) { po.disconnect(); return; }
+                dismissTooltips(bar);
+            });
+            po.observe(bar.parentElement, {
                 attributes: true,
                 attributeFilter: ["style"],
             });
