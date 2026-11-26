@@ -909,32 +909,685 @@ html.lm-web-bar {{ScrollToTopButton.ScrollToTopButtonPosition}} {
 
 /* ---- Downloads ---- */
 
-/* mostly text, so it gets a panel tint instead of sitting on the backdrop */
 {{DownloadsPage.DownloadsPage}} {
     background: var(--lm-panel) !important;
     background-image: none !important;
 }
 
-{{DownloadsPage.SectionItem}}:hover {
-    background: var(--lm-hover) !important;
-    border-radius: var(--lm-r-sm) !important;
+/* Bento telemetry hero card (top active download + graph + KPI tiles) */
+{{DownloadsPage.TopSection}} {
+    position: relative;
+    height: auto !important;
+    min-height: 224px;
+    padding: 16px 24px 8px !important;
+    box-sizing: border-box;
 }
 
-/* the row of the current download */
-{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {
-    background: var(--lm-panel-soft) !important;
-}
-
-/* the current download, with its graph */
 {{DownloadsPage.Section}}{{DownloadsPage.Active}} {
-    background: var(--lm-panel-soft) !important;
-    border-bottom: 1px solid var(--lm-border);
+    width: 100%;
+    margin-top: 0 !important;
+    padding-bottom: 0 !important;
+    border: 1px solid var(--lm-border-strong) !important;
+    border-radius: calc(var(--lm-r) * 1.15) !important;
+    background: var(--lm-panel) !important;
+    box-shadow: var(--lm-shadow), var(--lm-sheen) !important;
+    overflow: hidden;
 }
 
-/* nothing downloading: a blue gradient stands in for the game's hero */
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {
+    min-height: 206px;
+    background: transparent !important;
+    border-radius: 0 !important;
+}
+
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}}:hover {
+    background: transparent !important;
+}
+
+{{DownloadsPage.DownloadSectionActiveItem}} {{DownloadsPage.HoverRing}} {
+    border-radius: calc(var(--lm-r) * 1.15) !important;
+}
+
+{{DownloadsPage.DownloadSectionActiveItem}}:hover {{DownloadsPage.HoverRing}} {
+    border-color: var(--lm-border-strong) !important;
+}
+
+/* Hero artwork wash: drop Steam's harsh blue multiply gradient */
+{{GraphAndStats.HeroAndLogo}} {{GraphAndStats.HeroGradient}} {
+    background: linear-gradient(
+        to right,
+        rgba(6, 10, 18, 0.08) 0%,
+        color-mix(in srgb, var(--lm-t) 68%, transparent) 92%
+    ) !important;
+    mix-blend-mode: normal !important;
+}
+
+/* Nothing downloading: clear Steam's blue fallback gradient */
 {{GraphAndStats.HeroAndLogo}}{{GraphAndStats.Empty}} {
     background: transparent !important;
     background-image: none !important;
+}
+
+/* Content type badges ("Game content", "Workshop") as subtle glass pills */
+{{DownloadsPage.DownloadSectionActiveItem}} {{DownloadsPage.ContentTypes}} {
+    top: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    gap: 6px !important;
+}
+
+{{DownloadsPage.DownloadSectionActiveItem}} {{DownloadsPage.ContentTypes}} {{DownloadsPage.ContentType}} {
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    padding: 3px 10px 3px 7px !important;
+    gap: 5px;
+    border-radius: 999px;
+    background: rgba(8, 12, 20, 0.58);
+    border: 1px solid var(--lm-border);
+    color: var(--lm-text) !important;
+}
+
+{{DownloadsPage.DownloadSectionActiveItem}} {{DownloadsPage.ContentTypes}} {{DownloadsPage.ContentType}} svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex: none;
+}
+
+{{DownloadsPage.DownloadSectionActiveItem}} {{DownloadsPage.ContentTypes}} {{DownloadsPage.ContentType}} {{DownloadsPage.Text}} {
+    width: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    color: var(--lm-text) !important;
+    line-height: 16px;
+}
+
+/* Settings gear button docked cleanly inside the Bento hero card */
+{{DownloadsPage.TopSection}} {{GraphAndStats.SettingsButton}} {
+    top: 28px !important;
+    right: 38px !important;
+    z-index: 10;
+}
+
+{{DownloadsPage.TopSection}} {{GraphAndStats.SettingsButton}} {{GraphAndStats.Button}},
+{{DownloadsPage.TopSection}} {{GraphAndStats.SettingsButton}} {{GraphAndStats.Button}}:enabled {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    align-items: center;
+    border-radius: var(--lm-r-sm) !important;
+    background: var(--lm-panel-strong) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.14s ease, box-shadow 0.14s ease !important;
+}
+
+{{DownloadsPage.TopSection}} {{GraphAndStats.SettingsButton}} {{GraphAndStats.Button}}:hover {
+    background: var(--lm-hover) !important;
+    color: #fff !important;
+}
+
+{{DownloadsPage.TopSection}} {{GraphAndStats.SettingsButton}} {{GraphAndStats.Button}} svg {
+    width: 15px !important;
+    height: 15px !important;
+}
+
+/* Active right column & Bento KPI telemetry tiles (Network / Peak / Disk) */
+{{DownloadsPage.ActiveItemRightColumn}} {
+    padding: 16px 20px 14px !important;
+    gap: 10px !important;
+}
+
+{{GraphAndStats.DownloadGraphStatsWrapper}} {
+    width: 100%;
+    padding-right: 40px;
+    box-sizing: border-box;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px !important;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.SingleStat}} {
+    min-width: 0 !important;
+    padding: 8px 12px 9px !important;
+    border-radius: var(--lm-r-sm);
+    background: var(--lm-panel-soft);
+    border: 1px solid var(--lm-border);
+    box-shadow: var(--lm-sheen);
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendRow}} {
+    height: 20px !important;
+    align-items: center !important;
+    gap: 7px;
+    margin-bottom: 5px;
+}
+
+/* Custom crisp vector KPI icons (Network / Peak / Disk) inside tinted badges */
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendBox}} {
+    position: relative;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    color: var(--lm-a);
+    background: color-mix(in srgb, var(--lm-a) 16%, transparent) !important;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendBox}} svg {
+    display: none !important;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendBox}}::before {
+    content: "";
+    width: 13px;
+    height: 13px;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4.5 19h15'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4.5 19h15'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.SingleStat}}:nth-child(2) {{GraphAndStats.LegendBox}}{{GraphAndStats.Network}} {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15) !important;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.SingleStat}}:nth-child(2) {{GraphAndStats.LegendBox}}{{GraphAndStats.Network}}::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 17l6-6 4 4 8-8M16 7h5v5'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 17l6-6 4 4 8-8M16 7h5v5'/%3E%3C/svg%3E");
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendBox}}{{GraphAndStats.Disk}} {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.15) !important;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendBox}}{{GraphAndStats.Disk}}::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 14h17M5.5 6h13a2 2 0 0 1 1.9 1.4L21 14v3.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V14l.6-6.6A2 2 0 0 1 5.5 6Z'/%3E%3Ccircle cx='7.5' cy='16.8' r='1' fill='%23000' stroke='none'/%3E%3Ccircle cx='11' cy='16.8' r='1' fill='%23000' stroke='none'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 14h17M5.5 6h13a2 2 0 0 1 1.9 1.4L21 14v3.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V14l.6-6.6A2 2 0 0 1 5.5 6Z'/%3E%3Ccircle cx='7.5' cy='16.8' r='1' fill='%23000' stroke='none'/%3E%3Ccircle cx='11' cy='16.8' r='1' fill='%23000' stroke='none'/%3E%3C/svg%3E");
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.LegendText}} {
+    font-family: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em;
+    line-height: 16px !important;
+    height: auto !important;
+    color: rgba(226, 232, 240, 0.8) !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.Stat}} {
+    padding-left: 0 !important;
+    width: auto !important;
+}
+
+{{GraphAndStats.DownloadGraphStats}} {{GraphAndStats.Figure}} {
+    width: auto !important;
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.015em;
+    line-height: 22px !important;
+    color: #fff !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Idle / empty-queue telemetry KPI tiles (StatsPanel) */
+{{GraphAndStats.StatsPanel}} {{GraphAndStats.Stats}} {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px !important;
+}
+
+{{GraphAndStats.StatsPanel}} {{GraphAndStats.Stat}} {
+    padding: 8px 12px !important;
+    border-radius: var(--lm-r-sm);
+    background: var(--lm-panel-soft);
+    border: 1px solid var(--lm-border);
+    box-shadow: var(--lm-sheen);
+}
+
+{{GraphAndStats.StatsPanel}} {{GraphAndStats.Figure}} {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums;
+    color: #fff !important;
+}
+
+{{GraphAndStats.StatsPanel}} {{GraphAndStats.Label}} {
+    font-size: 11px !important;
+    color: var(--lm-text-dim) !important;
+}
+
+/* Active & queued progress bars: 10px glass tube with forward-sweeping flow */
+{{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}} {
+    height: 10px !important;
+    border-radius: 999px !important;
+    background-color: rgba(6, 10, 20, 0.48) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+{{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}} > div {
+    position: relative;
+    overflow: hidden;
+    border-radius: 999px !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(0, 0, 0, 0.2) 100%),
+        linear-gradient(90deg, color-mix(in srgb, var(--lm-a) 72%, #1d4ed8), var(--lm-a) 62%, color-mix(in srgb, var(--lm-a) 72%, #fff)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.25),
+        0 0 12px color-mix(in srgb, var(--lm-a) 48%, transparent);
+}
+
+@keyframes lm-progress-flow {
+    0% {
+        transform: translate3d(-100%, 0, 0);
+    }
+    100% {
+        transform: translate3d(100%, 0, 0);
+    }
+}
+
+{{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}}:not({{DownloadsPage.NotActive}}) > div::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.16) 35%,
+        rgba(255, 255, 255, 0.56) 72%,
+        rgba(255, 255, 255, 0.82) 90%,
+        transparent 100%
+    );
+    animation: lm-progress-flow 1.35s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+    will-change: transform;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    {{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}} > div::after {
+        animation: none !important;
+    }
+}
+
+{{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}}{{DownloadsPage.Disk}} > div {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(0, 0, 0, 0.2) 100%),
+        linear-gradient(90deg, #16a34a, #4ade80 65%, #bbf7d0) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.25),
+        0 0 12px rgba(74, 222, 128, 0.45);
+}
+
+{{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}}{{DownloadsPage.NotActive}} > div {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.18) 100%),
+        rgba(255, 255, 255, 0.24) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+{{DownloadsPage.ProgressPercentageAndBar}} {{DownloadsPage.Progress}} {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+}
+
+{{DownloadsPage.DownloadSectionActiveItem}} {{DownloadsPage.Bottom}} {
+    overflow: visible !important;
+    min-height: 36px;
+    flex: none;
+}
+
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {{DownloadsPage.Button}}.DialogButton:enabled {
+    box-sizing: border-box !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    align-items: center;
+    border-radius: var(--lm-r-sm) !important;
+    background: color-mix(in srgb, var(--lm-a) 44%, transparent) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lm-a) 65%, rgba(255, 255, 255, 0.2)), var(--lm-sheen) !important;
+    color: #fff !important;
+}
+
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {{DownloadsPage.Button}}.DialogButton:enabled svg {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {{DownloadsPage.Button}}.DialogButton:enabled:hover {
+    background: color-mix(in srgb, var(--lm-a) 62%, transparent) !important;
+}
+
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {{DownloadsPage.RemoveFromQueue}}.DialogButton:enabled {
+    background: var(--lm-panel-strong) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong) !important;
+}
+
+{{DownloadsPage.SectionItem}}{{DownloadsPage.Active}} {{DownloadsPage.RemoveFromQueue}}.DialogButton:enabled:hover {
+    background: rgba(235, 92, 108, 0.42) !important;
+}
+
+/* Queue / Scheduled / Unscheduled: equal-height responsive Kanban row via flex
+   (3 equal columns when all three have items, 2 equal 50/50 columns when two,
+   1 full-width panel when one — never a ragged 2+1 void; each column keeps a
+   native 1D vertical list so react-beautiful-dnd drag & snap-back stay exact).
+   Completed (non-draggable) always spans full width below as a card grid. */
+{{DownloadsPage.ItemLists}} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: stretch;
+    align-content: flex-start;
+    padding: 10px 24px calc(var(--lm-bar-space) + 20px) !important;
+    box-sizing: border-box;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}} {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 340px;
+    min-width: 0;
+    margin-top: 0 !important;
+    padding: 14px 16px 6px !important;
+    border-radius: var(--lm-r);
+    background: color-mix(in srgb, var(--lm-t) 18%, transparent);
+    border: 1px solid var(--lm-border);
+    box-shadow: var(--lm-sheen);
+    box-sizing: border-box;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}}{{DownloadsPage.EmptyQueue}} {
+    flex: 1 0 100%;
+    padding: 10px 16px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}}{{DownloadsPage.Completed}} {
+    flex: 1 0 100%;
+    padding: 4px 0 6px !important;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+{{DownloadsPage.SectionTitle}} {
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px !important;
+    padding: 0 2px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}}{{DownloadsPage.EmptyQueue}} {{DownloadsPage.SectionTitle}} {
+    margin-bottom: 0 !important;
+}
+
+{{DownloadsPage.SectionTitle}} {{DownloadsPage.TitleAndCount}} {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    color: var(--lm-text) !important;
+    white-space: nowrap;
+}
+
+{{DownloadsPage.SectionTitle}} {{DownloadsPage.Count}} {
+    color: var(--lm-text-dim) !important;
+    font-weight: 500;
+}
+
+{{DownloadsPage.SectionTitle}} {{DownloadsPage.Rule}} {
+    height: 1px !important;
+    background: linear-gradient(90deg, var(--lm-border-strong), transparent) !important;
+}
+
+{{DownloadsPage.RemoveAllButton}}.DialogButton:enabled {
+    height: 30px !important;
+    min-width: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 14px !important;
+    font-size: 12px !important;
+    border-radius: 999px !important;
+    background: var(--lm-panel-strong) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.14s ease, color 0.14s ease !important;
+}
+
+{{DownloadsPage.RemoveAllButton}}.DialogButton:enabled:hover {
+    background: var(--lm-hover) !important;
+    color: #fff !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionList}} {
+    position: relative;
+    display: block;
+    flex: 1 1 auto;
+    margin-left: 0 !important;
+    padding: 2px 0 !important;
+    border-radius: var(--lm-r-sm) !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionList}}{{DownloadsPage.DropOption}} {
+    border: 1.5px dashed color-mix(in srgb, var(--lm-a) 65%, transparent) !important;
+    padding: 4px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionList}}{{DownloadsPage.DropOption}}{{DownloadsPage.DragOver}} {
+    border-style: solid !important;
+    border-color: var(--lm-a) !important;
+    background: color-mix(in srgb, var(--lm-a) 12%, transparent) !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemWrapper}} {
+    min-width: 0;
+    margin-bottom: 10px;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}}{{DownloadsPage.Completed}} {{DownloadsPage.SectionList}} {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+    gap: 12px;
+    border: none !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}}{{DownloadsPage.Completed}} {{DownloadsPage.SectionList}} > {{DownloadsPage.PlaceHolder}} {
+    position: absolute;
+    pointer-events: none;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Section}}{{DownloadsPage.Completed}} {{DownloadsPage.SectionItemWrapper}} {
+    margin-bottom: 0;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {
+    height: auto !important;
+    min-height: 90px;
+    padding: 12px 14px !important;
+    box-sizing: border-box;
+    border-radius: var(--lm-r) !important;
+    background: var(--lm-panel-soft) !important;
+    border: 1px solid var(--lm-border) !important;
+    box-shadow: var(--lm-sheen) !important;
+    contain: layout style paint;
+    transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.14s ease !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}}:hover,
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}}{{DownloadsPage.Dragging}} {
+    background: var(--lm-hover) !important;
+    border-color: var(--lm-border-strong) !important;
+    border-radius: var(--lm-r) !important;
+    transform: translateY(-1px);
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemContent}} {
+    gap: 14px !important;
+    align-items: center !important;
+    min-width: 0;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.AppPortrait}} {
+    width: 124px !important;
+    height: 58px !important;
+    flex: none !important;
+    border-radius: var(--lm-r-sm);
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.AppPortrait}} {{FeaturedCapsule.LibraryItemBox}} {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemCenter}} {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemColumn}} {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.Name}} {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 20px !important;
+    color: #fff !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.DetailsAndType}} {
+    height: auto !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+    row-gap: 2px !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    color: var(--lm-text-dim) !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.DetailsAndType}} > * {
+    flex: 0 1 auto !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemStatus}},
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemStatus}} {{DownloadsPage.State}},
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemStatus}} > div {
+    width: 100% !important;
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--lm-text-dim) !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItemButtons}} {
+    flex: none !important;
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+}
+
+/* Dock hover-only remove (x) in top-right corner so Play / Download stays flush right with zero shift */
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.ButtonWrapper}}{{DownloadsPage.Right}} {
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    margin: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    z-index: 3;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.RemoveFromQueue}}.DialogButton:enabled {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    align-items: center;
+    border-radius: 6px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.RemoveFromQueue}} svg {
+    width: 9px !important;
+    height: 9px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.Button}}.DialogButton:enabled {
+    border-radius: var(--lm-r-sm) !important;
+    background: var(--lm-panel-strong) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border) !important;
+    color: var(--lm-text) !important;
+    transition: background-color 0.14s ease, box-shadow 0.14s ease !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.Button}}.DialogButton:enabled:hover {
+    background: var(--lm-selected) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lm-a) 60%, transparent) !important;
+    color: #fff !important;
+}
+
+/* Compact Play pill inside completed cards so title & timestamp never squeeze */
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.PlayButton}} {
+    min-width: 0 !important;
+    width: auto !important;
+    height: 32px !important;
+    border-radius: 999px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.PlayButton}} > button,
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.PlayButton}} > div {
+    min-width: 0 !important;
+    width: auto !important;
+    height: 32px !important;
+    padding: 0 11px !important;
+    gap: 4px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.PlayButton}} > div > div,
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.PlayButton}} > div > span {
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.PlayButton}} svg {
+    width: 13px !important;
+    height: 13px !important;
+    margin-right: 2px !important;
+}
+
+{{DownloadsPage.ItemLists}} {{DownloadsPage.SectionItem}} {{DownloadsPage.RemoveFromQueue}}.DialogButton:enabled:hover {
+    background: rgba(235, 92, 108, 0.42) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 140, 152, 0.45) !important;
+}
+
+/* Entire card is draggable (cursor: grab); hide the floating ≡ overlay */
+{{DownloadsPage.DownloadsPage}} {{DownloadsPage.DragHandle}} {
+    display: none !important;
 }
 
 /* ---- Library home ---- */
