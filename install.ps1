@@ -27,6 +27,7 @@ param(
     [switch]$NoPlugin,
     [switch]$NoRestart,
     [switch]$Force,
+    [switch]$Yes,
     [switch]$Pause
 )
 
@@ -234,6 +235,7 @@ function Invoke-SelfElevate([string]$resolvedSteamDir) {
         if ($NoPlugin)         { $argList.Add("-NoPlugin") }
         if ($NoRestart)        { $argList.Add("-NoRestart") }
         if ($Force)            { $argList.Add("-Force") }
+        if ($Yes)              { $argList.Add("-Yes") }
         $argList.Add("-Pause")
     } else {
         # Invoked via `irm ... | iex` without a script file on disk
@@ -1025,6 +1027,47 @@ try {
         Write-Host ""
         Write-Ok (Msg "Millennium、Lumina 及配置均已是最新状态，无需关闭或重启 Steam！（如需强制重装可加 -Force）" "Millennium, Lumina, and configuration are already up to date. No Steam restart needed! (Use -Force to reinstall)")
         return
+    }
+
+    # Brief confirmation before downloading / closing Steam
+    if (-not $Yes) {
+        $plan = New-Object System.Collections.Generic.List[string]
+        if ($needMillennium) {
+            if ($installed.MillenniumInstalled -and $installed.MillenniumVersion) {
+                $plan.Add((Msg "更新 Millennium：$($installed.MillenniumVersion) -> $($milRel.Tag)" "Update Millennium: $($installed.MillenniumVersion) -> $($milRel.Tag)"))
+            } else {
+                $plan.Add((Msg "安装 Millennium：$($milRel.Tag)" "Install Millennium: $($milRel.Tag)"))
+            }
+        }
+        if ($needLumina) {
+            $lumTarget = if ($lumRel) { $lumRel.Tag } elseif (-not [string]::IsNullOrWhiteSpace($LocalDir)) { Msg "本地目录" "local folder" } else { [System.IO.Path]::GetFileName($LocalZip) }
+            $plNote = if ($wantPlugin) { Msg "（含插件）" " (+ plugin)" } else { "" }
+            if ($installed.LuminaInstalled -and $installed.LuminaVersion) {
+                $plan.Add((Msg "更新 Lumina：v$($installed.LuminaVersion) -> $lumTarget$plNote" "Update Lumina: v$($installed.LuminaVersion) -> $lumTarget$plNote"))
+            } else {
+                $plan.Add((Msg "安装 Lumina：$lumTarget$plNote" "Install Lumina: $lumTarget$plNote"))
+            }
+        }
+        if ($needConfigUpdate) {
+            $plan.Add((Msg "启用 Lumina 主题配置（原配置自动备份）" "Enable Lumina in config.json (auto-backup)"))
+        }
+        $steamRunning = @(Get-Process -Name "steam", "steamwebhelper" -ErrorAction SilentlyContinue).Count -gt 0
+        if ($steamRunning) {
+            $plan.Add($(if ($NoRestart) { Msg "关闭运行中的 Steam" "Close running Steam" } else { Msg "关闭并重启 Steam" "Restart Steam" }))
+        } elseif (-not $NoRestart) {
+            $plan.Add((Msg "安装完成后启动 Steam" "Launch Steam when done"))
+        }
+
+        Write-Host ""
+        Write-Host (Msg "即将执行：" "Planned actions:") -ForegroundColor White
+        foreach ($line in $plan) {
+            Write-Host ("  - {0}" -f $line) -ForegroundColor Gray
+        }
+        $ans = (Read-Host (Msg "确认继续？[Y/n]" "Proceed? [Y/n]")).Trim()
+        if (-not [string]::IsNullOrEmpty($ans) -and $ans -notmatch "^[yY]$") {
+            Write-Warn (Msg "已取消安装。" "Cancelled.")
+            return
+        }
     }
 
     # Step 3: Pre-download & verify needed packages WHILE Steam is still running
