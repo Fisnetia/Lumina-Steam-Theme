@@ -11,7 +11,10 @@ html.MillenniumWindow_Settings body::before,
 html.ModalDialogPopup body::before,
 {{LoginStaticBackground}}::before {
     background-image:
-        linear-gradient(rgba(6, 8, 14, 0.18), rgba(6, 8, 14, 0.18)),
+        linear-gradient(
+            color-mix(in srgb, rgb(6, 8, 14) var(--lm-wall-dim, 18%), transparent),
+            color-mix(in srgb, rgb(6, 8, 14) var(--lm-wall-dim, 18%), transparent)
+        ),
         var(--lm-wallpaper, url("../../images/wallpaper.jpg")) !important;
     background-size: cover !important;
     background-position: center !important;
@@ -27,7 +30,7 @@ html.ModalDialogPopup body::before,
     object-fit: cover;
     z-index: -1;
     pointer-events: none;
-    filter: blur(var(--lm-blur-px)) saturate(1.15) brightness(0.84);
+    filter: blur(var(--lm-blur-px)) saturate(1.15) brightness(calc(100% - var(--lm-wall-dim, 18%)));
 }
 
 html.friendsui-container .lm-video-layer {
@@ -52,7 +55,10 @@ html.lm-web body::before {
     z-index: -1;
     pointer-events: none;
     background:
-        linear-gradient(color-mix(in srgb, var(--lm-t) 55%, transparent), color-mix(in srgb, var(--lm-t) 55%, transparent)),
+        linear-gradient(
+            color-mix(in srgb, var(--lm-t) max(55%, var(--lm-wall-dim, 18%)), transparent),
+            color-mix(in srgb, var(--lm-t) max(55%, var(--lm-wall-dim, 18%)), transparent)
+        ),
         var(--lm-web-wallpaper, url("../../images/wallpaper.jpg")) center / cover;
     filter: blur(max(var(--lm-blur-px), 12px)) saturate(1.15);
 }

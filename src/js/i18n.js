@@ -18,7 +18,7 @@
         "Backdrop": "背景", "Interface": "界面", "Motion": "动效",
         "Blur": "模糊", "Opacity": "不透明度", "Corner radius": "圆角",
         "Menu animation": "菜单动画", "Smooth scrolling": "平滑滚动", "Nav menu": "导航菜单",
-        "Wallpaper mouse": "壁纸鼠标响应", "Desktop blur": "桌面模糊", "Game list": "玻璃材质",
+        "Wallpaper opacity": "不透明度", "Wallpaper mouse": "壁纸鼠标响应", "Desktop blur": "桌面模糊", "Game list": "玻璃材质",
         "Liquid opacity": "液态玻璃不透明度", "Refraction": "折射强度", "Liquid blur": "模糊", "Acrylic blur": "模糊",
         "Nav position": "导航位置", "Play bar": "开始栏位置", "URL bar": "URL 栏",
     };
@@ -32,6 +32,7 @@
     const DESCRIPTIONS = {
         "Backdrop": "玻璃后面的背景。桌面亚克力需启用 Lumina Extended 插件",
         "Blur": "背景的模糊程度",
+        "Wallpaper opacity": "壁纸暗化不透明度，越高越暗",
         "Wallpaper mouse": "Scene 壁纸跟随鼠标",
         "Desktop blur": "透出桌面时的模糊强度",
         "Game list": "液态玻璃：边缘折射；亚克力：磨砂模糊",

@@ -23,6 +23,7 @@ html.MillenniumWindow_Settings.MillenniumWindow_Settings body::before {
 
 /* desktop acrylic blur is controlled by Windows DWM */
 [data-condition="Blur"]:not([data-lm-hidden="0"]),
+[data-condition="Wallpaper opacity"]:not([data-lm-hidden="0"]),
 [data-condition="Wallpaper mouse"]:not([data-lm-hidden="0"]) {
     display: none !important;
 }

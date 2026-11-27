@@ -785,6 +785,17 @@ html.friendsui-container body::before {
     line-height: 1 !important;
 }
 
+/* Crisp rounded game icon inside multi-friend same-game group headers */
+.friendGroup.gameGroup .groupIcon {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    border-radius: 4px !important;
+    flex: none !important;
+    object-fit: cover;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
 .friendGroup .groupName hr {
     display: none !important;
 }
@@ -1220,13 +1231,20 @@ html.friendsui-container .friend .avatarHolder img.avatar {
     text-overflow: ellipsis !important;
 }
 
-.friendlistListContainer .friend.awayOrSnooze .richPresenceLabel,
-.friendlistListContainer .friend.awayOrSnooze .gameName,
-.friendlistListContainer .friend .labelHolder.awayOrSnooze .richPresenceLabel,
-.friendlistListContainer .friend .labelHolder.awayOrSnooze .gameName {
+.friendlistListContainer .friend.awayOrSnooze:not(.ingame) .richPresenceLabel,
+.friendlistListContainer .friend.awayOrSnooze:not(.ingame) .gameName,
+.friendlistListContainer .friend:not(.ingame) .labelHolder.awayOrSnooze .richPresenceLabel,
+.friendlistListContainer .friend:not(.ingame) .labelHolder.awayOrSnooze .gameName {
     background: rgba(251, 191, 36, 0.08);
     box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.18);
     color: rgba(253, 224, 71, 0.78) !important;
+}
+
+.friendlistListContainer .friend.ingame.awayOrSnooze .gameName,
+.friendlistListContainer .friend.ingame .labelHolder.awayOrSnooze .gameName,
+.chatTabSetContainer .ChatTab .friend.ingame.awayOrSnooze .gameName,
+.chatTabSetContainer .ChatTab .friend.ingame .labelHolder.awayOrSnooze .gameName {
+    color: rgba(253, 224, 71, 0.85) !important;
 }
 
 /* ---- Tier 3: Ultra-Dense Single-Line Offline Rows ---- */
@@ -1310,6 +1328,10 @@ html.friendsui-container .friend .avatarHolder img.avatar {
     .friendlistListContainer .friendGroup.gameGroup .friendsContainer .friend {
         margin: 0 !important;
         min-width: 0;
+    }
+
+    .friendlistListContainer .friendGroup.gameGroup .friendsContainer .SteamPlayerGroupFooter {
+        grid-column: 1 / -1;
     }
 }
 
@@ -1536,8 +1558,8 @@ html.friendsui-container .friend .avatarHolder img.avatar {
 /* ---- Flat-Modern Chat Panel & Standalone Chat Windows ---- */
 
 .titleBarContainer.ChatTabs {
-    height: 44px !important;
-    min-height: 44px !important;
+    height: 48px !important;
+    min-height: 48px !important;
     padding: 0 !important;
     box-sizing: border-box !important;
     background: var(--lm-panel-strong) !important;
@@ -1547,7 +1569,7 @@ html.friendsui-container .friend .avatarHolder img.avatar {
 }
 
 .titleBarContainer.ChatTabs .chatTitleBar {
-    height: 44px !important;
+    height: 48px !important;
 }
 
 .titleBarContainer.ChatTabs .window-controls {
@@ -1572,8 +1594,8 @@ html.friendsui-container .friend .avatarHolder img.avatar {
     position: relative !important;
     top: 0 !important;
     margin: 0 !important;
-    height: 44px !important;
-    padding: 6px 104px 6px 8px !important;
+    height: 48px !important;
+    padding: 5px 104px 5px 8px !important;
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
@@ -1582,20 +1604,20 @@ html.friendsui-container .friend .avatarHolder img.avatar {
 .titleBarContainer.ChatTabs .HorizontalMiniSlider,
 .titleBarContainer.ChatTabs .chatTabList,
 .titleBarContainer.ChatTabs .ChatTabTransitionGroup {
-    height: 32px !important;
+    height: 38px !important;
     margin: 0 !important;
     padding: 0 !important;
     display: flex !important;
     align-items: center !important;
 }
 
-/* Flat rounded chat tabs matching the Friends List segmented tab language */
+/* Flat rounded chat tabs (38px fits both single-line & two-line in-game tabs cleanly) */
 .chatTabSetContainer .ChatTab {
     position: relative !important;
-    height: 32px !important;
-    min-height: 32px !important;
+    height: 38px !important;
+    min-height: 38px !important;
     margin: 0 4px 0 0 !important;
-    padding: 0 6px 0 8px !important;
+    padding: 0 6px 2px 9px !important;
     border-radius: 7px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.035) !important;
@@ -1648,28 +1670,79 @@ html.friendsui-container .friend .avatarHolder img.avatar {
 }
 
 .chatTabSetContainer .ChatTab .avatarHolder {
-    width: 22px !important;
-    height: 22px !important;
+    position: relative !important;
+    width: 24px !important;
+    height: 24px !important;
     padding: 0 !important;
     margin: 0 !important;
     transform: none !important;
+    flex: none !important;
 }
 
 .chatTabSetContainer .ChatTab .avatarHolder img.avatar {
-    width: 22px !important;
-    height: 22px !important;
+    width: 24px !important;
+    height: 24px !important;
     border-radius: 6px !important;
     border: none !important;
+    display: block;
+}
+
+.chatTabSetContainer .ChatTab .avatarHolder .avatarFrame {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    right: 0 !important;
+    transform: scale(1.2) !important;
+    pointer-events: none;
+}
+
+.chatTabSetContainer .ChatTab .avatarHolder .avatarFrameImg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
 
 .chatTabSetContainer .ChatTab .avatarHolder .avatarStatus {
     display: none !important;
 }
 
+.chatTabSetContainer .ChatTab .labelHolder {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin-left: 7px !important;
+    min-width: 0 !important;
+}
+
+.chatTabSetContainer .ChatTab .statusAndName {
+    height: auto !important;
+    line-height: 15px !important;
+}
+
 .chatTabSetContainer .ChatTab .playerName {
     font-size: 12.5px !important;
     font-weight: 500 !important;
+    line-height: 15px !important;
     color: var(--lm-text) !important;
+}
+
+.chatTabSetContainer .ChatTab .richPresenceContainer {
+    height: auto !important;
+    margin: 0 !important;
+    line-height: 13px !important;
+}
+
+.chatTabSetContainer .ChatTab .gameName,
+.chatTabSetContainer .ChatTab .richPresenceLabel {
+    font-size: 10.5px !important;
+    line-height: 13px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .chatTabSetContainer .ChatTab.Active .playerName {
