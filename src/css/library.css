@@ -843,7 +843,24 @@ html.lm-web-bar {{ForceOpaqueBackground.ContentFrame}} {
 {{BottomBarContainer.DownloadStatus}} {
     flex: 0 1 560px;
     margin: 0 auto;
+    padding: 0 !important;
     justify-content: center;
+    -webkit-app-region: no-drag !important;
+    app-region: no-drag !important;
+}
+
+{{BottomBarContainer.DownloadStatus}} > div {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    padding: 0 16px !important;
+    justify-content: center;
+}
+
+{{BottomBarContainer.DetailedDownloadProgress}} {
+    width: auto !important;
+    min-width: 0;
 }
 
 {{BottomBarContainer.AddGameButton}}:hover,
@@ -861,6 +878,14 @@ html.lm-web-bar {{BottomBarContainer.FriendsButton}} {
     background: transparent !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
+}
+
+html.lm-web-bar {{BottomBarContainer.DownloadStatus}} {
+    padding: 0 !important;
+}
+
+html.lm-web-bar {{BottomBarContainer.DownloadStatus}} > div {
+    padding: 0 12px !important;
 }
 
 html.lm-web-bar {{BottomBarContainer.AddGameButton}}:hover,

@@ -16,7 +16,12 @@ SKIP = {".lumina-install", "__pycache__"}
 
 NOTES = """Lumina {version}（Steam 主题，需要 Millennium）
 
-安装
+自动安装（推荐）
+  直接双击压缩包解压后的 install.bat 即可：
+  自动检测 Steam 目录、安装或更新最新版 Millennium 与 Lumina（含配套插件）、
+  备份原配置并启用主题与插件，完成后自动重启 Steam。
+
+手动安装
 1. 先安装 Millennium：https://steambrew.app
 2. 关闭 Steam，把压缩包里的两个文件夹复制到 Steam 的 millennium 目录下：
      lumina            -> Steam\\millennium\\themes\\lumina
@@ -62,6 +67,10 @@ def main():
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         add_tree(z, DIST, "lumina")
         add_tree(z, PLUGIN, "lumina-extended")
+        for script_name in ("install.bat", "install.ps1"):
+            script_path = os.path.join(ROOT, script_name)
+            if os.path.exists(script_path):
+                z.write(script_path, script_name)
         z.writestr("安装说明.txt", NOTES.format(version=version).replace("\n", "\r\n").encode("utf-8-sig"))
     print(f"packaged {out} ({os.path.getsize(out) // 1024} KB)")
 
