@@ -110,6 +110,7 @@ uniform vec4 uCover;
 uniform vec2 uDir;
 uniform float uSigma;
 uniform float uGrade;
+uniform float uDim;
 uniform float uFlipY;
 
 vec3 sat(vec3 c, float s) {
@@ -119,11 +120,11 @@ vec3 sat(vec3 c, float s) {
 
 vec3 grade(vec3 c) {
     if (uGrade > 1.5) {
-        c = mix(c, vec3(0.0235, 0.0314, 0.0549), 0.18);
+        c = mix(c, vec3(0.0235, 0.0314, 0.0549), uDim);
         return clamp(sat(c, 1.15), 0.0, 1.0);
     }
     if (uGrade > 0.5) {
-        return clamp(sat(c, 1.15) * 0.84, 0.0, 1.0);
+        return clamp(sat(c, 1.15) * (1.0 - uDim), 0.0, 1.0);
     }
     return c;
 }
@@ -162,6 +163,7 @@ uniform vec2 uRes;      // physical canvas size
 uniform vec2 uCss;      // CSS px size of canvas
 uniform vec4 uCover;    // cover UV scale.xy, offset.zw
 uniform float uGrade;   // 0 already graded, 1 video/scene, 2 picture
+uniform float uDim;     // wallpaper dim 0..0.95 (--lm-wall-dim)
 uniform float uFlipY;   // 1 for uploaded DOM media, 0 for FBOs
 uniform vec4 uRect0;    // left, top, width, height in CSS px
 uniform vec4 uMeta0;    // radius, bevel, scale, opacity
@@ -175,11 +177,11 @@ vec3 sat(vec3 c, float s) {
 
 vec3 grade(vec3 c) {
     if (uGrade > 1.5) {
-        c = mix(c, vec3(0.0235, 0.0314, 0.0549), 0.18);
+        c = mix(c, vec3(0.0235, 0.0314, 0.0549), uDim);
         return clamp(sat(c, 1.15), 0.0, 1.0);
     }
     if (uGrade > 0.5) {
-        return clamp(sat(c, 1.15) * 0.84, 0.0, 1.0);
+        return clamp(sat(c, 1.15) * (1.0 - uDim), 0.0, 1.0);
     }
     return c;
 }
@@ -268,7 +270,7 @@ void main() {
     const fboB = { fbo: null, tex: null, w: 0, h: 0, ok: false };
     const fboC = { fbo: null, tex: null, w: 0, h: 0, ok: false };
     let raf = 0, compRaf = 0, last = 0, colors = [0.49, 0.77, 1];
-    let mode = "", liquid = false, strength = 50, blurPx = 0, liquidBlur = 0, radiusStr = "";
+    let mode = "", liquid = false, strength = 50, blurPx = 0, wallDim = 0.18, liquidBlur = 0, radiusStr = "";
     let failed = false, lostCount = 0, retryTimer = 0;
     const uni = {}, pUni = {}, bUni = {};
 
@@ -367,7 +369,7 @@ void main() {
         if (isMain) {
             paneProg = link(VERT, PANE_FRAG);
             if (paneProg) {
-                for (const n of ["uTex", "uPaneTex", "uHasPaneTex", "uRes", "uCss", "uCover", "uGrade", "uFlipY", "uRect0", "uMeta0", "uRect1", "uMeta1"]) {
+                for (const n of ["uTex", "uPaneTex", "uHasPaneTex", "uRes", "uCss", "uCover", "uGrade", "uDim", "uFlipY", "uRect0", "uMeta0", "uRect1", "uMeta1"]) {
                     pUni[n] = gl.getUniformLocation(paneProg, n);
                 }
                 pUni.p = gl.getAttribLocation(paneProg, "p");
@@ -375,7 +377,7 @@ void main() {
             }
             blurProg = link(VERT, BLUR_FRAG);
             if (blurProg) {
-                for (const n of ["uTex", "uRes", "uCover", "uDir", "uSigma", "uGrade", "uFlipY"]) {
+                for (const n of ["uTex", "uRes", "uCover", "uDir", "uSigma", "uGrade", "uDim", "uFlipY"]) {
                     bUni[n] = gl.getUniformLocation(blurProg, n);
                 }
                 bUni.p = gl.getAttribLocation(blurProg, "p");
@@ -511,6 +513,7 @@ void main() {
         gl.uniform1i(bUni.uTex, 0);
         gl.uniform2f(bUni.uRes, bw, bh);
         gl.uniform1f(bUni.uSigma, sigma);
+        gl.uniform1f(bUni.uDim, wallDim);
         gl.viewport(0, 0, bw, bh);
 
         for (let i = 0; i < passes; i++) {
@@ -560,6 +563,7 @@ void main() {
         gl.uniform2f(pUni.uCss, cw, ch);
         gl.uniform4fv(pUni.uCover, cov);
         gl.uniform1f(pUni.uGrade, gradeMode);
+        gl.uniform1f(pUni.uDim, wallDim);
         gl.uniform1f(pUni.uFlipY, flipY);
         gl.uniform4fv(pUni.uRect0, cachedR0);
         gl.uniform4fv(pUni.uMeta0, cachedM0);
@@ -620,7 +624,7 @@ void main() {
         const needBgBlur = blurPx > 0.01;
         const needPaneBlur = liquidBlur > 0.01 && hasVisiblePane();
         if (needBgBlur || needPaneBlur) {
-            const key = `${cw}x${ch}x${blurPx}x${needPaneBlur ? liquidBlur : 0}x${wallGrade}`;
+            const key = `${cw}x${ch}x${blurPx}x${wallDim}x${needPaneBlur ? liquidBlur : 0}x${wallGrade}`;
             if (!wallBlurred || lastBlurKey !== key) {
                 if (needBgBlur && !blurToFbo(wallTex, cov, 1, wallGrade, cw, ch, blurPx, fboA)) {
                     setWallActive(false); return false;
@@ -899,12 +903,14 @@ void main() {
         if (!Number.isNaN(rf)) strength = Math.min(Math.max(rf, 0), 100);
         const bp = parseFloat(cs.getPropertyValue("--lm-blur-px"));
         if (!Number.isNaN(bp)) blurPx = Math.min(Math.max(bp, 0), 64);
+        const wd = parseFloat(cs.getPropertyValue("--lm-wall-dim"));
+        if (!Number.isNaN(wd)) wallDim = Math.min(Math.max(wd / 100, 0), 0.95);
         const lb = parseFloat(cs.getPropertyValue("--lm-liquid-blur"));
         if (!Number.isNaN(lb)) liquidBlur = Math.min(Math.max(lb, 0), 24);
         const rs = cs.getPropertyValue("--lm-radius").trim();
         if (rs) radiusStr = rs;
 
-        const settingsKey = `${mode}|${liquid}|${strength}|${blurPx}|${liquidBlur}|${radiusStr}`;
+        const settingsKey = `${mode}|${liquid}|${strength}|${blurPx}|${wallDim}|${liquidBlur}|${radiusStr}`;
         const changed = settingsKey !== prevSettings;
         const modeChanged = mode !== prevMode;
         prevSettings = settingsKey;

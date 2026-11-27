@@ -93,9 +93,9 @@ html{{contextMenu.ContextMenuPopup}} {{contextMenu.contextMenuItem}} {
     box-shadow: none !important;
 }
 
-/* Menus drawn inside the main window (game right-click, library filter)
-   can blur what's behind them. */
-html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
+/* Menus drawn inside the main window or friends/chat windows can blur what's behind them. */
+html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}},
+html.friendsui-container {{contextMenu.contextMenu}} {
     background: color-mix(in srgb, var(--lm-t) 62%, transparent) !important;
     backdrop-filter: blur(22px) saturate(1.4) !important;
     border: 1px solid var(--lm-border-strong) !important;
@@ -137,6 +137,245 @@ html.MillenniumWindow_MainSteamWindow {{contextMenu.contextMenu}} {
     border-radius: 0 !important;
     background: var(--lm-border-strong) !important;
     pointer-events: none;
+}
+
+/* ---- Friends online-status switcher menu (.currentUserContextMenu) ---- */
+
+@keyframes lm-status-menu-open {
+    from {
+        opacity: 0;
+        clip-path: inset(0 0 100% 0 round 11px);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 11px);
+    }
+}
+
+@keyframes lm-status-menu-close {
+    from {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 11px);
+    }
+    to {
+        opacity: 0;
+        clip-path: inset(0 0 100% 0 round 11px);
+    }
+}
+
+@keyframes lm-status-row-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -7px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Keep outer menu untransformed so Steam's PositionPopupWindow measures exact 100% width & height */
+{{contextMenu.contextMenu}}:has(.currentUserContextMenu) {
+    min-width: 176px !important;
+    border-radius: 11px !important;
+    box-sizing: border-box !important;
+}
+
+/* Keyed strictly on Steam's .ready (clip-path only, no transform scale/shift; no !important so menu-anim.js can restart) */
+{{contextMenu.contextMenu}}.ready:has(.currentUserContextMenu) {
+    animation: lm-status-menu-open 260ms cubic-bezier(0.2, 0.85, 0.25, 1) backwards;
+}
+
+{{contextMenu.contextMenu}}.lm-closing:has(.currentUserContextMenu) {
+    animation: lm-status-menu-close var(--lm-menu-close, 160ms) cubic-bezier(0.4, 0, 0.9, 0.6) forwards !important;
+}
+
+.currentUserContextMenu {
+    min-width: 176px !important;
+    padding: 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    box-sizing: border-box !important;
+}
+
+/* Hide redundant multi-line subtitles under Invisible / Offline / Do Not Disturb */
+.currentUserContextMenu .persona_menu_descriptor,
+.currentUserContextMenu .persona_menu_dnd_descriptor {
+    display: none !important;
+}
+
+/* Status section (Online / Away / Invisible / Offline) separated cleanly from utility actions */
+.currentUserContextMenu .contextMenuSectionContent {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    padding: 0 0 5px 0 !important;
+    margin: 0 0 3px 0 !important;
+    border-bottom: 1px solid var(--lm-border) !important;
+}
+
+.currentUserContextMenu {{contextMenu.contextMenuItem}} {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 0 28px 0 10px !important;
+    margin: 0 !important;
+    border-radius: 7px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    color: var(--lm-text) !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.12s ease, color 0.12s ease !important;
+}
+
+/* Pure-CSS cascade stagger keyed on .ready (no !important so menu-anim.js restart works cleanly) */
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu {{contextMenu.contextMenuItem}} {
+    animation: lm-status-row-in 210ms cubic-bezier(0.2, 0.85, 0.25, 1) backwards;
+}
+
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(1) { animation-delay: 45ms; }
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(2) { animation-delay: 75ms; }
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(3) { animation-delay: 105ms; }
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(4) { animation-delay: 135ms; }
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu > {{contextMenu.contextMenuItem}}:nth-of-type(1) { animation-delay: 165ms; }
+{{contextMenu.contextMenu}}.ready .currentUserContextMenu > {{contextMenu.contextMenuItem}}:nth-of-type(2) { animation-delay: 195ms; }
+
+/* Flat vertical accent rail per status row matching Friends List left-rail language */
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}::before {
+    content: "";
+    width: 3px;
+    height: 13px;
+    border-radius: 999px;
+    flex: none;
+    background: var(--lm-a);
+    transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(2)::before {
+    background: #eab308;
+}
+
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(3)::before {
+    background: rgba(148, 163, 184, 0.6);
+}
+
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(4)::before {
+    background: rgba(100, 116, 139, 0.42);
+}
+
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:hover::before {
+    transform: scaleY(1.18);
+}
+
+/* Highlight active status row and render crisp right-aligned checkmark */
+.currentUserContextMenu {{contextMenu.contextMenuItem}}:has(.menuChecked) {
+    background: rgba(255, 255, 255, 0.085) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+.currentUserContextMenu .contextMenuCheckMark {
+    display: none !important;
+}
+
+.currentUserContextMenu .contextMenuCheckMark.menuChecked {
+    display: block !important;
+    position: absolute !important;
+    left: auto !important;
+    inset-inline-start: auto !important;
+    right: 10px !important;
+    top: 50% !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    transform: translateY(-50%) !important;
+    background-color: var(--lm-a) !important;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10.5 8 14.5 16 6.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(2) .contextMenuCheckMark.menuChecked {
+    background-color: #eab308 !important;
+}
+
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(3) .contextMenuCheckMark.menuChecked,
+.currentUserContextMenu .contextMenuSectionContent > {{contextMenu.contextMenuItem}}:nth-child(4) .contextMenuCheckMark.menuChecked {
+    background-color: rgba(226, 232, 240, 0.85) !important;
+}
+
+/* Clean flat Do Not Disturb checkbox row */
+.currentUserContextMenu .DNDCheckBox {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.currentUserContextMenu .DNDCheckBox .DialogCheckbox {
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px !important;
+    margin: 0 !important;
+    margin-inline-end: 0 !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: none !important;
+    border-radius: 4px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong) !important;
+}
+
+.currentUserContextMenu .DNDCheckBox .DialogCheckbox svg {
+    width: 11px !important;
+    height: 11px !important;
+    margin: 0 !important;
+}
+
+.currentUserContextMenu .DNDCheckBox .DialogCheckbox.Active {
+    background: color-mix(in srgb, var(--lm-a) 55%, var(--lm-panel-strong)) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lm-a) 80%, transparent) !important;
+}
+
+.currentUserContextMenu .DNDCheckBox .DialogToggle_Label,
+.currentUserContextMenu .DNDCheckBox .DialogToggle_Label span {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    color: inherit !important;
+}
+
+/* Subtle pencil icon on Edit Profile Name row */
+.currentUserContextMenu > {{contextMenu.contextMenuItem}}:last-child {
+    padding-right: 12px !important;
+}
+
+.currentUserContextMenu > {{contextMenu.contextMenuItem}}:last-child::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    flex: none;
+    background-color: currentColor;
+    opacity: 0.72;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    {{contextMenu.contextMenu}}:has(.currentUserContextMenu),
+    {{contextMenu.contextMenu}}.lm-closing:has(.currentUserContextMenu),
+    .currentUserContextMenu {{contextMenu.contextMenuItem}} {
+        animation: none !important;
+    }
 }
 
 /* dialog dropdowns (sorting, shelves, settings, properties).

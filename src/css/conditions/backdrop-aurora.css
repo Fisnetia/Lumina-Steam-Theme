@@ -24,6 +24,7 @@ body > .lm-aurora-layer {
     position: fixed;
 }
 
+[data-condition="Wallpaper opacity"]:not([data-lm-hidden="0"]),
 [data-condition="Wallpaper mouse"]:not([data-lm-hidden="0"]),
 [data-condition="Desktop blur"]:not([data-lm-hidden="0"]) {
     display: none !important;

@@ -1173,12 +1173,13 @@ html.lm-web-bar {{ScrollToTopButton.ScrollToTopButtonPosition}} {
     color: var(--lm-text-dim) !important;
 }
 
-/* Active & queued progress bars: 10px glass tube with forward-sweeping flow */
+/* Active & queued progress bars: minimalist 7px borderless flat bar with forward-sweeping flow */
 {{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}} {
-    height: 10px !important;
+    height: 7px !important;
     border-radius: 999px !important;
-    background-color: rgba(6, 10, 20, 0.48) !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: none !important;
+    box-shadow: none !important;
     overflow: hidden;
 }
 
@@ -1186,13 +1187,8 @@ html.lm-web-bar {{ScrollToTopButton.ScrollToTopButtonPosition}} {
     position: relative;
     overflow: hidden;
     border-radius: 999px !important;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(0, 0, 0, 0.2) 100%),
-        linear-gradient(90deg, color-mix(in srgb, var(--lm-a) 72%, #1d4ed8), var(--lm-a) 62%, color-mix(in srgb, var(--lm-a) 72%, #fff)) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.5),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.25),
-        0 0 12px color-mix(in srgb, var(--lm-a) 48%, transparent);
+    background: color-mix(in srgb, var(--lm-a) 72%, rgba(255, 255, 255, 0.28)) !important;
+    box-shadow: none !important;
 }
 
 @keyframes lm-progress-flow {
@@ -1228,20 +1224,13 @@ html.lm-web-bar {{ScrollToTopButton.ScrollToTopButtonPosition}} {
 }
 
 {{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}}{{DownloadsPage.Disk}} > div {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(0, 0, 0, 0.2) 100%),
-        linear-gradient(90deg, #16a34a, #4ade80 65%, #bbf7d0) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.5),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.25),
-        0 0 12px rgba(74, 222, 128, 0.45);
+    background: rgba(110, 231, 183, 0.82) !important;
+    box-shadow: none !important;
 }
 
 {{DownloadsPage.SectionItemStatus}} {{DownloadsPage.ProgressBar}}{{DownloadsPage.NotActive}} > div {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.18) 100%),
-        rgba(255, 255, 255, 0.24) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.26) !important;
+    box-shadow: none !important;
 }
 
 {{DownloadsPage.ProgressPercentageAndBar}} {{DownloadsPage.Progress}} {

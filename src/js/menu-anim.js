@@ -138,36 +138,26 @@
         subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ["class"],
     });
 
-    /* ---- Add a Game: a second click closes its menu ----
-     * Steam opens this menu in a new "Menu" popup at the pointer and closes it
-     * when the main window takes focus back, which happens on mousedown; the
-     * click that follows would open it again. (Where the popup covers the
-     * button, the press goes to the popup and Steam handles it.) A press on the
-     * button while the popup is still shown, or less than REOPEN ms after the
-     * main window took focus back from it, is dropped. */
-    if (document.documentElement.classList.contains("MillenniumWindow_MainSteamWindow")) {
-        const BUTTON = "{{BottomBarContainer.AddGameButton}}";
+    /* ---- Second click closes popup menus triggered from buttons ----
+     * Steam opens these menus in a "Menu" popup and closes them when the
+     * opener window takes focus back on mousedown; the click that follows
+     * would immediately reopen the menu. Drop presses on the trigger while
+     * the popup is shown or within REOPEN ms after focus returned from it. */
+    const installToggleGuard = (buttonSelector, isMenuShown) => {
         const REOPEN = 400;
         let ours = false, closedAt = 0, dropping = false;
 
-        const menuShown = () => {
-            try {
-                return [...window.opener.g_PopupManager.GetPopups()].some(p =>
-                    p.m_strTitle === "Menu" && p.window && p.window.document.visibilityState === "visible");
-            } catch { return false; }
-        };
-
         // focus returns before the press reaches the button
         window.addEventListener("focus", () => {
-            if (ours && menuShown()) closedAt = performance.now();
+            if (ours && isMenuShown()) closedAt = performance.now();
             ours = false;
         });
 
-        const onButton = (e) => e.target instanceof Element && e.target.closest(BUTTON);
+        const onButton = (e) => e.target instanceof Element && e.target.closest(buttonSelector);
 
         window.addEventListener("pointerdown", (e) => {
             if (!onButton(e) || e.button !== 0) return;
-            dropping = (ours && menuShown()) || performance.now() - closedAt < REOPEN;
+            dropping = (ours && isMenuShown()) || performance.now() - closedAt < REOPEN;
             if (dropping) { ours = false; closedAt = 0; e.stopPropagation(); e.preventDefault(); }
         }, true);
         for (const type of ["mousedown", "mouseup"]) {
@@ -180,6 +170,35 @@
             if (dropping) { dropping = false; e.stopPropagation(); e.preventDefault(); return; }
             ours = true;
         }, true);
+    };
+
+    const getPopupManager = () => {
+        try { return (window.opener && window.opener.g_PopupManager) || window.g_PopupManager || null; }
+        catch { return null; }
+    };
+
+    if (document.documentElement.classList.contains("MillenniumWindow_MainSteamWindow")) {
+        installToggleGuard("{{BottomBarContainer.AddGameButton}}", () => {
+            try {
+                const pm = getPopupManager();
+                return !!pm && [...pm.GetPopups()].some(p =>
+                    p.m_strTitle === "Menu" && p.window && p.window.document.visibilityState === "visible");
+            } catch { return false; }
+        });
+    }
+
+    if (document.documentElement.classList.contains("friendsui-container")) {
+        installToggleGuard(".currentUserContainer .ContextMenuButton", () => {
+            if (document.querySelector(".currentUserContextMenu")) return true;
+            try {
+                const pm = getPopupManager();
+                return !!pm && [...pm.GetPopups()].some(p => {
+                    const doc = p.window && p.window.document;
+                    if (!doc || doc.visibilityState !== "visible") return false;
+                    return !!doc.querySelector(".currentUserContextMenu") || p.m_strTitle === "Menu";
+                });
+            } catch { return false; }
+        });
     }
 
     /* ---- close animation for in-window menus ---- */
