@@ -51,6 +51,7 @@
             desc: "Picture, video, or a Wallpaper Engine scene or video.",
             chooseFile: "Choose file…", engine: "Wallpaper Engine…", engineTip: "Choose from Wallpaper Engine",
             reset: "Reset to default", close: "Close", all: "All", prev: "Prev", next: "Next",
+            search: "Search wallpapers…", clearSearch: "Clear search", noMatch: "No matching wallpapers",
             libraryTitle: "Wallpaper Engine library", pickOne: "Choose a wallpaper",
             kinds: { scene: "Scene", video: "Video", web: "Web", picture: "Picture", application: "App", "": "Other" },
             default: "Default",
@@ -74,6 +75,7 @@
             desc: "图片、视频，或 Wallpaper Engine 的 Scene 与视频壁纸",
             chooseFile: "选择文件…", engine: "WE 壁纸库…", engineTip: "从 Wallpaper Engine 选择",
             reset: "恢复默认", close: "关闭", all: "全部", prev: "上一页", next: "下一页",
+            search: "搜索壁纸…", clearSearch: "清空搜索", noMatch: "未找到匹配的壁纸",
             libraryTitle: "Wallpaper Engine 壁纸库", pickOne: "选择壁纸",
             kinds: { scene: "Scene", video: "视频", web: "网页", picture: "图片", application: "应用程序", "": "其他" },
             default: "默认",
@@ -635,11 +637,15 @@
 
     /* ---- gallery ---- */
 
-    // items: [{ title, kind, preview (URL or Blob), pick() }]
+    // items: [{ id?, title, kind, preview (URL or Blob), pick() }]
     let closeGallery = null;
     const gallery = (items, heading) => {
         if (closeGallery) closeGallery();
         const PAGE_SIZE = 24;
+        const indexed = items.map(it => ({
+            it,
+            hay: `${it.title || ""} ${it.id || ""}`.toLowerCase(),
+        }));
         const root = document.createElement("div");
         root.className = "lm-gallery";
         const blobUrls = new Map();
@@ -654,8 +660,10 @@
             grid.querySelectorAll("img").forEach(img => img.removeAttribute("src"));
         };
 
+        let searchTimer = 0;
         const close = () => {
             if (closeGallery === close) closeGallery = null;
+            clearTimeout(searchTimer);
             releaseImages();
             root.remove();
             blobUrls.forEach(u => URL.revokeObjectURL(u));
@@ -664,16 +672,8 @@
         };
         closeGallery = close;
 
-        let filtered = items, page = 0;
+        let activeKind = null, query = "", filtered = items, page = 0;
         const totalPages = () => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-
-        const onKey = (e) => {
-            if (e.key === "Escape") { e.stopPropagation(); close(); }
-            else if (e.key === "ArrowLeft" && page > 0) { e.preventDefault(); showPage(page - 1); }
-            else if (e.key === "ArrowRight" && page < totalPages() - 1) { e.preventDefault(); showPage(page + 1); }
-        };
-        document.addEventListener("keydown", onKey, true);
-        root.addEventListener("click", (e) => { if (e.target === root) close(); });
 
         const panel = document.createElement("div");
         panel.className = "lm-gallery-panel";
@@ -684,12 +684,57 @@
         h.textContent = heading;
         const filters = document.createElement("div");
         filters.className = "lm-gallery-filters";
+
+        const searchWrap = document.createElement("div");
+        searchWrap.className = "lm-gallery-search";
+        const searchIcon = document.createElement("span");
+        searchIcon.className = "lm-gallery-search-icon";
+        searchIcon.innerHTML = `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"/><path d="M10.6 10.6L14 14"/></svg>`;
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.className = "lm-gallery-search-input";
+        searchInput.placeholder = T.search;
+        searchInput.spellcheck = false;
+        const searchClear = document.createElement("button");
+        searchClear.type = "button";
+        searchClear.className = "lm-gallery-search-clear";
+        searchClear.textContent = "✕";
+        searchClear.title = T.clearSearch;
+        searchClear.style.display = "none";
+        searchWrap.append(searchIcon, searchInput, searchClear);
+
         const x = document.createElement("button");
         x.className = "lm-gallery-close";
         x.textContent = "✕";
         x.title = T.close;
         x.onclick = close;
-        head.append(h, filters, x);
+        head.append(h, filters, searchWrap, x);
+
+        const onKey = (e) => {
+            const typing = document.activeElement === searchInput;
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+                e.preventDefault();
+                e.stopPropagation();
+                searchInput.focus();
+                searchInput.select();
+                return;
+            }
+            if (e.key === "Escape") {
+                e.stopPropagation();
+                if (typing && searchInput.value) {
+                    searchInput.value = "";
+                    applySearch(true);
+                } else {
+                    close();
+                }
+                return;
+            }
+            if (typing) return;
+            if (e.key === "ArrowLeft" && page > 0) { e.preventDefault(); showPage(page - 1); }
+            else if (e.key === "ArrowRight" && page < totalPages() - 1) { e.preventDefault(); showPage(page + 1); }
+        };
+        document.addEventListener("keydown", onKey, true);
+        root.addEventListener("click", (e) => { if (e.target === root) close(); });
 
         const grid = document.createElement("div");
         grid.className = "lm-gallery-grid";
@@ -742,6 +787,15 @@
             const pages = totalPages();
             page = Math.max(0, Math.min(next, pages - 1));
             releaseImages();
+            if (!filtered.length) {
+                const empty = document.createElement("div");
+                empty.className = "lm-gallery-empty";
+                empty.textContent = T.noMatch;
+                grid.replaceChildren(empty);
+                grid.scrollTop = 0;
+                renderPager();
+                return;
+            }
             const slice = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
             grid.replaceChildren(...slice.map(it => {
                 const card = document.createElement("button");
@@ -768,23 +822,56 @@
             renderPager();
         };
 
-        const render = (kind) => {
-            filtered = kind === null ? items : items.filter(it => it.kind === kind);
+        const kinds = [...new Set(items.map(i => i.kind))].sort();
+        const filterBtns = [];
+        const updateView = () => {
+            const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+            const matched = terms.length
+                ? indexed.filter(e => terms.every(w => e.hay.includes(w))).map(e => e.it)
+                : items;
+            for (const { kind: k, btn } of filterBtns) {
+                const count = k === null ? matched.length : matched.filter(it => it.kind === k).length;
+                btn.textContent = `${k === null ? T.all : kindLabel(k)} ${count}`;
+            }
+            filtered = activeKind === null ? matched : matched.filter(it => it.kind === activeKind);
             showPage(0);
         };
-        const kinds = [...new Set(items.map(i => i.kind))].sort();
-        [[null, `${T.all} ${items.length}`], ...kinds.map(k => [k, `${kindLabel(k)} ${items.filter(i => i.kind === k).length}`])]
-            .forEach(([k, label], i) => {
-                const b = document.createElement("button");
-                b.textContent = label;
-                b.className = i === 0 ? "active" : "";
-                b.onclick = () => { filters.querySelectorAll("button").forEach(x => x.className = ""); b.className = "active"; render(k); };
-                filters.appendChild(b);
-            });
+
+        const applySearch = (immediate = false) => {
+            query = searchInput.value;
+            searchClear.style.display = query ? "" : "none";
+            clearTimeout(searchTimer);
+            if (immediate) {
+                updateView();
+            } else {
+                searchTimer = setTimeout(updateView, 80);
+            }
+        };
+
+        searchInput.addEventListener("input", () => applySearch(false));
+        searchClear.onclick = () => {
+            searchInput.value = "";
+            applySearch(true);
+            searchInput.focus();
+        };
+
+        [null, ...kinds].forEach((k, i) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = i === 0 ? "active" : "";
+            b.onclick = () => {
+                activeKind = k;
+                filterBtns.forEach(({ btn }) => btn.className = "");
+                b.className = "active";
+                updateView();
+            };
+            filterBtns.push({ kind: k, btn: b });
+            filters.appendChild(b);
+        });
         panel.append(head, grid, foot);
         root.appendChild(panel);
         document.body.appendChild(root);
-        render(null);
+        updateView();
     };
 
     /* ---- actions ---- */
@@ -816,7 +903,7 @@
                 note("");
                 if (!list.length) throw new UserError(T.emptyLibrary);
                 gallery(list.map(it => ({
-                    title: it.title, kind: it.type,
+                    id: it.id, title: it.title, kind: it.type,
                     preview: it.preview ? itemBase(it.id) + encodePath(it.preview) : null,
                     pick: async () => {
                         if (it.type === "application") throw new UserError(T.appUnsupported);
@@ -843,7 +930,7 @@
                 if (!items.length) throw new UserError(T.noItems);
                 if (items.length === 1) { await useLocalItem(items[0]); await changed(); return; }
                 gallery(items.map(it => ({
-                    title: it.title, kind: it.kind, preview: fileOf(it, it.project.preview),
+                    id: it.id, title: it.title, kind: it.kind, preview: fileOf(it, it.project.preview),
                     pick: () => useLocalItem(it),
                 })), T.pickOne);
             } catch (err) { report(err); }

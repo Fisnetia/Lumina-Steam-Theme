@@ -14,7 +14,21 @@
 
 ![商店](docs/screenshots/store.jpg)
 
-安装 Millennium 后，从 [Releases](../../releases) 下载，把 `lumina` 放进 `Steam\millennium\themes`；插件 `lumina-extended` 可选，放进 `Steam\millennium\plugins`。
+## 安装
+
+**一键安装 / 更新（Windows）：**
+
+- 在 PowerShell 中执行一行命令：
+
+```powershell
+irm https://raw.githubusercontent.com/Fisnetia/Lumina-Steam-Theme/main/install.ps1 | iex
+```
+
+- 或直接从 [Releases](../../releases) 下载压缩包解压后双击 **`install.bat`**（无需手动打开或右键 PowerShell，目录权限不足时会自动请求 UAC 提权）。
+
+脚本会自动定位 Steam 目录、比对本机 Millennium 与 Lumina 版本（已是最新则跳过下载；GitHub 无法直连时自动探测本机代理或加速镜像），先预下载并校验通过后再关闭 Steam、备份 `config.json`、启用主题与 `lumina-extended` 插件并重启 Steam。
+
+**手动安装：** 安装 Millennium 后，从 [Releases](../../releases) 下载，把 `lumina` 放进 `Steam\millennium\themes`；插件 `lumina-extended` 可选，放进 `Steam\millennium\plugins`。
 
 ## 设置项
 

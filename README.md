@@ -14,7 +14,21 @@ A glass theme for the Steam desktop client, built on [Millennium](https://steamb
 
 ![Store](docs/screenshots/store.jpg)
 
-Install Millennium, then put `lumina` from a [release](../../releases) in `Steam\millennium\themes`; the optional `lumina-extended` plugin goes in `Steam\millennium\plugins`.
+## Installation
+
+**One-click install / update (Windows):**
+
+- Run in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/Fisnetia/Lumina-Steam-Theme/main/install.ps1 | iex
+```
+
+- Or download a [release](../../releases) zip, extract it, and double-click **`install.bat`** (no PowerShell needed; requests UAC elevation automatically only if the Steam folder requires admin permission).
+
+The script auto-detects Steam, checks installed Millennium and Lumina versions (skipping downloads if already up to date, and auto-probing local proxies or GitHub mirrors if GitHub is unreachable), downloads updates before closing Steam, backs up `config.json`, enables the theme and plugin, and restarts Steam.
+
+**Manual installation:** install Millennium, then put `lumina` from a [release](../../releases) in `Steam\millennium\themes`; the optional `lumina-extended` plugin goes in `Steam\millennium\plugins`.
 
 ## Settings
 
