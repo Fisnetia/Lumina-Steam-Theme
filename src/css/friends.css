@@ -157,8 +157,9 @@ html.friendsui-container body::before {
 .currentUserContainer .labelHolder {
     padding: 0 !important;
     margin: 0 !important;
-    flex: 0 1 auto !important;
+    flex: 1 1 auto !important;
     min-width: 0;
+    overflow: hidden;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
@@ -212,19 +213,21 @@ html.friendsui-container body::before {
     margin: 0 !important;
     height: auto !important;
     display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    width: auto !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 2px;
+    width: 100% !important;
+    min-width: 0;
 }
 
-/* Crisp flat status tag (snug fit-content, left-aligned under nickname, no neon dots) */
-.currentUserContainer .richPresenceLabel {
-    display: inline-flex !important;
-    align-items: center !important;
+/* Crisp flat status tag (snug fit-content, left-aligned under nickname, real text-overflow ellipsis) */
+.currentUserContainer .richPresenceLabel,
+.currentUserContainer .gameName {
+    display: block !important;
+    box-sizing: border-box;
     width: fit-content !important;
     max-width: 100% !important;
-    flex: 0 1 auto !important;
     margin: 0 !important;
     height: 18px;
     padding: 0 7px;
@@ -233,19 +236,37 @@ html.friendsui-container body::before {
     color: color-mix(in srgb, var(--lm-a) 86%, #fff) !important;
     font-size: 11px !important;
     font-weight: 500 !important;
-    line-height: 1 !important;
+    line-height: 18px !important;
     letter-spacing: 0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.currentUserContainer.ingame .richPresenceLabel {
+.currentUserContainer.ingame .richPresenceLabel,
+.currentUserContainer.ingame .gameName {
     background: rgba(74, 222, 128, 0.15);
     color: #86efac !important;
 }
 
-.currentUserContainer.awayOrSnooze .richPresenceLabel {
+/* Secondary rich presence detail line below game name: subtle plain text, no duplicate pill */
+.currentUserContainer .richPresenceContainer > :not(:first-child) {
+    height: auto !important;
+    padding: 0 2px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    line-height: 1.3 !important;
+    font-weight: 400 !important;
+    opacity: 0.78;
+}
+
+.currentUserContainer.awayOrSnooze:not(.ingame) .richPresenceLabel {
+    background: rgba(251, 191, 36, 0.12);
+    color: rgba(253, 224, 71, 0.88) !important;
+}
+
+.currentUserContainer.ingame.awayOrSnooze .richPresenceLabel,
+.currentUserContainer.ingame.awayOrSnooze .gameName {
     background: rgba(251, 191, 36, 0.12);
     color: rgba(253, 224, 71, 0.88) !important;
 }
