@@ -19,7 +19,7 @@
 }
 
 {{contextMenu.contextMenu}}.ready,
-.DialogMenuPosition.ready > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+.DialogMenuPosition.ready {
     animation: lm-menu-fade 240ms ease-out backwards;
 }
 
@@ -137,7 +137,7 @@ html.MillenniumWindow_GameProperties .DialogContent_InnerWidth > .DialogBody > *
     .lm-morph.open .lm-first .lm-morph-item,
     {{contextMenu.contextMenu}}.ready,
     {{contextMenu.contextMenu}}.ready {{contextMenu.contextMenuItem}},
-    .DialogMenuPosition.ready > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+    .DialogMenuPosition.ready {
         animation: none !important;
     }
 }

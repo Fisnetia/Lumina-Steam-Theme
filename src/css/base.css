@@ -67,13 +67,16 @@ html{{contextMenu.ContextMenuPopup}} body,
     background: transparent !important;
 }
 
-/* The window is exactly the box's size: outline with an inset shadow, not a border. */
+/* The window is exactly the box's size: outline with an inset shadow, not a border.
+   Keep vertical scrolling enabled so long context menus still scroll when constrained. */
 {{contextMenu.contextMenu}} {
+    box-sizing: border-box;
     background: var(--lm-menu-bg) !important;
     border: none !important;
     border-radius: var(--lm-r) !important;
     box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen), 0 2px 5px 1px rgba(0, 0, 0, 0.25) !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
 
 /* Size popup menus to their content instead of Steam's wide inline min-width. */
@@ -379,17 +382,13 @@ html.friendsui-container {{contextMenu.contextMenu}} {
 }
 
 /* dialog dropdowns (sorting, shelves, settings, properties).
-   Let DialogMenuPosition's overflow stay visible so the dropdown's outer
-   box-shadow isn't clipped to a faint square box around the rounded corners;
-   the inner DialogDropDownMenu inherits max-height and scrolls instead. */
-html .DialogMenuPosition {
-    overflow: visible !important;
-}
-
-html .DialogMenuPosition > {{DialogDropDownMenu_Item.DialogDropDownMenu}}._DialogInputContainer,
-html {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
-    max-height: inherit;
-    padding: 4px !important;
+   Keep DialogMenuPosition as the scroll container so Steam's PositionMenu()
+   always reads the full content scrollHeight on componentDidUpdate (otherwise
+   moving overflow-y: auto to the child causes Steam to clear menuHeight).
+   Styling DialogMenuPosition itself keeps the outer box-shadow unclipped. */
+html .DialogMenuPosition:has(> {{DialogDropDownMenu_Item.DialogDropDownMenu}}) {
+    box-sizing: border-box;
+    margin-top: 2px;
     background: var(--lm-menu-bg) !important;
     border: none !important;
     border-radius: var(--lm-r) !important;
@@ -398,12 +397,33 @@ html {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
     overflow-y: auto !important;
 }
 
-html.MillenniumWindow_MainSteamWindow .DialogMenuPosition > {{DialogDropDownMenu_Item.DialogDropDownMenu}}._DialogInputContainer,
-html.MillenniumWindow_MainSteamWindow {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+html.MillenniumWindow_MainSteamWindow .DialogMenuPosition:has(> {{DialogDropDownMenu_Item.DialogDropDownMenu}}) {
     background: color-mix(in srgb, var(--lm-t) min(calc(var(--lm-alpha, 38%) + 24%), 100%), transparent) !important;
     backdrop-filter: blur(22px) saturate(1.4) !important;
     border: 1px solid var(--lm-border-strong) !important;
     box-shadow: var(--lm-shadow), var(--lm-sheen) !important;
+}
+
+html {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+    box-sizing: border-box;
+    padding: 4px !important;
+    background: var(--lm-menu-bg) !important;
+    border: none !important;
+    border-radius: var(--lm-r) !important;
+    box-shadow: inset 0 0 0 1px var(--lm-border-strong), var(--lm-sheen), 0 6px 20px rgba(0, 0, 0, 0.32) !important;
+}
+
+html .DialogMenuPosition > {{DialogDropDownMenu_Item.DialogDropDownMenu}}._DialogInputContainer,
+html .DialogMenuPosition > {{DialogDropDownMenu_Item.DialogDropDownMenu}} {
+    margin: 0 !important;
+    padding: 4px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
+    max-height: none !important;
 }
 
 html .DialogMenuPosition {{DialogDropDownMenu_Item.DialogDropDownMenu_Item}},
